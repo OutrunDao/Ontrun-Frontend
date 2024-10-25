@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.12",
     "decimal.js-light": "^2.5.1",
+    "ethers": "^6.13.4",
     "framer-motion": "^11.3.21",
     "jsbi": "^4.3.0",
     "lucide-react": "^0.446.0",

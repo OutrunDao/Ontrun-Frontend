@@ -20,7 +20,7 @@ export function HomeDescription() {
 					Trade, earn, and build with community on the all-in-one DeFi platform
 				</p>
 				<div className="flex flex-wrap justify-center gap-6">
-					<ConnectButton />
+					
 					<Button
 						href="https://outrun.gitbook.io/"
 						as="a"

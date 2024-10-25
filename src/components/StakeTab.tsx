@@ -19,6 +19,7 @@ import { useYT } from "@/hooks/useYT";
 
 import { POTslisBNB } from "@/contracts/tokens/POT";
 import { usePOT } from "@/hooks/usePOT";
+import { useMulticall } from "@/hooks/useMulticall";
 
 // const mockTokens = {
 //   ETH: { symbol: "ETH", name: "Ethereum" },
@@ -48,17 +49,21 @@ export default function StakeTab() {
   const [NTBalance, setNTBalance] = useState<Decimal>(new Decimal(0));
   const [PTBalance, setPTBalance] = useState<Decimal>(new Decimal(0));
   const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
+  const [SYBalance, setSYBalance] = useState<Decimal>(new Decimal(0));
   const [NTAmount, setNTAmount] = useState("");
   const [SYAmount, setSYAmount] = useState("");
   const [PTAmount, setPTAmount] = useState("");
   const [YTAmount, setYTAmount] = useState("");
   const [NTSymbol, setNTSymbol] = useState<string | undefined>("");
   // @ts-ignore
-  const UseSY = useSY(SY,publicClient,chainId);
+  const UseSY = useSY(SY);
   // @ts-ignore
   const UseYT = useYT(YT);
   // @ts-ignore
+  const UseMulticall = useMulticall(SY,POT);
+  // @ts-ignore
   const UsePOT = usePOT(POT);
+
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
 
   useEffect(() => {
@@ -100,6 +105,12 @@ export default function StakeTab() {
       return YT.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
     }
     _YT().then(setYTBalance);
+
+    async function _SY() {
+      if (!account.address || !SY || !publicClient) return new Decimal(0);
+      return SY.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    }
+    _SY().then(setSYBalance);
 
   }, [chainId, account.address, NT]);
 
@@ -173,11 +184,20 @@ export default function StakeTab() {
 
     if (POT && PT && YT && SYAmount && NT) {
 
-      UseSY.SYWrite.deposit({
+      UseMulticall.stake({
         NT: NT,
+        PT: PT,
+        YT: YT,
         NTAmount: NTAmount,
-        SYAmount: SYAmount
+        SYAmount: SYAmount,
+        lockupDays: sliderValue,
       })
+
+      // UseSY.SYWrite.deposit({
+      //   NT: NT,
+      //   NTAmount: NTAmount,
+      //   SYAmount: SYAmount
+      // })
 
       // UsePOT.POTWrite.stake({
       //   PT: PT,
@@ -197,22 +217,33 @@ export default function StakeTab() {
       //   />
       // ));
 
-      if (UsePOT.POTWrite.isPending) {
-        setNTAmount("");
-        setPTAmount("");
-      } else {
-        toast.custom(() => (
-          <ToastCustom
-            content={
-              <>
-                {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-                . View on <Link href="#">BlockExplorer</Link>
-              </>
-            }
-          />
-        ));
+      toast.custom(() => (
+        <ToastCustom
+          content={
+            <>
+              {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
+              . View on <Link href="#">BlockExplorer</Link>
+            </>
+          }
+        />
+      ));
 
-      }
+      // if (UsePOT.POTWrite.isPending) {
+      //   setNTAmount("");
+      //   setPTAmount("");
+      // } else {
+      //   toast.custom(() => (
+      //     <ToastCustom
+      //       content={
+      //         <>
+      //           {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
+      //           . View on <Link href="#">BlockExplorer</Link>
+      //         </>
+      //       }
+      //     />
+      //   ));
+
+      // }
     }
     
 

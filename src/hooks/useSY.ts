@@ -3,13 +3,13 @@ import { SY, SYslisBNB } from "@/contracts/tokens/SY";
 import { Currency, Token } from "@/packages/core";
 import Decimal from "decimal.js-light";
 import { useEffect, useState } from "react";
-import { PublicClient, formatUnits, parseEther } from "viem";
+import { PublicClient, createPublicClient, formatUnits, parseEther } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 
-export function useSY(token:Currency,publicClient:PublicClient,chainId:number) {
+export function useSY(token:Currency) {
     
-    // const publicClient = usePublicClient();
-    // const chainId = useChainId();
+    const publicClient = usePublicClient();
+    const chainId = useChainId();
 
     const [exchangeRate,setExchangeRate] = useState<Decimal>();
     const [totalSupply,settotalSupply] = useState<Decimal>();
@@ -26,7 +26,8 @@ export function useSY(token:Currency,publicClient:PublicClient,chainId:number) {
         SYAmount: string
     }) {
 
-        if (publicClient) {
+        if (publicClient && account.address) {
+
             const { request } = await publicClient.simulateContract({
                 // @ts-ignore
                 address: (token as Token).address,
@@ -34,17 +35,47 @@ export function useSY(token:Currency,publicClient:PublicClient,chainId:number) {
                 functionName: 'deposit',
                 value: parseEther(NTAmount),
                 args: [
-                    //@ts-ignore
                     account.address,
                     //@ts-ignore
-                    (NT as Token).address,
-                    BigInt(+SYAmount*10**18),
+                    "0x0000000000000000000000000000000000000000",
+                    parseEther(NTAmount),
                     BigInt(0)
                 ],
-                account: account.address
-              })
+                account: account.address,
+                
+            })
+
+            // const { request1 } = await publicClient.simulateContract({
+            //     // @ts-ignore
+            //     address: (token as Token).address,
+            //     abi: SYAbi,
+            //     functionName: 'approve',
+            //     args: [
+                    
+            //     ],
+            //     account: account.address,
+                
+            // })
 
             await walletClient?.writeContract(request);
+
+
+
+            // await walletClient?.writeContract({
+            //     // @ts-ignore
+            //     address: (token as Token).address,
+            //     abi: SYAbi,
+            //     functionName: 'deposit',
+            //     value: parseEther(NTAmount),
+            //     args: [
+            //         account.address,
+            //         //@ts-ignore
+            //         (NT as Token).address,
+            //         BigInt(+SYAmount*10**18),
+            //         BigInt(0)
+            //     ],
+            //     account: account.address,
+            // });
 
         }
         

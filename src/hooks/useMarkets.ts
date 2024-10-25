@@ -20,7 +20,7 @@ export function useMarkets() {
 
     const chainId = useChainId();
     const publicClient = usePublicClient();
-    const [result, setResult] = useState<Decimal>();
+    
     // @ts-ignore
     const SYSlisBNB = useSY(SYslisBNB[chainId],publicClient,chainId);
     // const UBNBView = useUTView(UBNB[chainId]);

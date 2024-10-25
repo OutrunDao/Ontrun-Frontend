@@ -2,8 +2,9 @@ import { POTAbi } from "@/contracts/abis/POT";
 import { POT } from "@/contracts/tokens/POT";
 import { Currency, Token } from "@/packages/core";
 import Decimal from "decimal.js-light";
+import { ethers } from "ethers";
 import { useState } from "react";
-import { createWalletClient } from "viem";
+import { createWalletClient, parseEther } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient, useWriteContract } from "wagmi";
 
 export function usePOT(token:Currency) {
@@ -28,28 +29,37 @@ export function usePOT(token:Currency) {
         }) {
             
             if (publicClient) {
-                const { request } = await publicClient.simulateContract({
-                    // @ts-ignore
-                    address: (token as Token).address,
-                    abi: POTAbi,
-                    functionName: 'stake',
-                    args: [
-                        BigInt(+SYAmount*10**18),
-                        BigInt(lockupDays),
-                        // @ts-ignore
-                        account.address,
-                        // @ts-ignore
-                        (PT as Token).address,
-                        // @ts-ignore
-                        (YT as Token).address,
-                    ],
-                    account: account.address
-                  })
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+
+                const POTContract = new ethers.Contract((token as Token).address, POTAbi, signer);
+
+                const tx = await POTContract.stake(parseEther(SYAmount), BigInt(lockupDays), account.address, account.address, account.address);
+
+                // const { request } = await publicClient.simulateContract({
+                //     // @ts-ignore
+                //     address: (token as Token).address,
+                //     abi: POTAbi,
+                //     functionName: 'stake',
+                //     args: [
+                //         parseEther(SYAmount),
+                //         BigInt(lockupDays),
+                //         // @ts-ignore
+                //         account.address,
+                //         // @ts-ignore
+                //         account.address,
+                //         // @ts-ignore
+                //         account.address,
+                //     ],
+                //     account: account.address
+                //   })
     
-                await walletClient?.writeContract(request);
+                // await walletClient?.writeContract(request);
 
                 
-                setIsPending(true);
+                // setIsPending(true);
             }
             
     }
