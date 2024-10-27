@@ -6,15 +6,50 @@ import { useEffect, useState } from "react";
 import { PublicClient, createPublicClient, formatUnits, parseEther } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 
-export function useSY(token:Currency) {
+export function useSY() {
     
     const publicClient = usePublicClient();
     const chainId = useChainId();
 
-    const [exchangeRate,setExchangeRate] = useState<Decimal>();
-    const [totalSupply,settotalSupply] = useState<Decimal>();
+    // const [exchangeRate,setExchangeRate] = useState<Decimal>();
+    // const [totalSupply,settotalSupply] = useState<Decimal>();
     const {data: walletClient} = useWalletClient();
     const account = useAccount();
+
+    async function exchangeRate(token: Currency) {
+
+        if (token?.chainId == chainId) {
+            const result = await publicClient?.readContract({
+                // @ts-ignore
+                address: (token as Token)?.address,
+                abi: SYAbi,
+                functionName: 'exchangeRate',
+            })
+            if (result) {
+                return new Decimal(formatUnits(result, token.decimals))
+            }
+        }
+        
+    }
+
+    async function totalSupply(token: Currency) {
+    
+        if (token?.chainId == chainId) {
+            try {
+                const result = await publicClient?.readContract({
+                    // @ts-ignore
+                    address: (token as Token)?.address,
+                    abi: SYAbi,
+                    functionName: 'totalSupply',
+                })
+                if (result) {
+                    return new Decimal(formatUnits(result, token.decimals))
+                }
+            } catch{
+            }
+        }
+
+    }
 
     async function deposit({
         NT,
@@ -81,47 +116,47 @@ export function useSY(token:Currency) {
         
     }
 
-    useEffect(() => {
-        if (token) {
-            async function _exchangeRate() {
+    // useEffect(() => {
+    //     if (token) {
+    //         async function _exchangeRate() {
 
-                if (token?.chainId == chainId) {
-                    const result = await publicClient?.readContract({
-                        // @ts-ignore
-                        address: (token as Token)?.address,
-                        abi: SYAbi,
-                        functionName: 'exchangeRate',
-                    })
-                    if (result) {
-                        return new Decimal(formatUnits(result, token.decimals))
-                    }
-                }
+    //             if (token?.chainId == chainId) {
+    //                 const result = await publicClient?.readContract({
+    //                     // @ts-ignore
+    //                     address: (token as Token)?.address,
+    //                     abi: SYAbi,
+    //                     functionName: 'exchangeRate',
+    //                 })
+    //                 if (result) {
+    //                     return new Decimal(formatUnits(result, token.decimals))
+    //                 }
+    //             }
                 
-            }
-            _exchangeRate().then(setExchangeRate)
+    //         }
+    //         _exchangeRate().then(setExchangeRate)
     
-            async function _totalSupply() {
+    //         async function _totalSupply() {
     
-                if (token?.chainId == chainId) {
-                    try {
-                        const result = await publicClient?.readContract({
-                            // @ts-ignore
-                            address: (token as Token)?.address,
-                            abi: SYAbi,
-                            functionName: 'totalSupply',
-                        })
-                        if (result) {
-                            return new Decimal(formatUnits(result, token.decimals))
-                        }
-                    } catch{
-                    }
-                }
+    //             if (token?.chainId == chainId) {
+    //                 try {
+    //                     const result = await publicClient?.readContract({
+    //                         // @ts-ignore
+    //                         address: (token as Token)?.address,
+    //                         abi: SYAbi,
+    //                         functionName: 'totalSupply',
+    //                     })
+    //                     if (result) {
+    //                         return new Decimal(formatUnits(result, token.decimals))
+    //                     }
+    //                 } catch{
+    //                 }
+    //             }
     
-            }
-            _totalSupply().then(settotalSupply)
-        }
+    //         }
+    //         _totalSupply().then(settotalSupply)
+    //     }
         
-    },[token, chainId])
+    // },[token, chainId])
 
     return {
         SYView: {
@@ -133,5 +168,3 @@ export function useSY(token:Currency) {
         }
     }
 }
-
-export type useSY = ReturnType<typeof useSY>;
