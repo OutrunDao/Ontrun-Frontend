@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { ArrowUpDown, Link, Star, TrendingUp, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
@@ -16,11 +16,14 @@ import { useMarkets } from '@/hooks/useMarkets';
 import { useRouter } from 'next/navigation';
 import { Currency, Token } from '@/packages/core';
 import { CurrencySelectListType } from '@/contracts/currencys';
+import { useChainId } from 'wagmi';
 
 export default function EnhancedMarketPage() {
 
   const { 
-    marketsData 
+    marketsData,
+    refresh,
+    refreshLiquiditys, 
   } = useMarkets();
 
   const [selectedMarket, setSelectedMarket] = useState(null);
@@ -40,6 +43,11 @@ export default function EnhancedMarketPage() {
     setSelectedMarket(null);
   };
 
+  const handleRefresh = () => {
+    refreshLiquiditys();
+    refresh();
+  }
+
   return (
     <div className="min-h-screen bg-[#030415] text-white p-6 overflow-hidden">
       <div className="max-w-7xl mx-auto relative">
@@ -58,7 +66,7 @@ export default function EnhancedMarketPage() {
               <TableRow
                 key={item.name}
                 className={`${index % 2 === 0 ? 'bg-gray-800/30' : 'bg-gray-800/10'} backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-gray-700/30 cursor-pointer`}
-                onClick={() => handleMarketClick(item.name)}
+                onClick={() => handleMarketClick(item.symbol)}
               >
                 <TableCell className="font-medium">
                   <div className="flex items-center">
@@ -98,17 +106,20 @@ export default function EnhancedMarketPage() {
             ))}
           </TableBody>
         </Table>
-        <div className="mt-6 text-center text-sm text-gray-300">
-          Showing all Blast pools (2 of 2).{' '}
-          <Button
-            variant="link"
-            className="text-blue-400 hover:text-purple-300 transition-colors duration-300"
-          >
-            Refresh
-          </Button>
-        </div>
       </div>
-      {selectedMarket && (
+      <div className="mt-6 text-center text-sm text-gray-300">
+        Showing all Blast pools (2 of 2).{' '}
+        <Button
+          variant="link"
+          className="text-blue-400 hover:text-purple-300 transition-colors duration-300"
+          onClick={handleRefresh}
+          style={{ zIndex: 10 }}
+        >
+          Refresh
+        </Button>
+        </div>
+      
+      {/* {selectedMarket && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="relative">
             <LiquidStakingCard />
@@ -123,7 +134,7 @@ export default function EnhancedMarketPage() {
             </Button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

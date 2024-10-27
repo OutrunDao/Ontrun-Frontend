@@ -10,7 +10,7 @@ export const outstake: DiscoverCard = {
       icon: "/images/mint.svg",
       title: "Stake",
       description: "Stake native yield tokens (LRT, LST, etc.) to earn more profits",
-      link: "/staking/liquidstaking",
+      link: "/markets",
     },
     {
       icon: "/images/position.svg",

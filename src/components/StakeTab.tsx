@@ -1,5 +1,5 @@
 import { Button, Divider, Input, Link, Slider } from "@nextui-org/react";
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
 import ToastCustom from "./ToastCustom";
@@ -7,7 +7,7 @@ import TokenSelect from "./TokenSelect";
 import { Currency, Ether, Token } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
 import { USDB, tBNB } from "@/contracts/tokens/tokens";
-import { CurrencySelectListType, currencySelectListETH, currencySelectListTBNB, currencySelectListUSDB } from "@/contracts/currencys";
+import { CurrencySelectListType, StakeCurrencyListMap } from "@/contracts/currencys";
 import TokenSure from "./TokenSure";
 import Decimal from "decimal.js-light";
 import { UBNB } from "@/contracts/tokens/UPT";
@@ -19,6 +19,8 @@ import { useYT } from "@/hooks/useYT";
 
 import { POTslisBNB } from "@/contracts/tokens/POT";
 import { usePOT } from "@/hooks/usePOT";
+import { useMulticall } from "@/hooks/useMulticall";
+import { set } from "radash";
 
 // const mockTokens = {
 //   ETH: { symbol: "ETH", name: "Ethereum" },
@@ -31,16 +33,16 @@ export default function StakeTab() {
 
   const searchParams = useSearchParams();
   const tokenName = searchParams.get('tokenName');
-  // const [tokenName, setTokenName] = useState(searchParams.get('token'));
-
-  // const data = searchParams.get('data');
-  // const currencySelectList = data ? JSON.parse(decodeURIComponent(data)) : {};
-
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const account = useAccount();
+  //@ts-ignore
+  // const [tokens,setTokens] = useState<any>();
+
+
+
   const [sliderValue, setSliderValue] = useState(365);
-  const [NT, setNT] = useState<Currency>();
+  const [NT, setNT] = useState<Currency | Ether>();
   const [SY, setSY] = useState<Currency>();
   const [PT, setPT] = useState<Currency>();
   const [YT, setYT] = useState<Currency>();
@@ -48,38 +50,35 @@ export default function StakeTab() {
   const [NTBalance, setNTBalance] = useState<Decimal>(new Decimal(0));
   const [PTBalance, setPTBalance] = useState<Decimal>(new Decimal(0));
   const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
+  const [SYBalance, setSYBalance] = useState<Decimal>(new Decimal(0));
   const [NTAmount, setNTAmount] = useState("");
   const [SYAmount, setSYAmount] = useState("");
   const [PTAmount, setPTAmount] = useState("");
   const [YTAmount, setYTAmount] = useState("");
   const [NTSymbol, setNTSymbol] = useState<string | undefined>("");
+  const [exchangeRate, setExchangeRate] = useState<Decimal>();
+  const UseSY = useSY();
+  const UseYT = useYT();
   // @ts-ignore
-  const UseSY = useSY(SY,publicClient,chainId);
-  // @ts-ignore
-  const UseYT = useYT(YT);
-  // @ts-ignore
-  const UsePOT = usePOT(POT);
+  // const UseMulticall = useMulticall(SY,POT);
+  // const UsePOT = usePOT();
+
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
 
   useEffect(() => {
-      switch (tokenName) {
-        case "slisBNB": 
-          setNT(Ether.onChain(chainId));
-          setSY(SYslisBNB[chainId]);
-          setPT(UBNB[chainId]);
-          setYT(YTslisBNB[chainId])
-          setPOT(POTslisBNB[chainId]);
-          setCurrencyList(currencySelectListTBNB)
-          break;
-        case "Blast ETH":
-          setNT(Ether.onChain(chainId));
-          setCurrencyList(currencySelectListETH);
-          break;
-        case "USDB":
-          setNT(USDB[chainId]);
-          setCurrencyList(currencySelectListUSDB)
-          break;
-  }
+    if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
+
+    // setTokens(StakeCurrencyListMap[chainId]["slisBNB"]);
+    const tokens = StakeCurrencyListMap[chainId][tokenName];
+    if (tokens) {
+      setNT(tokens.NT.onChain(chainId));
+      setSY(tokens.SY[chainId]);
+      setPT(tokens.UPT[chainId]);
+      setYT(tokens.YT[chainId]);
+      setPOT(tokens.POT[chainId]);
+      setCurrencyList([tokens.NT, tokens.RT]);
+    }
+    
   },[chainId, tokenName])
 
   useEffect(() => {
@@ -101,7 +100,22 @@ export default function StakeTab() {
     }
     _YT().then(setYTBalance);
 
+    async function _SY() {
+      if (!account.address || !SY || !publicClient) return new Decimal(0);
+      return SY.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    }
+    _SY().then(setSYBalance);
+
   }, [chainId, account.address, NT]);
+
+  useEffect(() => {
+    async function _() {
+      if (SY) {
+        return await UseSY.SYView.exchangeRate(SY);
+      }
+    }
+    _().then(setExchangeRate);
+  },[SY])
 
   useEffect(() => {
     if (NT?.symbol == "ETH") {
@@ -111,48 +125,37 @@ export default function StakeTab() {
     }
   }, [NT,chainId])
   
-
-  // switch (tokenName) {
-  //   case "tBNB":
-  //     setNT(tBNB);
-  //     // setCurrencyList(currencySelectListTBNB);
-  // }
-
   const title = useMemo(() => {
     if (!NT) return "Choose Token";
-    return `Stake ${NT.symbol}`;
+    return `Stake`;
   }, [NT]);
 
-  // const SYView = useMemo(() => {
-  //   if (SY) {
-  //     return useSY(SY);
-  //   }
-  // },[SY]);
-
-  const exchangeRate = useMemo(() => {
-    if (UseSY) {
-      return UseSY.SYView.exchangeRate; // Mock exchange rate
-    }
-  }, [UseSY]);
-
   useEffect(() => {
-    if (NTAmount) {
-      if (NT?.symbol != SY?.symbol) {
-        setSYAmount(String(+NTAmount / Number(UseSY.SYView.exchangeRate?.toFixed(18))));
+
+    async function _() {
+      if (NTAmount) {
+        if (NT?.symbol != tokenName && SY) {
+          return String(+NTAmount * Number(exchangeRate?.toFixed(18)));
+        } else {
+          return NTAmount;
+        }
       } else {
-        setSYAmount(NTAmount);
+        return "";
       }
-    } else {
-      setSYAmount("")
     }
-  }, [NTAmount, exchangeRate, NT])
+    _().then(setSYAmount);
+  }, [NTAmount, exchangeRate, NT]);
 
   useEffect(() => {
-    if (NTAmount) {
-      setPTAmount(String(handlePTAmount(NTAmount)))
-    } else {
-      setPTAmount("");
+
+    async function _() {
+      if (NTAmount) {
+        return String(await handlePTAmount(NTAmount));
+      } else {
+        return "";
+      }
     }
+    _().then(setPTAmount);
   }, [NTAmount, exchangeRate, NT]);
 
   useEffect(() => {
@@ -173,11 +176,20 @@ export default function StakeTab() {
 
     if (POT && PT && YT && SYAmount && NT) {
 
-      UseSY.SYWrite.deposit({
-        NT: NT,
-        NTAmount: NTAmount,
-        SYAmount: SYAmount
-      })
+      // UseMulticall.stake({
+      //   NT: NT,
+      //   PT: PT,
+      //   YT: YT,
+      //   NTAmount: NTAmount,
+      //   SYAmount: SYAmount,
+      //   lockupDays: sliderValue,
+      // })
+
+      // UseSY.SYWrite.deposit({
+      //   NT: NT,
+      //   NTAmount: NTAmount,
+      //   SYAmount: SYAmount
+      // })
 
       // UsePOT.POTWrite.stake({
       //   PT: PT,
@@ -197,22 +209,33 @@ export default function StakeTab() {
       //   />
       // ));
 
-      if (UsePOT.POTWrite.isPending) {
-        setNTAmount("");
-        setPTAmount("");
-      } else {
-        toast.custom(() => (
-          <ToastCustom
-            content={
-              <>
-                {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-                . View on <Link href="#">BlockExplorer</Link>
-              </>
-            }
-          />
-        ));
+      toast.custom(() => (
+        <ToastCustom
+          content={
+            <>
+              {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
+              . View on <Link href="#">BlockExplorer</Link>
+            </>
+          }
+        />
+      ));
 
-      }
+      // if (UsePOT.POTWrite.isPending) {
+      //   setNTAmount("");
+      //   setPTAmount("");
+      // } else {
+      //   toast.custom(() => (
+      //     <ToastCustom
+      //       content={
+      //         <>
+      //           {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
+      //           . View on <Link href="#">BlockExplorer</Link>
+      //         </>
+      //       }
+      //     />
+      //   ));
+
+      // }
     }
     
 
@@ -222,27 +245,30 @@ export default function StakeTab() {
 
   }
 
-  function handlePTAmount(NTAmount:string) {
-    if (NT?.symbol != SY?.symbol) {
-      if (Number(UseYT.YTView.totalSupply?.toFixed(18))) {
-        return (+NTAmount - Number(YTBalance) * Number(UseYT.YTView.totalRedeemableYields?.toFixed(18)) / Number(UseYT.YTView.totalSupply?.toFixed(18)))
+  async function handlePTAmount(NTAmount:string) {
+    if (!NT || !PT || !YT) return;
+    const YTtotalSupply = await UseYT.YTView.totalSupply(YT);
+    const YTtotalRedeemableYields = await UseYT.YTView.totalRedeemableYields(YT);
+    if (NT?.symbol != tokenName) {
+      if (Number(YTtotalSupply?.toFixed(18))) {
+        return (+NTAmount - Number(YTBalance) * Number(YTtotalSupply?.toFixed(18)) / Number(YTtotalSupply?.toFixed(18)))
       } else {
         return (+NTAmount);
       }
     } else {
-      if (Number(UseYT.YTView.totalSupply?.toFixed(18))) {
-        return (+NTAmount * Number(UseSY.SYView.exchangeRate?.toFixed(18)) - Number(YTBalance) * Number(UseYT.YTView.totalRedeemableYields?.toFixed(18)) / Number(UseYT.YTView.totalSupply?.toFixed(18)))
+      if (Number(YTtotalSupply?.toFixed(18))) {
+        return (+NTAmount * Number(exchangeRate?.toFixed(18)) - Number(YTBalance) * Number(YTtotalRedeemableYields?.toFixed(18)) / Number(YTtotalSupply?.toFixed(18)))
       } else {
-        return (+NTAmount * Number(UseSY.SYView.exchangeRate?.toFixed(18)));
+        return (+NTAmount * Number(exchangeRate?.toFixed(18)));
       }
     }
   }
 
   function handleYTAmount(NTAmount:string) {
-    if (NT?.symbol != SY?.symbol) {
+    if (NT?.symbol != tokenName) {
       return (+NTAmount * sliderValue)
     } else {
-      return (+NTAmount * Number(UseSY.SYView.exchangeRate?.toFixed(18)) * sliderValue)
+      return (+NTAmount * Number(exchangeRate?.toFixed(18)) * sliderValue)
     }
   }
 
@@ -272,10 +298,10 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {NTBalance.toFixed(6)}
+                balance: {NTBalance.toFixed(18)}
               </span>
               <Button
-                onClick={() => setNTAmount(NTBalance.toFixed(6))}
+                onClick={() => setNTAmount(NTBalance.toFixed(18))}
                 className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
                 Max
               </Button>
@@ -312,7 +338,7 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {PTBalance.toFixed(6)}
+                balance: {PTBalance.toFixed(18)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
@@ -341,7 +367,7 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {YTBalance.toFixed(6)}
+                balance: {YTBalance.toFixed(18)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">

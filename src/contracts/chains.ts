@@ -12,6 +12,12 @@ export enum NativeCurrencyName {
   ETHER = "ETH",
 }
 
+export const ChainNames = {
+  [ChainId.BLAST_SEPOLIA]: 'Blast Sepolia',
+  [ChainId.BLAST]: 'Blast',
+  [ChainId.BSC_TESTNET]: 'BSC Testnet',
+} as Record<number, string>;
+
 export const BlockExplorers = {
   [ChainId.BLAST_SEPOLIA]: "https://testnet.blastscan.io",
   [ChainId.BSC_TESTNET]: "https://testnet.bscscan.com/",

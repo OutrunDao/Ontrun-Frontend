@@ -1,5 +1,7 @@
 import { ChainId } from "@/contracts/chains";
 import { Ether, Token } from "@/packages/core";
+import { multicall } from "viem/actions";
+import { slisBNB } from "../tokens/tokenStake";
 
 type AddressMap = { [chainId: number]: string };
 export enum ContractName {
@@ -16,7 +18,9 @@ export enum ContractName {
   REY = "REY",
   OSETH = "OSETH",
 
-  TBNB = "TBNB"
+  TBNB = "TBNB",
+  multicall = "multicall",
+  slisBNB = "slisBNB",
 }
 export type ContractAddressMap = Record<string, `0x${string}`>;
 
@@ -37,9 +41,12 @@ export const addressMap = {
   },
   [ChainId.BSC_TESTNET]: {
     [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+    [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
+    [ContractName.slisBNB]: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
   }
 } as Record<number, ContractAddressMap>;
 
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
 } as Record<number, `0x${string}`>;
+

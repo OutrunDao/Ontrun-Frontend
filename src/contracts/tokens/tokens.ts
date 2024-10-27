@@ -104,12 +104,6 @@ computePairAddress({
   tokenB: ORUSD[ChainId.BLAST_SEPOLIA],
 });
 
-
-
-
-
-
-
 export const tBNB: { [chainId: number]: Token } = {
 
   [ChainId.BSC_TESTNET]: new Token(
@@ -120,3 +114,16 @@ export const tBNB: { [chainId: number]: Token } = {
     "Test BNB",
   )
 }
+
+export const getTokensByChainId = (chainId: number): Token[] => {
+  const tokenObjects = [WETH9, USDB, RUY, ORUSD, REY, ORETH, OSUSD, OSETH, tBNB];
+  const tokens: Token[] = [];
+
+  tokenObjects.forEach(tokenObject => {
+    if (tokenObject[chainId]) {
+      tokens.push(tokenObject[chainId]);
+    }
+  });
+
+  return tokens;
+};
