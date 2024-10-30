@@ -21,6 +21,7 @@ export enum ContractName {
   TBNB = "TBNB",
   multicall = "multicall",
   slisBNB = "slisBNB",
+  stakeRouter = "stakeRouter",
 }
 export type ContractAddressMap = Record<string, `0x${string}`>;
 
@@ -43,6 +44,7 @@ export const addressMap = {
     [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
     [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
     [ContractName.slisBNB]: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
+    [ContractName.stakeRouter]: "0x10AE266fF84c07Cc4b0fFf394EE7C2ef7458c4B2",
   }
 } as Record<number, ContractAddressMap>;
 

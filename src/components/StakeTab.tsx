@@ -16,18 +16,10 @@ import { SYslisBNB } from "@/contracts/tokens/SY";
 import { useSY } from "@/hooks/useSY";
 import { ChainETHSymbol } from "@/contracts/chains";
 import { useYT } from "@/hooks/useYT";
-
-import { POTslisBNB } from "@/contracts/tokens/POT";
+import StakeSetting from "./trade/StakeSetting";
+import { useStakeRouter } from "@/hooks/useStakeRouter";
+import { parseEther } from "viem";
 import { usePOT } from "@/hooks/usePOT";
-import { useMulticall } from "@/hooks/useMulticall";
-import { set } from "radash";
-
-// const mockTokens = {
-//   ETH: { symbol: "ETH", name: "Ethereum" },
-//   NrETH: { symbol: "NrETH", name: "Nested rETH" },
-//   "PT-BETH": { symbol: "PT-BETH", name: "Principal Token BETH" },
-//   "YT-BETH": { symbol: "YT-BETH", name: "Yield Token BETH" },
-// };
 
 export default function StakeTab() {
 
@@ -36,10 +28,6 @@ export default function StakeTab() {
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const account = useAccount();
-  //@ts-ignore
-  // const [tokens,setTokens] = useState<any>();
-
-
 
   const [sliderValue, setSliderValue] = useState(365);
   const [NT, setNT] = useState<Currency | Ether>();
@@ -57,11 +45,11 @@ export default function StakeTab() {
   const [YTAmount, setYTAmount] = useState("");
   const [NTSymbol, setNTSymbol] = useState<string | undefined>("");
   const [exchangeRate, setExchangeRate] = useState<Decimal>();
+  const [slippage, setSlippage] = useState(0.1);
   const UseSY = useSY();
   const UseYT = useYT();
-  // @ts-ignore
-  // const UseMulticall = useMulticall(SY,POT);
-  // const UsePOT = usePOT();
+  const UseStakeRouter = useStakeRouter();
+  const UsePOT = usePOT();
 
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
 
@@ -146,8 +134,27 @@ export default function StakeTab() {
     _().then(setSYAmount);
   }, [NTAmount, exchangeRate, NT]);
 
-  useEffect(() => {
+  // useEffect(() => {
 
+  //   async function _() {
+  //     const { PTReviewAmount } = await handlePTYTAmount() as { PTReviewAmount: string; YTReviewAmount: string; };
+  //     return PTReviewAmount;
+  //   }
+  //   _().then(setPTAmount);
+  // }, [SYAmount, exchangeRate, NT]);
+
+  // useEffect(() => {
+  //   async function _() {
+  //     return String(await handlePTYTAmount());
+  //   }
+  //   if (NTAmount) {
+  //     _().then(setYTAmount);
+  //   } else {
+  //     setYTAmount("")
+  //   }
+  // },[NTAmount, sliderValue, NT])
+
+  useEffect(() => {
     async function _() {
       if (NTAmount) {
         return String(await handlePTAmount(NTAmount));
@@ -159,13 +166,16 @@ export default function StakeTab() {
   }, [NTAmount, exchangeRate, NT]);
 
   useEffect(() => {
-    if (NTAmount) {
-      setYTAmount(String(handleYTAmount(NTAmount)));
-    } else {
-      setYTAmount("")
+    async function _() {
+      if (NTAmount) {
+        return String(await handleYTAmount(NTAmount));
+      } else {
+        return "";
+      }
     }
+    _().then(setYTAmount);
   },[NTAmount, sliderValue, NT])
-
+  
   function onSelectNT(token: any) {
     setNT(token);
   }
@@ -175,74 +185,52 @@ export default function StakeTab() {
       return toast.custom(<ToastCustom content="Please Connect Wallet" />);
 
     if (POT && PT && YT && SYAmount && NT) {
-
-      // UseMulticall.stake({
-      //   NT: NT,
-      //   PT: PT,
-      //   YT: YT,
-      //   NTAmount: NTAmount,
-      //   SYAmount: SYAmount,
-      //   lockupDays: sliderValue,
-      // })
-
-      // UseSY.SYWrite.deposit({
-      //   NT: NT,
-      //   NTAmount: NTAmount,
-      //   SYAmount: SYAmount
-      // })
-
-      // UsePOT.POTWrite.stake({
-      //   PT: PT,
-      //   YT: YT,
-      //   SYAmount: SYAmount,
-      //   lockupDays: sliderValue,
-      // });
-
-      // toast.custom(() => (
-      //   <ToastCustom
-      //     content={
-      //       <>
-      //         {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-      //         . View on <Link href="#">BlockExplorer</Link>
-      //       </>
-      //     }
-      //   />
-      // ));
-
-      toast.custom(() => (
-        <ToastCustom
-          content={
-            <>
-              {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-              . View on <Link href="#">BlockExplorer</Link>
-            </>
-          }
-        />
-      ));
-
-      // if (UsePOT.POTWrite.isPending) {
-      //   setNTAmount("");
-      //   setPTAmount("");
-      // } else {
+      // try {
+        const receipt = await UseStakeRouter.mintYieldTokensFromToken({
+          SYAddress: (SY as Token).address,
+          POTAddress: (POT as Token).address,
+          TokenInAddress: NT.symbol == "ETH"?"0x0000000000000000000000000000000000000000":(NT as Token).address,
+          tokenAmount: BigInt(parseEther(NTAmount)),
+          lockupDays: BigInt(sliderValue),
+          minPTGenerated: BigInt(0),
+          value: NT.symbol == "ETH"?parseEther(NTAmount):undefined,
+        })
+  
+        toast.custom(() => (
+          <ToastCustom
+            content={receipt.status === 1 ?
+              <>
+                {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
+                . View on <Link href="#">BlockExplorer</Link>
+              </>
+              : "Transaction failed"
+            }
+          />
+        ));
+      // } catch (error) {
       //   toast.custom(() => (
       //     <ToastCustom
-      //       content={
-      //         <>
-      //           {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-      //           . View on <Link href="#">BlockExplorer</Link>
-      //         </>
-      //       }
+      //       content={"Transaction failed"}
       //     />
       //   ));
-
       // }
+      
     }
-    
+  }
 
-    // Mock stake function
-    
-
-
+  async function handlePTYTAmount() {
+    if (!POT || !YT) return;
+    const YTtotalSupply = await UseYT.YTView.totalSupply(YT);
+    if (!YTtotalSupply) return SYAmount;
+    const [PTGenerateable, YTGenerateable] = await UsePOT.POTRead.previewStake({
+      POT: POT,
+      amountInSY: BigInt(parseEther(SYAmount)),
+      lockupDays: BigInt(sliderValue),
+    })
+    return ({
+      PTReviewAmount: String(PTGenerateable),
+      YTReviewAmount: String(YTGenerateable),
+    });
   }
 
   async function handlePTAmount(NTAmount:string) {
@@ -264,7 +252,7 @@ export default function StakeTab() {
     }
   }
 
-  function handleYTAmount(NTAmount:string) {
+  async function handleYTAmount(NTAmount:string) {
     if (NT?.symbol != tokenName) {
       return (+NTAmount * sliderValue)
     } else {
@@ -274,7 +262,11 @@ export default function StakeTab() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-[32.9rem] h-[7rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+      {/* <StakeSetting
+          slippage={slippage}
+          setSlipPage={setSlippage}
+        /> */}
+      <div className="w-[28rem] h-[7rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
         <div>
           <Input
             placeholder="0.00"
@@ -298,10 +290,10 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {NTBalance.toFixed(18)}
+                balance: {NTBalance.toFixed(6)}
               </span>
               <Button
-                onClick={() => setNTAmount(NTBalance.toFixed(18))}
+                onClick={() => setNTAmount(NTBalance.toFixed(6))}
                 className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
                 Max
               </Button>
@@ -315,7 +307,7 @@ export default function StakeTab() {
 
       <div className="flex m-10 w-full justify-around items-center"></div>
 
-      <div className="w-[32.9rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+      <div className="w-[28rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
 
         {/* <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" /> */}
         
@@ -338,7 +330,7 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {PTBalance.toFixed(18)}
+                balance: {PTBalance.toFixed(6)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
@@ -367,7 +359,7 @@ export default function StakeTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {YTBalance.toFixed(18)}
+                balance: {YTBalance.toFixed(6)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
@@ -386,7 +378,7 @@ export default function StakeTab() {
         value={sliderValue.toString()}
         onValueChange={(value) => setSliderValue(Number(value))}
         classNames={{
-          base: "w-[32.9rem] rounded-xl text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent",
+          base: "w-[28rem] rounded-xl text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent",
           input: "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-white font-black",
           inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent",
         }}
@@ -405,7 +397,7 @@ export default function StakeTab() {
         step={1}
         maxValue={365}
         minValue={7}
-        className="w-[32.9rem] mt-[0.88rem]"
+        className="w-[28rem] mt-[0.88rem]"
         renderThumb={(props) => (
           <div
             {...props}
@@ -415,7 +407,7 @@ export default function StakeTab() {
         )}
       />
 
-      <div className="flex flex-col gap-y-[0.35rem] w-[32.9rem]  text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
+      <div className="flex flex-col gap-y-[0.35rem] w-[28rem]  text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
         <div className="flex justify-between w-full text-white text-opacity-50">
           <span>Exchange Rate</span>
           {NT&&PT ?  <span>1 {NTSymbol} = {1 / Number(exchangeRate?.toFixed(18))} {PT.symbol}</span> : null}

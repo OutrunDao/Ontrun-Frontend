@@ -7,21 +7,20 @@ import { useState } from "react";
 import { createWalletClient, parseEther } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient, useWriteContract } from "wagmi";
 
-export function usePOT(token:Currency) {
+export function usePOT() {
 
     const account = useAccount();
     const publicClient = usePublicClient();
-    // const {isPending, writeContract} = useWriteContract();
-    const {data: walletClient} = useWalletClient();
-    const [isPending , setIsPending] = useState(false);
 
     async function stake({
+            POT,
             PT,
             YT,
             SYAmount,
             lockupDays,
             
         }:{
+            POT:Currency,
             PT:Currency,
             YT:Currency,
             SYAmount:string,
@@ -29,63 +28,38 @@ export function usePOT(token:Currency) {
         }) {
             
             if (publicClient) {
-
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-
-                const POTContract = new ethers.Contract((token as Token).address, POTAbi, signer);
-
+                const POTContract = new ethers.Contract((POT as Token).address, POTAbi, signer);
                 const tx = await POTContract.stake(parseEther(SYAmount), BigInt(lockupDays), account.address, account.address, account.address);
-
-                // const { request } = await publicClient.simulateContract({
-                //     // @ts-ignore
-                //     address: (token as Token).address,
-                //     abi: POTAbi,
-                //     functionName: 'stake',
-                //     args: [
-                //         parseEther(SYAmount),
-                //         BigInt(lockupDays),
-                //         // @ts-ignore
-                //         account.address,
-                //         // @ts-ignore
-                //         account.address,
-                //         // @ts-ignore
-                //         account.address,
-                //     ],
-                //     account: account.address
-                //   })
-    
-                // await walletClient?.writeContract(request);
-
-                
-                // setIsPending(true);
             }
-            
+    }
+
+    async function previewStake({
+        POT,
+        amountInSY,
+        lockupDays,
+    }:{
+        POT:Currency,
+        amountInSY:BigInt,
+        lockupDays:BigInt,
+    }) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        // const signer = await provider.getSigner();
+        const POTContract = new ethers.Contract((POT as Token).address, POTAbi, provider);
+        const result = await POTContract.previewStake(amountInSY, lockupDays);
+        return result;
     }
 
     return {
         POTWrite: {
             stake,
-            isPending,
+        },
+        POTRead: {
+            previewStake,
         }
     }
 
 }
-
-// writeContract({
-            //     abi: POTAbi,
-            //     // @ts-ignore
-            //     address: (token as Token).address,
-            //     functionName: 'stake',
-            //     args: [
-            //         BigInt(SYAmount),
-            //         BigInt(lockupDays),
-            //         // @ts-ignore
-            //         account.address,
-            //         // @ts-ignore
-            //         (PT as Token).address,
-            //         // @ts-ignore
-            //         (YT as Token).address,
-            //     ]
-            // })
