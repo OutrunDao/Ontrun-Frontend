@@ -3,7 +3,8 @@ import { execute, RethPositionDocument, RusdPositionDocument, type StakeORETH, t
 import { Tab, Tabs } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
-import PositionTab from "./PositionTab";
+import PositionTab from "./PositionNTab";
+import PositionETHCard from "./PositionETHCard";
 
 export default function PositionTabs() {
   const account = useAccount();
@@ -37,10 +38,57 @@ export default function PositionTabs() {
         panel: "mt-12 pb-24",
       }}>
       <Tab key="ETH" title="ETH Position">
-        <PositionTab ethPositions={rethPositions} type="ETH" />
+        <PositionTab />
+        {/* <PositionTab ethPositions={rethPositions} type="ETH" /> */}
+        {/* <PositionETHCard
+          type={"0"}
+          key={"0"}
+          positionId={0n}
+          amountInOR={0n}
+          amountInOS={0n}
+          YT={0n}
+          deadline={0}
+        />
+        <PositionETHCard
+          type={"0"}
+          key={"0"}
+          positionId={0n}
+          amountInOR={0n}
+          amountInOS={0n}
+          YT={0n}
+          deadline={0}
+        />
+        <PositionETHCard
+          type={"0"}
+          key={"0"}
+          positionId={0n}
+          amountInOR={0n}
+          amountInOS={0n}
+          YT={0n}
+          deadline={0}
+        />
+        <PositionETHCard
+          type={"0"}
+          key={"0"}
+          positionId={0n}
+          amountInOR={0n}
+          amountInOS={0n}
+          YT={0n}
+          deadline={0}
+        />
+        <PositionETHCard
+          type={"0"}
+          key={"0"}
+          positionId={0n}
+          amountInOR={0n}
+          amountInOS={0n}
+          YT={0n}
+          deadline={0}
+        /> */}
       </Tab>
       <Tab key="USDB" title="USDB Position">
-        <PositionTab usdbPositions={rusdPositions} type="USDB" />
+        {/* <PositionTab usdbPositions={rusdPositions} type="USDB" /> */}
+        <PositionTab />
       </Tab>
     </Tabs>
   );

@@ -80,7 +80,7 @@ export function Menu() {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {NavbarMenu.map((item) => {
           return item.hasChildren ? (
-            <Dropdown key={item.name}>
+            <Dropdown classNames={{ content: "bg-gray-800/90 text-white min-w-[5rem]"}} key={item.name}>
               <NavbarItem>
                 <DropdownTrigger>
                   <Button
@@ -94,7 +94,7 @@ export function Menu() {
               </NavbarItem>
               <DropdownMenu
                 aria-label={`${item.name} dropdown`}
-                className="w-[200px] bg-gray-800/90 backdrop-blur-md"
+                className="w-[200px] rounded backdrop-blur-md"
                 itemClasses={{
                   base: "text-gray-300 data-[hover=true]:text-white data-[hover=true]:bg-gray-700/50",
                 }}

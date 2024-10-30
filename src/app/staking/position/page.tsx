@@ -11,7 +11,7 @@ export default function Position() {
   return (
     // <PositionTable />
     <div className="min-h-[57rem] bg-[url('/images/position-bg.png')] bg-no-repeat bg-cover pt-[8rem] pb-[8rem] px-[20rem]">
-      <PositionTables />
+      <PositionTabs />
     </div>
   );
 }
