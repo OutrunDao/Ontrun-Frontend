@@ -16,8 +16,7 @@ export default function RedeemTab() {
   const tokenName = searchParams.get('tokenName');
   const [PT, setPT] = useState<Currency>();
   const [POT, setPOT] = useState<Currency>();
-  const [PTAmount, setPTAmount] = useState("");
-  const [POTAmount, setPOTAmount] = useState("");
+  const [PTPOTAmount, setPTPOTAmount] = useState("");
 
   useEffect(() => {
     if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
@@ -30,14 +29,6 @@ export default function RedeemTab() {
     
   },[chainId, tokenName])
 
-  useEffect(() => {
-    setPTAmount(POTAmount);
-  },[POTAmount])
-
-  useEffect(() => {
-    setPOTAmount(PTAmount);
-  },[PTAmount])
-
   async function redeem() {
     if (!account.address)
       return toast.custom(<ToastCustom content="Please Connect Wallet" />);
@@ -47,7 +38,7 @@ export default function RedeemTab() {
       <ToastCustom
         content={
           <>
-            {`You have successfully redeemed ${token0Amount} ${token0.symbol} for ${token1Amount} ${token1.symbol}`}
+            {`You have successfully redeemed ${PTPOTAmount} ${PT?.symbol}`}
             . View on <Link href="#">BlockExplorer</Link>
           </>
         }
@@ -59,12 +50,12 @@ export default function RedeemTab() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-[32.9rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+      <div className="w-[28rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
       <div>
           <Input
             placeholder="0.00"
-            value={PTAmount}
-            onValueChange={setPTAmount}
+            value={PTPOTAmount}
+            onValueChange={setPTPOTAmount}
             classNames={{
               base: "h-[2.5rem] text-white",
               input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
@@ -91,8 +82,8 @@ export default function RedeemTab() {
         <div>
           <Input
             placeholder="0.00"
-            value={POTAmount}
-            onValueChange={setPOTAmount}
+            value={PTPOTAmount}
+            onValueChange={setPTPOTAmount}
             classNames={{
               base: "h-[2.5rem] text-white",
               input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
@@ -116,7 +107,7 @@ export default function RedeemTab() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-y-[0.35rem] w-[32.9rem] text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
+      <div className="flex flex-col gap-y-[0.35rem] w-[28rem] text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
         <div className="flex justify-between w-full text-white text-opacity-50">
           {/* <span>Exchange Rate</span>
           <span>
@@ -126,7 +117,7 @@ export default function RedeemTab() {
       </div>
       <Button
         onClick={redeem}
-        isDisabled={!PTAmount || !POTAmount}
+        isDisabled={!PTPOTAmount}
         className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
         {'Redeem'}
       </Button>

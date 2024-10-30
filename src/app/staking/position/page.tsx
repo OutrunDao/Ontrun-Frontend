@@ -1,3 +1,5 @@
+import PositionTable from "@/components/PositionTable";
+import PositionTables from "@/components/PositionTables";
 import PositionTabs from "@/components/PositionTabs";
 import type { Metadata } from "next";
 
@@ -7,8 +9,9 @@ export const metadata: Metadata = {
 
 export default function Position() {
   return (
-    <div className="min-h-[57rem] bg-[url('/images/position-bg.png')] bg-no-repeat bg-cover pt-[16.5rem] px-[14rem]">
-      <PositionTabs />
+    // <PositionTable />
+    <div className="min-h-[57rem] bg-[url('/images/position-bg.png')] bg-no-repeat bg-cover pt-[8rem] pb-[8rem] px-[20rem]">
+      <PositionTables />
     </div>
   );
 }

@@ -118,23 +118,6 @@ export default function EnhancedMarketPage() {
           Refresh
         </Button>
         </div>
-      
-      {/* {selectedMarket && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="relative">
-            <LiquidStakingCard />
-            <Button
-              onClick={handleClosePopup}
-              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-300"
-              variant="ghost"
-              size="icon"
-              aria-label="Close"
-            >
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
-        </div>
-      )} */}
     </div>
   )
 }

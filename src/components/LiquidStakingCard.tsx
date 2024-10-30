@@ -7,52 +7,40 @@ import StakeTab from "./StakeTab"
 import { CurrencySelectListType } from "@/contracts/currencys"
 import YieldPoolCard from "./YieldPoolCard"
 import RedeemTab from "./RedeemTab"
+import YieldPoolOTab from "./YieldPoolOTab"
 export default function LiquidStakingCard() {
   return (
     <div className="w-full max-w-3xl bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg">
       <div className="p-6">
         <Tabs
           aria-label="Yield Pool Tabs"
-          color="primary"
-          variant="underlined"
           classNames={{
             base: "w-full",
-            tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+            tabList: "h-full flex gap-x-8 rounded-none px-8 pt-4 bg-transparent",
             tab: "max-w-fit px-0 h-12",
-            tabContent: "group-data-[selected=true]:text-primary",
-            cursor: "w-full bg-primary",
-            panel: "pt-3",
+            tabContent: 
+            "text-white group-data-[selected=true]:bg-title text-[1.5rem] leading-[1.88rem] font-kronaOne group-data-[selected=true]:text-transparent group-data-[selected=true]:bg-clip-text",
+            cursor: "bg-transparent",
+            panel: "pt-6",
           }}
         >
           <Tab
             key="stake"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Stake</span>
-              </div>
-            }
+            title="Stake"
           >
             <StakeTab />
           </Tab>
           <Tab
             key="redeem"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Redeem</span>
-              </div>
-            }
+            title="Redeem"
           >
             <RedeemTab />
           </Tab>
           <Tab
             key="Yieldpool"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Yieldpool</span>
-              </div>
-            }
+            title="Yield Pool"
           >
-            <YieldPoolCard />
+            <YieldPoolOTab />
           </Tab>
         </Tabs>
       </div>

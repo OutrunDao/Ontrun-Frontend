@@ -7,7 +7,7 @@ export enum ContractName {
 
 export const uAddressMap = {
     [ChainId.BSC_TESTNET]: {
-      [ContractName.UBNB]: "0x294285577306bc14224510966DFb81002A5a3C6E",
+      [ContractName.UBNB]: "0xF7a6ff48b866b5ee0245AB0022F8AAab19F8F18F",
     }
   } as Record<number, ContractAddressMap>;
   
