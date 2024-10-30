@@ -8,6 +8,7 @@ import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
 import { Currency } from "@/packages/core";
 import { set } from "radash";
 
+/* eslint-disable no-unused-vars */
 
 export function useMarkets() {
 

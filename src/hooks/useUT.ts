@@ -14,24 +14,24 @@ export function useUTView(token:Currency) {
     const publicClient = usePublicClient();
     const chainId = useChainId();
 
-    const[ symbol,setSymbol ] = useState<string | undefined>();
+    // const[ symbol,setSymbol ] = useState<string | undefined>();
 
-    useEffect(() => {
-        async function _() {
-            return await publicClient?.readContract({
-                // @ts-ignore
-                address: (token as Token)?.address,
-                abi: UT,
-                functionName: 'symbol',
-            })
-        }
-        _().then(setSymbol)
-    },[token])
+    // useEffect(() => {
+    //     async function _() {
+    //         return await publicClient?.readContract({
+    //             // @ts-ignore
+    //             address: (token as Token)?.address,
+    //             abi: UT,
+    //             functionName: 'symbol',
+    //         })
+    //     }
+    //     _().then(setSymbol)
+    // },[token])
 
 
     return {
-        UTView: {
-            symbol
-        }
+        // UTView: {
+        //     symbol
+        // }
     }
 }

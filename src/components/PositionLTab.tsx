@@ -10,7 +10,7 @@ export default function PositionLTab() {
     return (
         <div>
             {PositionsDates.map((item, index) => (
-                <div className="w-full h-[5rem] text-white relative mb-12 border-solid border-[#504360] border-[0.15rem] rounded-[1.25rem] bg-white bg-opacity-5">
+                <div key={index} className="w-full h-[5rem] text-white relative mb-12 border-solid border-[#504360] border-[0.15rem] rounded-[1.25rem] bg-white bg-opacity-5">
                     <div className="flex justify-between h-full items-center text-lg text-center mx-8">
                             <span className="absolute left-[4%] top-1/2 transform -translate-y-1/2 text-white">{item.name}</span>
                             <span className="absolute left-[25%] top-1/2 transform -translate-y-1/2 text-white">{item.APY}</span>
