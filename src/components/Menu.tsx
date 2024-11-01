@@ -100,13 +100,8 @@ export function Menu() {
                 }}
               >
                 {item.children?.map((child) => (
-                  <DropdownItem key={child.name} className="py-2">
-                    <Link
-                      href={child.path}
-                      className="text-sm font-medium"
-                    >
+                  <DropdownItem key={child.name} href={child.path} className="py-2 text-sm font-medium">
                       {child.name}
-                    </Link>
                   </DropdownItem>
                 ))}
               </DropdownMenu>

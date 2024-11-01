@@ -1,6 +1,7 @@
 import { YTAbi } from "@/contracts/abis/YT";
 import { Currency, Token } from "@/packages/core";
 import Decimal from "decimal.js-light";
+import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { formatUnits } from "viem";
 import { usePublicClient, useChainId } from "wagmi";
@@ -59,11 +60,30 @@ export function useYT() {
         }
     }
 
+    async function withdrawYields({
+        YT,
+        amountInBurnedYT,
+    }:{
+        YT:Currency,
+        amountInBurnedYT:BigInt,
+    }) {
+        if (publicClient) {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const YTContract = new ethers.Contract((YT as Token).address, YTAbi, signer);
+            const tx = await YTContract.withdrawYields(amountInBurnedYT);
+        }
+    }
+
     return {
         YTView: {
             totalSupply,
             currentYields,
             totalRedeemableYields,
+        },
+        YTWrite: {
+            withdrawYields,
         }
     }
 }

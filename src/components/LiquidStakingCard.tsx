@@ -7,7 +7,7 @@ import StakeTab from "./StakeTab"
 import { CurrencySelectListType } from "@/contracts/currencys"
 import YieldPoolCard from "./YieldPoolCard"
 import RedeemTab from "./RedeemTab"
-import YieldPoolOTab from "./YieldPoolOTab"
+import YieldPoolOCard from "./YieldPoolOCard"
 export default function LiquidStakingCard() {
   return (
     <div className="w-full max-w-3xl bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg">
@@ -40,7 +40,7 @@ export default function LiquidStakingCard() {
             key="Yieldpool"
             title="Yield Pool"
           >
-            <YieldPoolOTab />
+            <YieldPoolOCard />
           </Tab>
         </Tabs>
       </div>

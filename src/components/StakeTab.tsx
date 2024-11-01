@@ -20,6 +20,8 @@ import StakeSetting from "./trade/StakeSetting";
 import { useStakeRouter } from "@/hooks/useStakeRouter";
 import { parseEther } from "viem";
 import { usePOT } from "@/hooks/usePOT";
+import { set } from "radash";
+import { N, ethers } from "ethers";
 
 export default function StakeTab() {
 
@@ -29,6 +31,7 @@ export default function StakeTab() {
   const publicClient = usePublicClient();
   const account = useAccount();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [sliderValue, setSliderValue] = useState(365);
   const [NT, setNT] = useState<Currency | Ether>();
   const [SY, setSY] = useState<Currency>();
@@ -143,38 +146,40 @@ export default function StakeTab() {
   //   _().then(setPTAmount);
   // }, [SYAmount, exchangeRate, NT]);
 
+  useEffect(() => {
+    async function _YT() {
+      const result = await handlePTYTAmount(SYAmount, sliderValue) as { PTReviewAmount: string; YTReviewAmount: string; };
+      return ethers.formatEther(result?.YTReviewAmount || "0");
+    }
+    _YT().then(setYTAmount);
+    async function _PT() {
+      const result = await handlePTYTAmount(SYAmount, sliderValue) as { PTReviewAmount: string; YTReviewAmount: string; };
+      return ethers.formatEther(result?.PTReviewAmount || "0");
+    }
+    _PT().then(setPTAmount);
+  },[SYAmount, sliderValue, NT])
+
   // useEffect(() => {
   //   async function _() {
-  //     return String(await handlePTYTAmount());
+  //     if (NTAmount) {
+  //       return String(await handlePTAmount(NTAmount));
+  //     } else {
+  //       return "";
+  //     }
   //   }
-  //   if (NTAmount) {
-  //     _().then(setYTAmount);
-  //   } else {
-  //     setYTAmount("")
+  //   _().then(setPTAmount);
+  // }, [NTAmount, exchangeRate, NT]);
+
+  // useEffect(() => {
+  //   async function _() {
+  //     if (NTAmount) {
+  //       return String(await handleYTAmount(NTAmount));
+  //     } else {
+  //       return "";
+  //     }
   //   }
+  //   _().then(setYTAmount);
   // },[NTAmount, sliderValue, NT])
-
-  useEffect(() => {
-    async function _() {
-      if (NTAmount) {
-        return String(await handlePTAmount(NTAmount));
-      } else {
-        return "";
-      }
-    }
-    _().then(setPTAmount);
-  }, [NTAmount, exchangeRate, NT]);
-
-  useEffect(() => {
-    async function _() {
-      if (NTAmount) {
-        return String(await handleYTAmount(NTAmount));
-      } else {
-        return "";
-      }
-    }
-    _().then(setYTAmount);
-  },[NTAmount, sliderValue, NT])
   
   function onSelectNT(token: any) {
     setNT(token);
@@ -185,7 +190,8 @@ export default function StakeTab() {
       return toast.custom(<ToastCustom content="Please Connect Wallet" />);
 
     if (POT && PT && YT && SYAmount && NT) {
-      // try {
+      setIsLoading(true);
+      try {
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
           POTAddress: (POT as Token).address,
@@ -207,22 +213,25 @@ export default function StakeTab() {
             }
           />
         ));
-      // } catch (error) {
-      //   toast.custom(() => (
-      //     <ToastCustom
-      //       content={"Transaction failed"}
-      //     />
-      //   ));
-      // }
+      } catch (error) {
+        toast.custom(() => (
+          <ToastCustom
+            content={"Transaction failed"}
+          />
+        ));
+      } finally {
+        setIsLoading(false);
+        setNTAmount("");
+      }
       
     }
   }
 
-  async function handlePTYTAmount() {
+  async function handlePTYTAmount(SYAmount:string, sliderValue:number) {
     if (!POT || !YT) return;
     const YTtotalSupply = await UseYT.YTView.totalSupply(YT);
     if (!YTtotalSupply) return SYAmount;
-    const [PTGenerateable, YTGenerateable] = await UsePOT.POTRead.previewStake({
+    const [YTGenerateable, PTGenerateable] = await UsePOT.POTRead.previewStake({
       POT: POT,
       amountInSY: BigInt(parseEther(SYAmount)),
       lockupDays: BigInt(sliderValue),
@@ -231,33 +240,6 @@ export default function StakeTab() {
       PTReviewAmount: String(PTGenerateable),
       YTReviewAmount: String(YTGenerateable),
     });
-  }
-
-  async function handlePTAmount(NTAmount:string) {
-    if (!NT || !PT || !YT) return;
-    const YTtotalSupply = await UseYT.YTView.totalSupply(YT);
-    const YTtotalRedeemableYields = await UseYT.YTView.totalRedeemableYields(YT);
-    if (NT?.symbol != tokenName) {
-      if (Number(YTtotalSupply?.toFixed(18))) {
-        return (+NTAmount - Number(YTBalance) * Number(YTtotalSupply?.toFixed(18)) / Number(YTtotalSupply?.toFixed(18)))
-      } else {
-        return (+NTAmount);
-      }
-    } else {
-      if (Number(YTtotalSupply?.toFixed(18))) {
-        return (+NTAmount * Number(exchangeRate?.toFixed(18)) - Number(YTBalance) * Number(YTtotalRedeemableYields?.toFixed(18)) / Number(YTtotalSupply?.toFixed(18)))
-      } else {
-        return (+NTAmount * Number(exchangeRate?.toFixed(18)));
-      }
-    }
-  }
-
-  async function handleYTAmount(NTAmount:string) {
-    if (NT?.symbol != tokenName) {
-      return (+NTAmount * sliderValue)
-    } else {
-      return (+NTAmount * Number(exchangeRate?.toFixed(18)) * sliderValue)
-    }
   }
 
   return (
@@ -293,7 +275,7 @@ export default function StakeTab() {
                 balance: {NTBalance.toFixed(6)}
               </span>
               <Button
-                onClick={() => setNTAmount(NTBalance.toFixed(6))}
+                onClick={() => setNTAmount(NTBalance.toFixed(18))}
                 className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
                 Max
               </Button>
@@ -315,7 +297,7 @@ export default function StakeTab() {
         <div>
           <Input
             placeholder="0.00"
-            value={PTAmount}
+            value={Number(PTAmount)?PTAmount:""}
             readOnly
             classNames={{
               base: "h-[2.5rem] text-white",
@@ -343,7 +325,7 @@ export default function StakeTab() {
         <div>
           <Input
             placeholder="0.00"
-            value={YTAmount}
+            value={(Number(YTAmount)?YTAmount:"")}
             readOnly
             classNames={{
               base: "h-[2.5rem] text-white",
@@ -416,7 +398,8 @@ export default function StakeTab() {
       </div>
       <Button
         onClick={Stake}
-        isDisabled={!NTAmount || !PTAmount }
+        isLoading={isLoading}
+        isDisabled={!Number(NTAmount) || !Number(PTAmount) }
         className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
         {title}
       </Button>
