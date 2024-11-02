@@ -192,7 +192,7 @@ export default function StakeTab() {
 
     if (POT && PT && YT && SYAmount && NT) {
       setIsLoading(true);
-      try {
+      // try {
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
           POTAddress: POT.address,
@@ -200,6 +200,8 @@ export default function StakeTab() {
           tokenAmount: BigInt(parseEther(NTAmount)),
           lockupDays: BigInt(sliderValue),
           minPTGenerated: BigInt(0),
+          PTAddress: (PT as Token).address,
+          UPTAddress: "0x0000000000000000000000000000000000000000",
           value: NT.symbol == "ETH"?parseEther(NTAmount):undefined,
         })
   
@@ -214,16 +216,16 @@ export default function StakeTab() {
             }
           />
         ));
-      } catch (error) {
-        toast.custom(() => (
-          <ToastCustom
-            content={"Transaction failed"}
-          />
-        ));
-      } finally {
-        setIsLoading(false);
-        setNTAmount("");
-      }
+      // } catch (error) {
+      //   toast.custom(() => (
+      //     <ToastCustom
+      //       content={"Transaction failed"}
+      //     />
+      //   ));
+      // } finally {
+      //   setIsLoading(false);
+      //   setNTAmount("");
+      // }
       
     }
   }

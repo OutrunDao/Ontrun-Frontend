@@ -11,6 +11,6 @@ export type graphURL = Record<string, string>;
 export const graphURLMap = {
   [ChainId.BSC_TESTNET]: {
     [ContractName.POTslisBNB]: "https://api.studio.thegraph.com/query/92841/ontrun-pot/version/latest",
-    [ContractName.YTslisBNB]: "",
+    [ContractName.YTslisBNB]: "https://api.studio.thegraph.com/query/92841/ontrun-yt/version/latest",
   }
 } as Record<number, graphURL>;

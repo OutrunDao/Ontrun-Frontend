@@ -37,59 +37,12 @@ export default function PositionTabs() {
         tabContent: "text-white text-[1.5rem] leading-[2.13rem] group-data-[selected=true]:text-white",
         panel: "mt-12 pb-24",
       }}>
-      <Tab key="ETH" title="ETH Position">
-        <PositionTab />
-        {/* <PositionTab ethPositions={rethPositions} type="ETH" /> */}
-        {/* <PositionETHCard
-          type={"0"}
-          key={"0"}
-          positionId={0n}
-          amountInOR={0n}
-          amountInOS={0n}
-          YT={0n}
-          deadline={0}
-        />
-        <PositionETHCard
-          type={"0"}
-          key={"0"}
-          positionId={0n}
-          amountInOR={0n}
-          amountInOS={0n}
-          YT={0n}
-          deadline={0}
-        />
-        <PositionETHCard
-          type={"0"}
-          key={"0"}
-          positionId={0n}
-          amountInOR={0n}
-          amountInOS={0n}
-          YT={0n}
-          deadline={0}
-        />
-        <PositionETHCard
-          type={"0"}
-          key={"0"}
-          positionId={0n}
-          amountInOR={0n}
-          amountInOS={0n}
-          YT={0n}
-          deadline={0}
-        />
-        <PositionETHCard
-          type={"0"}
-          key={"0"}
-          positionId={0n}
-          amountInOR={0n}
-          amountInOS={0n}
-          YT={0n}
-          deadline={0}
-        /> */}
+      <Tab key="ETH" title="Position">
+        <PositionTab /> 
       </Tab>
-      <Tab key="USDB" title="USDB Position">
-        {/* <PositionTab usdbPositions={rusdPositions} type="USDB" /> */}
+      {/* <Tab key="USDB" title="USDB Position">
         <PositionTab />
-      </Tab>
+      </Tab> */}
     </Tabs>
   );
 }
