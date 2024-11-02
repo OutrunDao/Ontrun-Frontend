@@ -8,6 +8,7 @@ import TokenSure from "./TokenSure";
 import { Currency } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
+import { POT } from "@/contracts/tokens/POT";
 
 export default function RedeemTab() {
   const chainId = useChainId();
@@ -15,7 +16,7 @@ export default function RedeemTab() {
   const searchParams = useSearchParams();
   const tokenName = searchParams.get('tokenName');
   const [PT, setPT] = useState<Currency>();
-  const [POT, setPOT] = useState<Currency>();
+  const [POT, setPOT] = useState<POT>();
   const [PTPOTAmount, setPTPOTAmount] = useState("");
 
   useEffect(() => {

@@ -9,6 +9,7 @@ import { useYT } from "@/hooks/useYT";
 import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { parseEther } from "ethers";
 import { set } from "radash";
+import { POT } from "@/contracts/tokens/POT";
 
 export default function YieldPoolOCard() {
 
@@ -22,7 +23,7 @@ export default function YieldPoolOCard() {
     const [isLoading, setIsLoading] = useState(false);
     const [YT, setYT] = useState<Currency>();
     const [RT, setRT] = useState<Currency>();
-    const [POT, setPOT] = useState<Currency>();
+    const [POT, setPOT] = useState<POT>();
     const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
     const UseYT = useYT();
 

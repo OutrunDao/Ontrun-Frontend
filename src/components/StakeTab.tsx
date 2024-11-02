@@ -22,6 +22,7 @@ import { parseEther } from "viem";
 import { usePOT } from "@/hooks/usePOT";
 import { set } from "radash";
 import { N, ethers } from "ethers";
+import { POT } from "@/contracts/tokens/POT";
 
 export default function StakeTab() {
 
@@ -37,7 +38,7 @@ export default function StakeTab() {
   const [SY, setSY] = useState<Currency>();
   const [PT, setPT] = useState<Currency>();
   const [YT, setYT] = useState<Currency>();
-  const [POT, setPOT] = useState<Currency>();
+  const [POT, setPOT] = useState<POT>();
   const [NTBalance, setNTBalance] = useState<Decimal>(new Decimal(0));
   const [PTBalance, setPTBalance] = useState<Decimal>(new Decimal(0));
   const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
