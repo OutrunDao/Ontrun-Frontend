@@ -44,7 +44,7 @@ export const addressMap = {
     [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
     [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
     [ContractName.slisBNB]: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
-    [ContractName.stakeRouter]: "0x10AE266fF84c07Cc4b0fFf394EE7C2ef7458c4B2",
+    [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
   }
 } as Record<number, ContractAddressMap>;
 

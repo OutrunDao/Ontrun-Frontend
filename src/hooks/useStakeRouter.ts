@@ -13,6 +13,8 @@ export  function useStakeRouter() {
     async function mintYieldTokensFromToken({
         SYAddress,
         POTAddress,
+        PTAddress,
+        UPTAddress,
         TokenInAddress,
         tokenAmount,
         lockupDays,
@@ -21,6 +23,8 @@ export  function useStakeRouter() {
     }:{
         SYAddress:string,
         POTAddress:string,
+        PTAddress:string,
+        UPTAddress:string,
         TokenInAddress:string,
         tokenAmount:BigInt,
         lockupDays:BigInt,
@@ -33,7 +37,7 @@ export  function useStakeRouter() {
             const signer = await provider.getSigner();
 
             const stakeRouterContract = new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
-            const tx = await stakeRouterContract.mintYieldTokensFromToken(
+            const tx = await stakeRouterContract.mintPPYFromToken(
                 SYAddress,
                 POTAddress,
                 TokenInAddress,
@@ -45,11 +49,39 @@ export  function useStakeRouter() {
                     account.address,
                     account.address,
                 ],
+                [
+                    PTAddress,
+                    UPTAddress,
+                ],
                 { value : value }
             );
             const receipt = await tx.wait();
             return receipt;
         }
+    }
+
+    async function redeemPPToToken({
+        SYAddress,
+        PTAddress,
+        UPTAddress,
+        POTAddress,
+        tokenOutAddress,
+        receiverAddress,
+        positionId,
+        positionShare,
+        minRedeemedSyAmount,
+    }:{
+        SYAddress:string,
+        PTAddress:string,
+        UPTAddress:string,
+        POTAddress:string,
+        tokenOutAddress:string,
+        receiverAddress:string,
+        positionId:BigInt,
+        positionShare:BigInt,
+        minRedeemedSyAmount:BigInt,
+    }) {
+        
     }
 
     return {

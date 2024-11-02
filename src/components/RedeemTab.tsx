@@ -1,21 +1,36 @@
 import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { use, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount, useChainId, usePublicClient } from "wagmi";
 import ToastCustom from "./ToastCustom";
 import TokenSelect from "./TokenSelect";
 import TokenSure from "./TokenSure";
 import { Currency } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
+import { POT } from "@/contracts/tokens/POT";
+import Decimal from "decimal.js-light";
+import { set } from "radash";
 
-export default function RedeemTab() {
+export default function RedeemTab({
+  // tokenName,
+
+  positionData,
+}:{
+  // tokenName:string
+
+  positionData:any
+}) {
+
   const chainId = useChainId();
   const account = useAccount();
-  const searchParams = useSearchParams();
-  const tokenName = searchParams.get('tokenName');
+  const publicClient = usePublicClient();
+  // const searchParams = useSearchParams();
+  const tokenName = positionData.RTSymbol;
   const [PT, setPT] = useState<Currency>();
-  const [POT, setPOT] = useState<Currency>();
+  const [POT, setPOT] = useState<POT>();
+  const [PTBalance, setPTBalance] = useState<Decimal>(new Decimal(0));
+  const [POTBalance, setPOTBalance] = useState<Decimal>(new Decimal(0));
   const [PTPOTAmount, setPTPOTAmount] = useState("");
 
   useEffect(() => {
@@ -28,6 +43,33 @@ export default function RedeemTab() {
     }
     
   },[chainId, tokenName])
+
+  useEffect(() => {
+    // async function _NT() {
+    //   if (!account.address || !NT || !publicClient) return new Decimal(0);
+    //   return NT.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    // }
+    // _NT().then(setNTBalance);
+
+    async function _PT() {
+      if (!account.address || !PT || !publicClient) return new Decimal(0);
+      return PT.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    }
+    _PT().then(setPTBalance);
+    setPOTBalance(positionData.POTBalance);
+    // async function _YT() {
+    //   if (!account.address || !YT || !publicClient) return new Decimal(0);
+    //   return YT.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    // }
+    // _YT().then(setYTBalance);
+
+    // async function _SY() {
+    //   if (!account.address || !SY || !publicClient) return new Decimal(0);
+    //   return SY.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    // }
+    // _SY().then(setSYBalance);
+
+  }, [chainId, account.address, PT]);
 
   async function redeem() {
     if (!account.address)
@@ -70,7 +112,7 @@ export default function RedeemTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {0}
+                balance: {PTBalance?.toFixed(6)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
@@ -98,7 +140,7 @@ export default function RedeemTab() {
           <div className="flex justify-between mt-4">
             <div className="text-white text-opacity-50 flex gap-x-4">
               <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {0}
+                balance: {POTBalance?.toFixed(6)}
               </span>
             </div>
             <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">

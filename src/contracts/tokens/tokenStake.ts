@@ -14,7 +14,7 @@ export const slisBNB: { [chainId: number]: Token } = {
   }
   
   export const getTokensByChainId = (chainId: number): Token[] => {
-    const tokenObjects = [slisBNB];
+    const tokenObjects = [slisBNB]; //expend
     const tokens: Token[] = [];
   
     tokenObjects.forEach(tokenObject => {
