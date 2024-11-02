@@ -9,7 +9,7 @@ export type POT = {
     decimals: number,
     symbol: string,
     name: string,
-    // RTName: string,
+    RTSymbol: string,
     graphURL?: string,
 };
 
@@ -21,6 +21,7 @@ export const POTslisBNB: {[chainId: number]: POT} = {
         decimals: 18,
         symbol: "POT-slisBNB",
         name: "SlisBNB Position Option Token",
+        RTSymbol: "slisBNB",
         graphURL: graphURLMap[ChainId.BSC_TESTNET].POTslisBNB,
     }
 

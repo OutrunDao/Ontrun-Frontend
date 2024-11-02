@@ -52,6 +52,30 @@ export  function useStakeRouter() {
         }
     }
 
+    async function redeemPPToToken({
+        SYAddress,
+        PTAddress,
+        UPTAddress,
+        POTAddress,
+        tokenOutAddress,
+        receiverAddress,
+        positionId,
+        positionShare,
+        minRedeemedSyAmount,
+    }:{
+        SYAddress:string,
+        PTAddress:string,
+        UPTAddress:string,
+        POTAddress:string,
+        tokenOutAddress:string,
+        receiverAddress:string,
+        positionId:BigInt,
+        positionShare:BigInt,
+        minRedeemedSyAmount:BigInt,
+    }) {
+        
+    }
+
     return {
         mintYieldTokensFromToken,
     }

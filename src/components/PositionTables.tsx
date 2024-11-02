@@ -71,11 +71,11 @@ export default function PositionTables() {
     useEffect(() => {
         async function _() {
             if (!account.address || !chainId) return;
-            const result = await UsePOT.POTRead.positions(POTslisBNB[chainId],account.address);
+            const result = await UsePOT.POTRead.getAllPOT(POTslisBNB[chainId],account.address);
             return result;
         }
         _().then(setResult);
-    },[account,chainId]);
+    },[account]);
 
     if (!result) return <p>Loading...</p>;
 
@@ -100,26 +100,12 @@ export default function PositionTables() {
             <p>Loading...</p>
           ) : (
             result.map((position, index) => (
-              <div key={index}>
-                <p>Position: {stringifyWithBigInt(position)}</p>
+              <div key={index} className="text-white">
+                <p>Position: {stringifyWithBigInt(position.value)}</p>
               </div>
             ))
           )}
         </div>
       );
 
-    return (
-        <div >
-
-            <span className="text-white bg-clip-text bg-title font-kronaOne text-[1.5rem] leading-[2.13rem] ml-10">{balancesArray}</span>
-            <PositionTable />
-            <span className="text-transparent bg-clip-text bg-title font-kronaOne text-[1.5rem] leading-[2.13rem] ml-10">YT Overview</span>
-            <PositionTable />
-            <span className="text-transparent bg-clip-text bg-title font-kronaOne text-[1.5rem] leading-[2.13rem] ml-10">PT Overview</span>
-            <PositionTable />
-            <span className="text-transparent bg-clip-text bg-title font-kronaOne text-[1.5rem] leading-[2.13rem] ml-10">POT Overview</span>
-            <PositionTable />
-        </div>
-        
-    )
 }

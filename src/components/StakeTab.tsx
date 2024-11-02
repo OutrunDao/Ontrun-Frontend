@@ -195,7 +195,7 @@ export default function StakeTab() {
       try {
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
-          POTAddress: (POT as Token).address,
+          POTAddress: POT.address,
           TokenInAddress: NT.symbol == "ETH"?"0x0000000000000000000000000000000000000000":(NT as Token).address,
           tokenAmount: BigInt(parseEther(NTAmount)),
           lockupDays: BigInt(sliderValue),

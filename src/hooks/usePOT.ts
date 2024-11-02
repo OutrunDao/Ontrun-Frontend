@@ -49,7 +49,7 @@ export function usePOT() {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
-                const POTContract = new ethers.Contract((POT as Token).address, POTAbi, signer);
+                const POTContract = new ethers.Contract(POT.address, POTAbi, signer);
                 const tx = await POTContract.stake(parseEther(SYAmount), BigInt(lockupDays), account.address, account.address, account.address);
             }
     }
@@ -66,9 +66,32 @@ export function usePOT() {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.BrowserProvider(window.ethereum);
         // const signer = await provider.getSigner();
-        const POTContract = new ethers.Contract((POT as Token).address, POTAbi, provider);
+        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
         const result = await POTContract.previewStake(amountInSY, lockupDays);
         return result;
+    }
+
+    async function getAllPOT(POT:POT,account:string) {
+        if (!POT) return;
+        const client = new ApolloClient({
+        uri: POT.graphURL,
+        cache: new InMemoryCache()
+        });
+        const GET_BALANCES = gql`
+            query GetBalances($account: String!) {
+                balances(where: { account: $account }) {
+                id
+                account
+                tokenId
+                value
+                }
+            }
+        `;
+        const Gresult = await client.query({
+            query: GET_BALANCES,
+            variables: { account },
+        })
+        return Gresult.data.balances;
     }
 
     async function positions(POT:POT,account:string) {
@@ -95,8 +118,17 @@ export function usePOT() {
 
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.BrowserProvider(window.ethereum);
-        const POTContract = new ethers.Contract((POT as Token).address, POTAbi, provider);
+        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
 
+        // const positionsArray = [];
+        // for (let i=0 ;i<tokenIds.length;i++) {
+        //     try {
+        //         const position = await POTContract.positions(tokenIds[i]);
+        //         positionsArray.push(position);
+        //     } catch (error) {
+        //         console.error(`Error fetching position for tokenId ${tokenIds[i]}:`, error);
+        //     }
+        // }
         const positionsPromises = tokenIds.map((tokenId: any | ethers.Overrides) => POTContract.positions(tokenId));
         const positionsArray = await Promise.all(positionsPromises);
 
@@ -109,6 +141,7 @@ export function usePOT() {
         },
         POTRead: {
             previewStake,
+            getAllPOT,
             positions,
         }
     }

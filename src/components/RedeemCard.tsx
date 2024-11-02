@@ -2,8 +2,19 @@ import { Tabs, Tab } from "@nextui-org/react";
 import RedeemTab from "./RedeemTab";
 import StakeTab from "./StakeTab";
 import YieldPoolOCard from "./YieldPoolOCard";
+import Decimal from "decimal.js-light";
 
-export default function RedeemCard() {
+export default function RedeemCard({
+    // tokenName
+
+    positionData,
+
+}:{
+    // tokenName:string,
+
+    positionData:any
+
+}) {
     return (
         <div className="w-full max-w-3xl bg-gray-900 text-white border border-gray-800 rounded-lg shadow-lg">
       <div className="p-6">
@@ -19,12 +30,13 @@ export default function RedeemCard() {
             panel: "pt-6",
           }}
         >
-          <Tab
+        <Tab
             key="redeem"
             title="Redeem"
-          >
-            <RedeemTab />
-          </Tab>
+        >
+            {/* <RedeemTab tokenName={tokenName}/> */}
+            <RedeemTab positionData={positionData}/>
+        </Tab>
         </Tabs>
       </div>
     </div>  

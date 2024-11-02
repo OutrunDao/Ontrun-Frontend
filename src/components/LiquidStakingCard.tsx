@@ -31,12 +31,6 @@ export default function LiquidStakingCard() {
             <StakeTab />
           </Tab>
           <Tab
-            key="redeem"
-            title="Redeem"
-          >
-            <RedeemTab />
-          </Tab>
-          <Tab
             key="Yieldpool"
             title="Yield Pool"
           >
