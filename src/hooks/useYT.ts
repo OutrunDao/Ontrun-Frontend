@@ -3,10 +3,11 @@ import { graphURLMap } from "@/contracts/graphURLs";
 import { Currency, Token } from "@/packages/core";
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 import Decimal from "decimal.js-light";
-import { ethers } from "ethers";
+import { ethers, parseEther } from "ethers";
 import { useState, useEffect } from "react";
 import { formatUnits } from "viem";
 import { usePublicClient, useChainId } from "wagmi";
+import { useSY } from "./useSY";
 
 
 
@@ -14,8 +15,6 @@ export function useYT() {
     
     const publicClient = usePublicClient();
     const chainId = useChainId();
-
-
 
     async function totalSupply(token: Currency) {
 
@@ -89,9 +88,9 @@ export function useYT() {
     }
 
     async function amountInYields(YT:Currency) {
-        if (!YT) return;
+        if (!YT || !YT.symbol) return;
         const client = new ApolloClient({
-        uri: String(graphURLMap[YT.chainId]),
+        uri: String(graphURLMap[YT.chainId][YT.symbol]),
         cache: new InMemoryCache()
         });
         const getAmountInYields = gql`
@@ -109,8 +108,24 @@ export function useYT() {
         return Gresult.data.accumulateYields_collection;
     }
 
-    async function getAmountInYields(YT:Currency) {
+    async function APY({YT, SY}:{YT:Currency, SY:Currency}) {
+        const _Principal = await totalSupply(SY);
+        const Principal = parseEther(_Principal?.toFixed(18) ?? '0');
         const YieldData = await amountInYields(YT);
+        if (!YieldData || YieldData.length < 2) return;
+        const Yield = YieldData[0].amountInYields;
+        const Time = YieldData[0].blockTimestamp - YieldData[1].blockTimestamp;
+        const APS = Yield / ( Number(Principal) * Time);
+        const APY = APS * 31536000;
+        return (Number(APY)*100 ?? 0).toFixed(3);
+    }
+
+    async function previewWithdrawYield({YT,amountInBurnedYT}:{YT:Currency,amountInBurnedYT:BigInt}) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const YTContract = new ethers.Contract((YT as Token).address, YTAbi, provider);
+        const result = await YTContract.previewWithdrawYields(amountInBurnedYT);
+        return result;
     }
 
     return {
@@ -119,7 +134,8 @@ export function useYT() {
             currentYields,
             totalRedeemableYields,
             amountInYields,
-
+            APY,
+            previewWithdrawYield
         },
         YTWrite: {
             withdrawYields,

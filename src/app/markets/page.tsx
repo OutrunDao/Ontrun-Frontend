@@ -75,12 +75,12 @@ export default function EnhancedMarketPage() {
                     </div>
                     <div>
                       <div className="flex items-center">
-                        {item.name}
+                        {item.symbol}
                         <div className="ml-2 text-yellow-500 transition-transform duration-300 ease-in-out hover:scale-125 hover:rotate-180">
                           <Star className="h-4 w-4" />
                         </div>
                       </div>
-                      <div className="text-sm text-gray-400">{item.platform}</div>
+                      <div className="text-sm text-gray-400">{item.name}</div>
                     </div>
                   </div>
                 </TableCell>

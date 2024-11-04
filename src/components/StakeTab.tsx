@@ -23,6 +23,7 @@ import { usePOT } from "@/hooks/usePOT";
 import { set } from "radash";
 import { N, ethers } from "ethers";
 import { POT } from "@/contracts/tokens/POT";
+import TokenTab from "./TokenTab";
 
 export default function StakeTab() {
 
@@ -192,7 +193,7 @@ export default function StakeTab() {
 
     if (POT && PT && YT && SYAmount && NT) {
       setIsLoading(true);
-      // try {
+      try {
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
           POTAddress: POT.address,
@@ -210,22 +211,22 @@ export default function StakeTab() {
             content={receipt.status === 1 ?
               <>
                 {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-                . View on <Link href="#">BlockExplorer</Link>
+                . View<Link href="/staking/position">Position</Link>
               </>
               : "Transaction failed"
             }
           />
         ));
-      // } catch (error) {
-      //   toast.custom(() => (
-      //     <ToastCustom
-      //       content={"Transaction failed"}
-      //     />
-      //   ));
-      // } finally {
-      //   setIsLoading(false);
-      //   setNTAmount("");
-      // }
+      } catch (error) {
+        toast.custom(() => (
+          <ToastCustom
+            content={"Transaction failed"}
+          />
+        ));
+      } finally {
+        setIsLoading(false);
+        setNTAmount("");
+      }
       
     }
   }
@@ -247,113 +248,49 @@ export default function StakeTab() {
 
   return (
     <div className="flex flex-col items-center">
-      {/* <StakeSetting
-          slippage={slippage}
-          setSlipPage={setSlippage}
-        /> */}
-      <div className="w-[28rem] h-[7rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
-        <div>
-          <Input
-            placeholder="0.00"
-            value={NTAmount}
-            onValueChange={setNTAmount}
-            classNames={{
-              base: "h-[2.5rem] text-white",
-              input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[12rem]",
-              inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
-              innerWrapper: "justify-between",
-            }}
-            startContent={
-              <TokenSelect
-                tokenList={CurrencyList}
-                token={NT as any}
-                onSelect={onSelectNT}
-                tokenSymbol={NTSymbol}
-              />
-            }
-          />
-          <div className="flex justify-between mt-4">
-            <div className="text-white text-opacity-50 flex gap-x-4">
-              <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {NTBalance.toFixed(6)}
-              </span>
-              <Button
-                onClick={() => setNTAmount(NTBalance.toFixed(18))}
-                className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
-                Max
-              </Button>
-            </div>
-            <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
-              ～$0
+        <div className="flex justify-start w-full px-8 mt-2 mb-2">
+          <div className="text-white text-opacity-50 flex gap-x-4">
+            <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
+              balance: {NTBalance.toFixed(6)}
             </span>
+            <Button
+              onClick={() => setNTAmount(NTBalance.toFixed(18))}
+              className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
+              Max
+            </Button>
+          </div>
+          <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal ml-auto">
+            ～$0
+          </span>
+        </div>
+        <div className="w-[28rem] h-[4rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+          <div>
+            <Input
+              placeholder="0.00"
+              value={NTAmount}
+              onValueChange={setNTAmount}
+              classNames={{
+                base: "h-[2.5rem] text-white",
+                input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[12rem]",
+                inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
+                innerWrapper: "justify-between",
+              }}
+              startContent={
+                <TokenSelect
+                  tokenList={CurrencyList}
+                  token={NT as any}
+                  onSelect={onSelectNT}
+                  tokenSymbol={NTSymbol}
+                />
+              }
+            />
           </div>
         </div>
-      </div>
 
       <div className="flex m-10 w-full justify-around items-center"></div>
 
-      <div className="w-[28rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
-
-        {/* <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" /> */}
-        
-        
-        <div>
-          <Input
-            placeholder="0.00"
-            value={Number(PTAmount)?PTAmount:""}
-            readOnly
-            classNames={{
-              base: "h-[2.5rem] text-white",
-              input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
-              inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
-              innerWrapper: "justify-between",
-            }}
-            startContent={
-              <TokenSure token={PT}/>
-            }
-          />
-          <div className="flex justify-between mt-4">
-            <div className="text-white text-opacity-50 flex gap-x-4">
-              <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {PTBalance.toFixed(6)}
-              </span>
-            </div>
-            <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
-              ～$0
-            </span>
-          </div>
-        </div>
-
-        <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" />
-        <div>
-          <Input
-            placeholder="0.00"
-            value={(Number(YTAmount)?YTAmount:"")}
-            readOnly
-            classNames={{
-              base: "h-[2.5rem] text-white",
-              input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
-              inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
-              innerWrapper: "justify-between",
-            }}
-            startContent={
-
-              <TokenSure token={YT}/>
-            }
-          />
-          <div className="flex justify-between mt-4">
-            <div className="text-white text-opacity-50 flex gap-x-4">
-              <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {YTBalance.toFixed(6)}
-              </span>
-            </div>
-            <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
-              ～$0
-            </span>
-          </div>
-        </div>
-
-      </div>
+      <TokenTab Balance={PTBalance} InputValue={Number(PTAmount)?PTAmount:""} token={PT}/>
+      <TokenTab Balance={YTBalance} InputValue={Number(YTAmount)?YTAmount:""} token={YT}/>
       <div className="flex m-8 w-full justify-around items-center">
         <Divider className="w-[8.76rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-30" />
         <span className="text-white font-avenir text-[0.82rem] leading-[1.12rem]">LOCK PERIOD</span>

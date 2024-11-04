@@ -66,7 +66,6 @@ export  function useStakeRouter() {
         UPTAddress,
         POTAddress,
         tokenOutAddress,
-        receiverAddress,
         positionId,
         positionShare,
         minRedeemedSyAmount,
@@ -81,7 +80,27 @@ export  function useStakeRouter() {
         positionShare:BigInt,
         minRedeemedSyAmount:BigInt,
     }) {
-        
+        if (publicClient && account.address) {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+
+            const stakeRouterContract = new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
+            const tx = await stakeRouterContract.redeemPPToToken(
+                SYAddress,
+                PTAddress,
+                UPTAddress,
+                POTAddress,
+                tokenOutAddress,
+                account.address,
+                [
+                    positionId,
+                    positionShare,
+                    minRedeemedSyAmount,
+                ]
+            );
+            
+        }
     }
 
     return {

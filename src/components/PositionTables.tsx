@@ -8,6 +8,8 @@ import { POTslisBNB } from "@/contracts/tokens/POT";
 import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { useYT } from "@/hooks/useYT";
 import { YTslisBNB } from "@/contracts/tokens/YT";
+import { graphURLMap } from "@/contracts/graphURLs";
+import { SYslisBNB } from "@/contracts/tokens/SY";
 
 
 
@@ -18,6 +20,7 @@ export default function PositionTables() {
     const [result, setResult] = useState<any[]>();
     const chainId = useChainId();
 
+    const [APY, setAPY] = useState<Number>();
     const UsePOT = usePOT();
     const UseYT = useYT();
 
@@ -32,6 +35,23 @@ export default function PositionTables() {
 
     // if (!result) return <p>Loading...</p>;
 
+  //   useEffect(() => {
+
+  //     async function APY() {
+  //         return UseYT.YTView.APY({YT:YTslisBNB[chainId],SY:SYslisBNB[chainId]});
+  //     }
+      
+  //     APY().then(setAPY);
+  // })
+
+    // useEffect(() => {
+    //   async function _() {
+    //     const result = await UseYT.YTView.amountInYields(YTslisBNB[chainId]);
+    //     return result;
+    //   }
+    //   _().then(setResult);
+    // })
+
     function Test() {
       UseYT.YTWrite.accumulateYields(YTslisBNB[chainId]);
     }
@@ -42,6 +62,8 @@ export default function PositionTables() {
         );
       };
       
+      // const a = graphURLMap[chainId]["YT-slisBNB"];
+
       return (
         <div>
           {/* {result.length === 0 ? (
@@ -53,6 +75,8 @@ export default function PositionTables() {
               </div>
             ))
           )} */}
+          <span className="text-white">{stringifyWithBigInt(result)}</span>
+          {/* <span className="text-white">{APY}</span> */}
           <Button
             onClick={Test}
             className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">

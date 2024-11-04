@@ -11,6 +11,9 @@ import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { POT } from "@/contracts/tokens/POT";
 import Decimal from "decimal.js-light";
 import { set } from "radash";
+import { usePOT } from "@/hooks/usePOT";
+import { ethers, parseEther } from "ethers";
+import TokenTab from "./TokenTab";
 
 export default function RedeemTab({
   // tokenName,
@@ -27,11 +30,16 @@ export default function RedeemTab({
   const publicClient = usePublicClient();
   // const searchParams = useSearchParams();
   const tokenName = positionData.RTSymbol;
+  const PositionId = positionData.PositionId;
   const [PT, setPT] = useState<Currency>();
   const [POT, setPOT] = useState<POT>();
+  const [RT, setRT] = useState<Currency>();
   const [PTBalance, setPTBalance] = useState<Decimal>(new Decimal(0));
   const [POTBalance, setPOTBalance] = useState<Decimal>(new Decimal(0));
   const [PTPOTAmount, setPTPOTAmount] = useState("");
+  const [RTAmount, setRTAmount] = useState<Decimal>(new Decimal(0));
+
+  const UsePOT = usePOT();
 
   useEffect(() => {
     if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
@@ -40,6 +48,7 @@ export default function RedeemTab({
     if (tokens) {
       setPT(tokens.UPT[chainId]);
       setPOT(tokens.POT[chainId]);
+      setRT(tokens.RT[chainId]);
     }
     
   },[chainId, tokenName])
@@ -68,8 +77,23 @@ export default function RedeemTab({
     //   return SY.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
     // }
     // _SY().then(setSYBalance);
-
   }, [chainId, account.address, PT]);
+
+  useEffect(() => {
+
+    async function _() {
+      if (!POT || !PTPOTAmount) return new Decimal(0); // Add this line to check if POT is undefined
+      const result = await UsePOT.POTRead.previewRedeem({
+        POT: POT,
+        positionId: BigInt(PositionId),
+        positionShare: BigInt(parseEther(PTPOTAmount)),
+      });
+      const result2 = new Decimal(ethers.formatEther(result || "0"));
+      return result2;
+    }
+    _().then(setRTAmount)
+  },[positionData,PTPOTAmount])
+
 
   async function redeem() {
     if (!account.address)
@@ -92,63 +116,14 @@ export default function RedeemTab({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-[28rem] h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
-      <div>
-          <Input
-            placeholder="0.00"
-            value={PTPOTAmount}
-            onValueChange={setPTPOTAmount}
-            classNames={{
-              base: "h-[2.5rem] text-white",
-              input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
-              inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
-              innerWrapper: "justify-between",
-            }}
-            startContent={
-
-              <TokenSure token={PT}/>
-            }
-          />
-          <div className="flex justify-between mt-4">
-            <div className="text-white text-opacity-50 flex gap-x-4">
-              <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {PTBalance?.toFixed(6)}
-              </span>
-            </div>
-            <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
-              ～$0
-            </span>
-          </div>
-        </div>
-        <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" />
-        <div>
-          <Input
-            placeholder="0.00"
-            value={PTPOTAmount}
-            onValueChange={setPTPOTAmount}
-            classNames={{
-              base: "h-[2.5rem] text-white",
-              input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
-              inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
-              innerWrapper: "justify-between",
-            }}
-            startContent={
-
-              <TokenSure token={POT}/>
-            }
-          />
-          <div className="flex justify-between mt-4">
-            <div className="text-white text-opacity-50 flex gap-x-4">
-              <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
-                balance: {POTBalance?.toFixed(6)}
-              </span>
-            </div>
-            <span className="text-white text-opacity-50 text-[0.88rem] leading-[1.19rem] font-avenir font-normal">
-              ～$0
-            </span>
-          </div>
-        </div>
-      </div>
+      <span>Deadline:{positionData.deadline}{" "}days</span>
+      <TokenTab Balance={PTBalance} InputValue={PTPOTAmount} onValueChange={setPTPOTAmount} token={PT}/>
+      <div className="text-white flex m-1 w-full justify-around items-center"></div>
+        {/* <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" /> */}
+      <TokenTab Balance={POTBalance} InputValue={PTPOTAmount} onValueChange={setPTPOTAmount} token={POT} ifMax={true}/>
+      <div className="text-white flex m-10 w-full justify-around items-center"></div>
+      <TokenTab Balance={new Decimal(0)} InputValue={Number(RTAmount)?RTAmount.toFixed(6):""} token={RT}/>
+        
       <div className="flex flex-col gap-y-[0.35rem] w-[28rem] text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
         <div className="flex justify-between w-full text-white text-opacity-50">
           {/* <span>Exchange Rate</span>

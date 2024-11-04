@@ -1,7 +1,10 @@
-import { Token } from "@/packages/core";
+import { Currency, Token } from "@/packages/core";
 import { POTAddressMap } from "../addressMap/POTAddressMap";
 import { ChainId } from "../chains";
 import { graphURLMap } from "../graphURLs";
+import { useYT } from "@/hooks/useYT";
+import { YTslisBNB } from "./YT";
+import { SYslisBNB } from "./SY";
 
 export type POT = {
     chainId: number,
@@ -11,6 +14,8 @@ export type POT = {
     name: string,
     RTSymbol: string,
     graphURL?: string,
+    SY: Currency,
+    YT: Currency,
 };
 
 export const POTslisBNB: {[chainId: number]: POT} = {
@@ -23,6 +28,8 @@ export const POTslisBNB: {[chainId: number]: POT} = {
         name: "SlisBNB Position Option Token",
         RTSymbol: "slisBNB",
         graphURL: graphURLMap[ChainId.BSC_TESTNET].POTslisBNB,
+        SY: SYslisBNB[ChainId.BSC_TESTNET],
+        YT: YTslisBNB[ChainId.BSC_TESTNET],
     }
 
 }
