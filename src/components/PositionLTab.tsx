@@ -108,8 +108,8 @@ export default function PositionLTab() {
                     <div className="flex justify-between h-full items-center text-lg text-center mx-8">
                             <span className="absolute left-[4%] top-1/2 transform -translate-y-1/2 text-white">{item.name}</span>
                             <span className="absolute left-[25%] top-1/2 transform -translate-y-1/2 text-white">{item.principalRedeemable.toFixed(6)}</span>
-                            <span className="absolute left-[50%] top-1/2 transform -translate-y-1/2 text-white">{item.APY}</span>
-                            <span className="absolute left-[75%] top-1/2 transform -translate-y-1/2 text-white">{item.deadline}</span>
+                            <span className="absolute left-[50%] top-1/2 transform -translate-y-1/2 text-white">{item.APY}%</span>
+                            <span className="absolute left-[75%] top-1/2 transform -translate-y-1/2 text-white">{item.deadline}{" "}days</span>
                             <Button 
                                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-button-gradient text-white" 
                                 // onClick={() => setRTSymbol(item.RTSymbol)}

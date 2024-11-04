@@ -116,6 +116,7 @@ export default function RedeemTab({
 
   return (
     <div className="flex flex-col items-center">
+      <span>Deadline:{positionData.deadline}{" "}days</span>
       <TokenTab Balance={PTBalance} InputValue={PTPOTAmount} onValueChange={setPTPOTAmount} token={PT}/>
       <div className="text-white flex m-1 w-full justify-around items-center"></div>
         {/* <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" /> */}

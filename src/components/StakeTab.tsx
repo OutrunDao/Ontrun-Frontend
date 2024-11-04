@@ -193,7 +193,7 @@ export default function StakeTab() {
 
     if (POT && PT && YT && SYAmount && NT) {
       setIsLoading(true);
-      // try {
+      try {
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
           POTAddress: POT.address,
@@ -211,22 +211,22 @@ export default function StakeTab() {
             content={receipt.status === 1 ?
               <>
                 {`You have successfully staked ${NTAmount} ${NTSymbol} for ${PTAmount} ${PT?.symbol}`}
-                . View on <Link href="#">BlockExplorer</Link>
+                . View<Link href="/staking/position">Position</Link>
               </>
               : "Transaction failed"
             }
           />
         ));
-      // } catch (error) {
-      //   toast.custom(() => (
-      //     <ToastCustom
-      //       content={"Transaction failed"}
-      //     />
-      //   ));
-      // } finally {
-      //   setIsLoading(false);
-      //   setNTAmount("");
-      // }
+      } catch (error) {
+        toast.custom(() => (
+          <ToastCustom
+            content={"Transaction failed"}
+          />
+        ));
+      } finally {
+        setIsLoading(false);
+        setNTAmount("");
+      }
       
     }
   }
