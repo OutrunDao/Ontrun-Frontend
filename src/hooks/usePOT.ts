@@ -71,6 +71,23 @@ export function usePOT() {
         return result;
     }
 
+    async function previewRedeem({
+        POT,
+        positionId,
+        positionShare,
+    }:{
+        POT:POT,
+        positionId:BigInt,
+        positionShare:BigInt,
+    }) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        // const signer = await provider.getSigner();
+        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
+        const result = await POTContract.previewRedeem(positionId, positionShare);
+        return result;
+    }
+
     async function getAllPOT(POT:POT,account:string) {
         if (!POT) return;
         const client = new ApolloClient({
@@ -141,6 +158,7 @@ export function usePOT() {
         },
         POTRead: {
             previewStake,
+            previewRedeem,
             getAllPOT,
             positions,
         }

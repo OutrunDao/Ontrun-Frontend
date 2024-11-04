@@ -8,9 +8,11 @@ import { usePOT } from "@/hooks/usePOT";
 import { ethers } from "ethers";
 import Decimal from "decimal.js-light";
 import RedeemTab from "./RedeemTab";
-import { chain, set } from "radash";
+import { all, chain, set } from "radash";
 import { X } from 'lucide-react'
 import RedeemCard from "./RedeemCard";
+import Position from "@/app/staking/position/page";
+import { useYT } from "@/hooks/useYT";
 
 
 
@@ -27,6 +29,7 @@ export default function PositionLTab() {
     const [onOpen,setOnOpne] = useState(false);
 
     const UsePOT = usePOT();
+    const UseYT = useYT();
 
     useEffect(() => {
         async function _() {
@@ -41,6 +44,7 @@ export default function PositionLTab() {
             return _POTs;
         }
         _().then(setPOTs);
+
     },[chainId,tokensOnChain]);
 
     useEffect(() => {
@@ -50,10 +54,13 @@ export default function PositionLTab() {
             for (let i = 0; i < POTs.length; i++) {
                 const allPOT = await UsePOT.POTRead.getAllPOT(POTs[i],account.address);
                 const result = await UsePOT.POTRead.positions(POTs[i],account.address);
+                const APY = await UseYT.YTView.APY({YT:POTs[i].YT,SY:POTs[i].SY} );
                 if (!result) return;
                 for (let j = 0; j < result.length; j++) {
                     const POTBalance = new Decimal(ethers.formatEther(allPOT[j].value || "0"));
+                    const PositionId = allPOT[j].tokenId.toString();
                     const principalRedeemable = new Decimal(ethers.formatEther(result[j][2] || "0"));
+                    
 
                     const currentTimeInSeconds = BigInt(Math.floor(Date.now() / 1000));
                     const remainingTimeInDays = Number((result[j][3] - currentTimeInSeconds) / BigInt(60 * 60 * 24));
@@ -62,10 +69,11 @@ export default function PositionLTab() {
                     const _positionData = {
                         name: POTs[i].symbol,
                         principalRedeemable:principalRedeemable,
-                        APY:"0",
+                        APY: APY,
                         deadline:remainingTimeInDays,
                         RTSymbol:POTs[i].RTSymbol,
-                        POTBalance:POTBalance
+                        POTBalance:POTBalance,
+                        PositionId:PositionId,
                     }
                     _positionDatas.push(_positionData);
                 }

@@ -4,7 +4,7 @@ import { multicall } from "viem/actions";
 
 export enum ContractName {
   POTslisBNB = "POTslisBNB",
-  YTslisBNB = "YTslisBNB",
+  YTslisBNB = "YT-slisBNB",
 }
 export type graphURL = Record<string, string>;
 

@@ -7,13 +7,14 @@ import { useAccount, useChainId, usePublicClient } from "wagmi";
 import Decimal from "decimal.js-light";
 import { useYT } from "@/hooks/useYT";
 import { Button, Divider, Input, Link } from "@nextui-org/react";
-import { parseEther } from "ethers";
+import { ethers, parseEther } from "ethers";
 import { set } from "radash";
 import { POT } from "@/contracts/tokens/POT";
 
 export default function YieldPoolOCard() {
 
     const [withdrawAmount, setWithdrawAmount] = useState("");
+    const [amountOut, setAmountOut] = useState<string | undefined>("");
 
     const searchParams = useSearchParams();
     const tokenName = searchParams.get('tokenName');
@@ -21,10 +22,13 @@ export default function YieldPoolOCard() {
     const account = useAccount();
     const publicClient = usePublicClient();
     const [isLoading, setIsLoading] = useState(false);
+    const [SY, setSY] = useState<Currency>();
     const [YT, setYT] = useState<Currency>();
     const [RT, setRT] = useState<Currency>();
     const [POT, setPOT] = useState<POT>();
     const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
+    // const [SYBalance, setSYBalance] = useState<Decimal>(new Decimal(0));
+    const [APY, setAPY] = useState<string | undefined>("");
     const UseYT = useYT();
 
     useEffect(() => {
@@ -34,7 +38,7 @@ export default function YieldPoolOCard() {
         const tokens = StakeCurrencyListMap[chainId][tokenName];
         if (tokens) {
         //   setNT(tokens.NT.onChain(chainId));
-        //   setSY(tokens.SY[chainId]);
+          setSY(tokens.SY[chainId]);
         //   setPT(tokens.UPT[chainId]);
 
           setYT(tokens.YT[chainId]);
@@ -70,7 +74,30 @@ export default function YieldPoolOCard() {
         // }
         // _SY().then(setSYBalance);
     
-      }, [chainId, account.address, YT]);
+    }, [chainId, account.address, YT]);
+
+    useEffect(() => {
+
+        async function APY() {
+            if (!YT || !SY) return;
+            return UseYT.YTView.APY({YT:YT,SY:SY});
+        }
+        
+        APY().then(setAPY);
+    },[YT,SY])
+
+    useEffect(() => {
+        async function _() {
+            if (!YT) return;
+            const _withdrawAmount = withdrawAmount === "" ? new Decimal(0) : new Decimal(withdrawAmount);
+            const result = await UseYT.YTView.previewWithdrawYield({
+                YT:YT,
+                amountInBurnedYT:BigInt(parseEther(_withdrawAmount.toFixed(18)) || "")
+            });
+            return ethers.formatEther(result.toString());
+        }
+        _().then(setAmountOut);
+    },[withdrawAmount])
 
     async function handleWithdraw(amountInBurnedYT:BigInt) {
         setIsLoading(true);
@@ -86,6 +113,14 @@ export default function YieldPoolOCard() {
             setIsLoading(false);
         }
         
+    }
+
+    function handleSetWithdrawAmount(amount:string) {
+        if (Number(amount) > Number(YTBalance)) {
+            setWithdrawAmount(YTBalance.toFixed(18));
+        } else {
+            setWithdrawAmount(amount);
+        }
     }
 
     return (
@@ -108,16 +143,16 @@ export default function YieldPoolOCard() {
             <div className="flex flex-col items-center text-white font-avenir">
             <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] rounded-[0.25rem] flex gap-x-12 items-center">
                 <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
-                <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
-                <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
+                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
+                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
                 </div>
                 <div className="flex flex-col gap-5 ml-[1.13rem]">
-                <span className="text-[1.13rem] leading-[1.56rem] opacity-30">APR</span>
-                <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}%</span>
+                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">APR</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{APY}%</span>
                 </div>
             </div>
             <span className="text-[1.13rem] leading-[1.56rem] font-medium mt-[2.5rem]">
@@ -125,7 +160,7 @@ export default function YieldPoolOCard() {
             </span>
             <Input
                 value={withdrawAmount}
-                onValueChange={setWithdrawAmount}
+                onValueChange={handleSetWithdrawAmount}
                 placeholder="withdraw amount"
                 classNames={{
                 base: "h-[3.19rem] mt-[0.69rem] rounded-[0.75rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
@@ -147,6 +182,23 @@ export default function YieldPoolOCard() {
                 MAX
                 </Link>
             </div>
+            <Input
+                value={Number(amountOut) ? amountOut : ""}
+                placeholder="withdraw amount"
+                classNames={{
+                base: "h-[3.19rem] mt-[0.69rem] rounded-[0.75rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
+                mainWrapper: "justify-center",
+                input:
+                    "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-wihte font-black text-[1.13rem] leading-[1.56rem]",
+                inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent",
+                }}
+                startContent={
+                <div className="flex h-full items-center space-x-4">
+                    <p className="text-[1.13rem] leading-[1.56rem]">AmountOut</p>
+                    <Divider orientation="vertical" className="bg-white bg-opacity-30 h-[60%]" />
+                </div>
+                }
+            />
             <Button
                 isLoading={isLoading}
                 isDisabled={!Number(withdrawAmount)}

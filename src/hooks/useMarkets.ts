@@ -7,6 +7,7 @@ import { useSY } from "./useSY";
 import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
 import { Currency } from "@/packages/core";
 import { set } from "radash";
+import { useYT } from "./useYT";
 
 /* eslint-disable no-unused-vars */
 
@@ -16,13 +17,16 @@ export function useMarkets() {
     const publicClient = usePublicClient();
     const tokensOnChain = useMemo(() => getTokensByChainId(chainId), [chainId]);
     const [ liquiditys, setLiquiditys ] = useState<any[]>([]);
+    const [ APYs, setAPYs ] = useState<any[]>([]);
     const [ SYs,setSYs ] = useState<any[]>([]);
+    const [ YTs,setYTs ] = useState<any[]>([]);
     const [SY,setSY] = useState<Currency>();
     const UseSY = useSY();
+    const UseYT = useYT();
     const [ marketDatas, setMarketDatas ] = useState<any[]>([]);
 
-    function refreshSYs() {
-        async function _() {
+    function refreshSYsYTs() {
+        async function _SYs() {
             const _SYs = [];
             for (let i = 0; i < tokensOnChain.length; i++) {
                 const token = tokensOnChain[i];
@@ -33,7 +37,20 @@ export function useMarkets() {
             }
             return _SYs;
         }
-        _().then(setSYs);
+        _SYs().then(setSYs);
+
+        async function _YTs() {
+            const _YTs = [];
+            for (let i = 0; i < tokensOnChain.length; i++) {
+                const token = tokensOnChain[i];
+                if (token.symbol) {
+                    const YT = StakeCurrencyListMap[chainId][token.symbol].YT[chainId];
+                    _YTs.push(YT);
+                }
+            }
+            return _YTs;
+        }
+        _YTs().then(setYTs);
     }
 
     function refreshLiquiditys() {
@@ -50,6 +67,19 @@ export function useMarkets() {
         _().then(setLiquiditys);
     }
 
+    function refreshAPY() {
+        
+        async function _() {
+            const _APYs = [];
+            for (let i = 0; i < SYs.length; i++) {
+                setSY(SYs[i]);
+                const APY = await UseYT.YTView.APY({YT:YTs[i],SY:SYs[i]});
+                _APYs.push(APY);
+            }
+            return _APYs;
+        }
+        _().then(setAPYs);
+    }
     function refresh() {
 
         async function _() {
@@ -64,7 +94,7 @@ export function useMarkets() {
                     icon: '🔹',
                     platform: ChainNames[chainId],
                     liquidity: liquiditys[i],
-                    currentlyAnchoredAPY: 7.9,
+                    currentlyAnchoredAPY: APYs[i],
                     averageLockTime: SYs[i]?.symbol,
                     days: 235,
                     currencySelectList: StakeCurrencyListMap[chainId][token.symbol]
@@ -78,17 +108,18 @@ export function useMarkets() {
     }
 
     useEffect(() => {
-        refreshSYs();
+        refreshSYsYTs();
     },[chainId, tokensOnChain])
 
     useEffect(() => {
         refreshLiquiditys();
-    },[chainId, SYs])
+        refreshAPY();
+    },[chainId, SYs, YTs])
 
     useEffect(() => {
         refresh();
-    },[chainId, liquiditys])
+    },[chainId, liquiditys, APYs])
 
-    return { marketsData: marketDatas, refresh, refreshSYs, refreshLiquiditys };
+    return { marketsData: marketDatas, refresh, refreshSYsYTs, refreshLiquiditys, refreshAPY };
 
 }
