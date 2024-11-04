@@ -35,14 +35,14 @@ export default function PositionTables() {
 
     // if (!result) return <p>Loading...</p>;
 
-    useEffect(() => {
+  //   useEffect(() => {
 
-      async function APY() {
-          return UseYT.YTView.APY({YT:YTslisBNB[chainId],SY:SYslisBNB[chainId]});
-      }
+  //     async function APY() {
+  //         return UseYT.YTView.APY({YT:YTslisBNB[chainId],SY:SYslisBNB[chainId]});
+  //     }
       
-      APY().then(setAPY);
-  })
+  //     APY().then(setAPY);
+  // })
 
     // useEffect(() => {
     //   async function _() {
@@ -76,7 +76,7 @@ export default function PositionTables() {
             ))
           )} */}
           <span className="text-white">{stringifyWithBigInt(result)}</span>
-          <span className="text-white">{APY}</span>
+          {/* <span className="text-white">{APY}</span> */}
           <Button
             onClick={Test}
             className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
