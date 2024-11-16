@@ -2,7 +2,7 @@ import { addressMap } from "@/contracts/addressMap/addressMap";
 import { SUPPORTED_CHAINS } from "@/contracts/chains";
 import { getERC20Token } from "@/contracts/getTokenContract/getTokenContract";
 import { ORETH, ORUSD, USDB } from "@/contracts/tokens/tokens";
-import { Currency, CurrencyAmount, Percent, Token, TradeType } from "@/packages/core";
+import { Currency, CurrencyAmount, Ether, Percent, Token, TradeType } from "@/packages/core";
 import { Native, Pair, Trade } from "@/packages/sdk";
 import { Fetcher } from "@/packages/sdk/fetcher";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Address, PublicClient, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
+import { CurrencySelectListType } from "@/contracts/currencys";
 
 export enum BtnAction {
   disable,
@@ -37,28 +38,33 @@ export type SwapOptions = {
 };
 
 function tokenConvert(token: Currency): Token {
-  if (token.equals(USDB[token.chainId])) return ORUSD[token.chainId];
+  // if (token.equals(USDB[token.chainId])) return ORUSD[token.chainId];
+  // console.log("token", token);
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
 async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: PublicClient): Promise<Pair[]> {
   const chainId = publicClient.chain!.id;
   let pairs: Pair[] = [];
-  await map([[ORETH[chainId], ORUSD[chainId]]], async (rawPair) => {
-    let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null);
-    if (p) pairs.push(p);
-  });
+  if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
+  let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient);
+  console.log("p", p);
+  if (p) pairs.push(p);
+  // await map([[ORETH[chainId], ORUSD[chainId]]], async (rawPair) => {
+  //   let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null);
+  //   if (p) pairs.push(p);
+  // });
 
-  await map([ORETH[chainId], ORUSD[chainId]], async (token) => {
-    if (!tokenA.equals(token)) {
-      let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null);
-      if (p1) pairs.push(p1);
-    }
-    if (!tokenB.equals(token)) {
-      let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null);
-      if (p2) pairs.push(p2);
-    }
-  });
+  // await map([ORETH[chainId], ORUSD[chainId]], async (token) => {
+  //   if (!tokenA.equals(token)) {
+  //     let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null);
+  //     if (p1) pairs.push(p1);
+  //   }
+  //   if (!tokenB.equals(token)) {
+  //     let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null);
+  //     if (p2) pairs.push(p2);
+  //   }
+  // });
   return pairs;
 }
 
@@ -67,8 +73,8 @@ export function useSwap(swapOpts: SwapOptions) {
   const publicClient = usePublicClient();
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [token0, setToken0] = useState<Currency>();
-  const [token1, setToken1] = useState<Currency>();
+  const [token0, setToken0] = useState<Currency | Ether>();
+  const [token1, setToken1] = useState<Currency | Ether>();
   const [token0AmountInput, setToken0AmountInput] = useState<string>("");
   const [token1AmountInput, setToken1AmountInput] = useState<string>("");
   const [routeNotExist, setRouteNotExist] = useState<boolean>(false);
@@ -78,6 +84,7 @@ export function useSwap(swapOpts: SwapOptions) {
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.EXACT_INPUT);
   const [transactionDeadline, setTransactionDeadline] = useState<number>(10);
   const [unlimitedAmount, setUnlimitedAmount] = useState<boolean>(false);
+  const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -142,10 +149,10 @@ export function useSwap(swapOpts: SwapOptions) {
 
   const isTransformView = useMemo(() => {
     if (!token0 || !token1) return false;
-    if (token0.isNative && token1.equals(ORETH[chainId])) return true;
-    if (token1.isNative && token0.equals(ORETH[chainId])) return true;
-    if (token0.equals(USDB[chainId]) && token1.equals(ORUSD[chainId])) return true;
-    if (token1.equals(USDB[chainId]) && token0.equals(ORUSD[chainId])) return true;
+    // if (token0.isNative && token1.equals(ORETH[chainId])) return true;
+    // if (token1.isNative && token0.equals(ORETH[chainId])) return true;
+    // if (token0.equals(USDB[chainId]) && token1.equals(ORUSD[chainId])) return true;
+    // if (token1.equals(USDB[chainId]) && token0.equals(ORUSD[chainId])) return true;
     return false;
   }, [chainId, token0, token1]);
 
@@ -253,6 +260,7 @@ export function useSwap(swapOpts: SwapOptions) {
     if (swapOpts.view === SwapView.swap) {
       if (!publicClient) return;
       if (tradeType === TradeType.EXACT_INPUT) {
+        // console.log("token0", tokenConvert(token0!));
         const result = Trade.bestTradeExactIn(
           await makePairs(token0!, token1!, publicClient),
           CurrencyAmount.fromRawAmount(tokenConvert(token0!), parseUnits(value, token0!.decimals).toString()),
@@ -340,6 +348,7 @@ export function useSwap(swapOpts: SwapOptions) {
       slippage,
       transactionDeadline,
       unlimitedAmount,
+      CurrencyList,
     },
     loading,
     setLoading,
@@ -355,5 +364,6 @@ export function useSwap(swapOpts: SwapOptions) {
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
+    setCurrencyList,
   };
 }

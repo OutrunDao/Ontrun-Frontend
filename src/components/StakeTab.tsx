@@ -35,6 +35,7 @@ export default function StakeTab() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [sliderValue, setSliderValue] = useState(365);
+  const [sliderValueView, setSliderValueView] = useState(365);
   const [NT, setNT] = useState<Currency | Ether>();
   const [SY, setSY] = useState<Currency>();
   const [PT, setPT] = useState<Currency>();
@@ -159,7 +160,7 @@ export default function StakeTab() {
       return ethers.formatEther(result?.PTReviewAmount || "0");
     }
     _PT().then(setPTAmount);
-  },[SYAmount, sliderValue, NT])
+  },[SYAmount, sliderValue, NT, NTAmount])
 
   // useEffect(() => {
   //   async function _() {
@@ -182,6 +183,19 @@ export default function StakeTab() {
   //   }
   //   _().then(setYTAmount);
   // },[NTAmount, sliderValue, NT])
+
+  useEffect(() => {
+    async function _() {
+      if (sliderValueView <= 1) {
+        return 1;
+      } else if (sliderValueView >= 365) {
+        return 365;
+      } else {
+        return sliderValueView;
+      }
+    }
+    _().then(setSliderValue);
+  },[sliderValueView])
   
   function onSelectNT(token: any) {
     setNT(token);
@@ -194,13 +208,14 @@ export default function StakeTab() {
     if (POT && PT && YT && SYAmount && NT) {
       setIsLoading(true);
       try {
+        const minPTGenerated = Number(parseEther(PTAmount)) * (1 - slippage/100);
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,
           POTAddress: POT.address,
           TokenInAddress: NT.symbol == "ETH"?"0x0000000000000000000000000000000000000000":(NT as Token).address,
           tokenAmount: BigInt(parseEther(NTAmount)),
           lockupDays: BigInt(sliderValue),
-          minPTGenerated: BigInt(0),
+          minPTGenerated: BigInt(minPTGenerated),
           PTAddress: (PT as Token).address,
           UPTAddress: "0x0000000000000000000000000000000000000000",
           value: NT.symbol == "ETH"?parseEther(NTAmount):undefined,
@@ -247,7 +262,13 @@ export default function StakeTab() {
   }
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center relative">
+      <div className="absolute text-white right-[0rem] top-[-2rem]">
+      <StakeSetting
+        slippage={slippage}
+        setSlipPage={setSlippage}
+      />
+      </div>
         <div className="flex justify-start w-full px-8 mt-2 mb-2">
           <div className="text-white text-opacity-50 flex gap-x-4">
             <span className="text-[0.88rem] leading-[1.19rem] font-avenir font-medium">
@@ -263,22 +284,22 @@ export default function StakeTab() {
             ～$0
           </span>
         </div>
-        <div className="w-[28rem] h-[4rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+        <div className="w-[28rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-4">
           <div>
             <Input
               placeholder="0.00"
               value={NTAmount}
               onValueChange={setNTAmount}
               classNames={{
-                base: "h-[2.5rem] text-white",
-                input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[12rem]",
+                base: "text-white",
+                input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1rem] leading-[1.69rem] font-avenir font-black text-right w-[12rem]",
                 inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
                 innerWrapper: "justify-between",
               }}
               startContent={
                 <TokenSelect
                   tokenList={CurrencyList}
-                  token={NT as any}
+                  token={NT}
                   onSelect={onSelectNT}
                   tokenSymbol={NTSymbol}
                 />
@@ -297,8 +318,12 @@ export default function StakeTab() {
         <Divider className="w-[8.76rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-30" />
       </div>
       <Input
-        value={sliderValue.toString()}
-        onValueChange={(value) => setSliderValue(Number(value))}
+        value={sliderValueView.toString()}
+        onValueChange={(value) => {
+          const numericValue = Number(value);
+          if (numericValue >= 0 && numericValue <= 1000) {
+            setSliderValueView(numericValue);
+          }}}
         classNames={{
           base: "w-[28rem] rounded-xl text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent",
           input: "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-white font-black",
@@ -313,12 +338,12 @@ export default function StakeTab() {
       />
       <Slider
         value={sliderValue}
-        onChange={(value) => setSliderValue(value as number)}
+        onChange={(value) => setSliderValueView(value as number)}
         color="secondary"
         size="sm"
         step={1}
         maxValue={365}
-        minValue={7}
+        minValue={1}
         className="w-[28rem] mt-[0.88rem]"
         renderThumb={(props) => (
           <div
@@ -329,13 +354,13 @@ export default function StakeTab() {
         )}
       />
 
-      <div className="flex flex-col gap-y-[0.35rem] w-[28rem]  text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
+      {/* <div className="flex flex-col gap-y-[0.35rem] w-[28rem]  text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
         <div className="flex justify-between w-full text-white text-opacity-50">
           <span>Exchange Rate</span>
           {NT&&PT ?  <span>1 {NTSymbol} = {1 / Number(exchangeRate?.toFixed(18))} {PT.symbol}</span> : null}
           
         </div>
-      </div>
+      </div> */}
       <Button
         onClick={Stake}
         isLoading={isLoading}

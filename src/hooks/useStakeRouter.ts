@@ -3,6 +3,7 @@ import { addressMap } from "@/contracts/addressMap/addressMap";
 import { ethers, parseEther } from "ethers";
 import { usePublicClient, useChainId, useAccount } from "wagmi";
 import { stakeRouterAbi } from "@/contracts/abis/stakeRouter";
+import { slisBNB } from "@/contracts/tokens/tokenStake";
 
 export  function useStakeRouter() {
 
@@ -65,7 +66,8 @@ export  function useStakeRouter() {
         PTAddress,
         UPTAddress,
         POTAddress,
-        tokenOutAddress,
+        // tokenOutAddress,
+        receiverAddress,
         positionId,
         positionShare,
         minRedeemedSyAmount,
@@ -74,7 +76,7 @@ export  function useStakeRouter() {
         PTAddress:string,
         UPTAddress:string,
         POTAddress:string,
-        tokenOutAddress:string,
+        // tokenOutAddress:string,
         receiverAddress:string,
         positionId:BigInt,
         positionShare:BigInt,
@@ -91,19 +93,21 @@ export  function useStakeRouter() {
                 PTAddress,
                 UPTAddress,
                 POTAddress,
-                tokenOutAddress,
-                account.address,
+                slisBNB[chainId].address,
+                receiverAddress,
                 [
                     positionId,
                     positionShare,
                     minRedeemedSyAmount,
                 ]
             );
-            
+            const receipt = await tx.wait();
+            return receipt;
         }
     }
 
     return {
         mintYieldTokensFromToken,
+        redeemPPToToken,
     }
 }

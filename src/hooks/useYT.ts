@@ -95,10 +95,11 @@ export function useYT() {
         });
         const getAmountInYields = gql`
             query getAmountInYields {
-                accumulateYields_collection(first: 2, orderBy: blockTimestamp, orderDirection: desc) {
+                accumulateYields_collection(orderBy: blockTimestamp, orderDirection: desc) {
                 amountInYields
                 blockTimestamp
                 protocolFee
+                syTotalStaking
                 }
               }
         `;
@@ -108,16 +109,31 @@ export function useYT() {
         return Gresult.data.accumulateYields_collection;
     }
 
-    async function APY({YT, SY}:{YT:Currency, SY:Currency}) {
-        const _Principal = await totalSupply(SY);
-        const Principal = parseEther(_Principal?.toFixed(18) ?? '0');
+    async function APY({YT}:{YT:Currency}) {
         const YieldData = await amountInYields(YT);
-        if (!YieldData || YieldData.length < 2) return;
-        const Yield = YieldData[0].amountInYields;
-        const Time = YieldData[0].blockTimestamp - YieldData[1].blockTimestamp;
-        const APS = Yield / ( Number(Principal) * Time);
+        let time = 0;
+        let Yield = 0;
+        let syTotalStaking = 0;
+        let i = 0;
+        while (time < 604800 && i < YieldData.length && YieldData.length > 1) {
+            time = YieldData[0].blockTimestamp - YieldData[i + 1].blockTimestamp;
+            Yield += YieldData[i].amountInYields;
+            syTotalStaking += YieldData[i].syTotalStaking;
+            i++;
+        }
+        const aveSYTotalStaking = syTotalStaking / (i+1);
+        const APS = Yield / (time*aveSYTotalStaking);
         const APY = APS * 31536000;
-        return (Number(APY)*100 ?? 0).toFixed(3);
+        return ethers.formatEther("0");
+
+
+        
+        // if (!YieldData || YieldData.length < 2) return;
+        // const Yield = YieldData[0].amountInYields;
+        // const Time = YieldData[0].blockTimestamp - YieldData[1].blockTimestamp;
+        // const APS = Yield / Time;
+        // const APY = APS * 31536000;
+        // return ethers.formatEther(APY.toFixed(18));
     }
 
     async function previewWithdrawYield({YT,amountInBurnedYT}:{YT:Currency,amountInBurnedYT:BigInt}) {

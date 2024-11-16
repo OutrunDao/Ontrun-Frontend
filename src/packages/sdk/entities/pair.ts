@@ -15,6 +15,7 @@ import {
   ZERO_PERCENT,
 } from "../constants";
 import { InsufficientInputAmountError, InsufficientReservesError } from "../errors";
+import { getCreate2Address } from "ethers";
 
 export const computePairAddress = ({
   factoryAddress,
@@ -26,23 +27,31 @@ export const computePairAddress = ({
   tokenB: Token;
 }): string => {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
-  return getContractAddress({
-    bytecodeHash: initCodeHashMap[token0.chainId],
-    from: getAddress(factoryAddress),
-    opcode: "CREATE2",
-    salt: keccak256(encodePacked(["address", "address"], [getAddress(token0.address), getAddress(token1.address)])),
-  });
+  console.log("computePairAddress", initCodeHashMap[token0.chainId], getAddress(factoryAddress), token0.chainId, getAddress(token0.address), getAddress(token1.address), BigInt(30));
+  
+  const initCodeHash = initCodeHashMap[token0.chainId];
+  const from = getAddress(factoryAddress);
+  const salt = keccak256(encodePacked(["address", "address", "uint256"], [getAddress(token0.address), getAddress(token1.address), BigInt(30)]));
+  return getCreate2Address(from, salt, initCodeHash);
+  // return getContractAddress({
+  //   bytecodeHash: initCodeHashMap[token0.chainId],
+  //   from: getAddress(factoryAddress),
+  //   opcode: "CREATE2",
+  //   salt: keccak256(encodePacked(["address", "address", "uint256"], [getAddress(token0.address), getAddress(token1.address), BigInt(30)])),
+  // });
 };
 export class Pair {
   public readonly liquidityToken: Token;
+  public readonly swapFeeRate!: BigInt;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
-  public static getAddress(tokenA: Token, tokenB: Token): string {
+  public static getAddress(tokenA: Token, tokenB: Token,): string {
     const factoryAddress = addressMap[tokenA.chainId].SWAP_FACTORY;
+    console.log("Pair getAddress", factoryAddress, tokenA, tokenB);
     return computePairAddress({ factoryAddress, tokenA, tokenB });
   }
 
-  public constructor(currencyAmountA: CurrencyAmount<Token>, tokenAmountB: CurrencyAmount<Token>) {
+  public constructor(currencyAmountA: CurrencyAmount<Token>, tokenAmountB: CurrencyAmount<Token>, swapFeeRate: BigInt = BigInt(0)) {
     const tokenAmounts = currencyAmountA.currency.sortsBefore(tokenAmountB.currency) // does safety checks
       ? [currencyAmountA, tokenAmountB]
       : [tokenAmountB, currencyAmountA];
@@ -53,6 +62,7 @@ export class Pair {
       `${tokenAmounts[0].currency.symbol + "/" + tokenAmounts[1].currency.symbol}`, //'Outswap V1',
       "OUT-V1",
     );
+    this.swapFeeRate = swapFeeRate;
     this.tokenAmounts = tokenAmounts as [CurrencyAmount<Token>, CurrencyAmount<Token>];
   }
 

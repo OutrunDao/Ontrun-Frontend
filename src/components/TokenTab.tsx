@@ -37,15 +37,15 @@ export default function TokenTab({
                 ～$0
                 </span>
             </div>
-            <div className="w-[28rem] h-[4rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8">
+            <div className="w-[28rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-4">
                 <div>
                 <Input
                     placeholder="0.00"
                     value={InputValue}
                     onValueChange={onValueChange}
                     classNames={{
-                    base: "h-[2.5rem] text-white",
-                    input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1.25rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
+                    base: "text-white",
+                    input: "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1rem] leading-[1.69rem] font-avenir font-black text-right w-[10rem]",
                     inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0",
                     innerWrapper: "justify-between",
                     }}

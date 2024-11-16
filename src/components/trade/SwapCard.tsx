@@ -1,10 +1,10 @@
 "use client";
 import { BlockExplorers } from "@/contracts/chains";
-import { currencySelectList } from "@/contracts/currencys";
+import { SwapCurrencyList } from "@/contracts/currencys";
 import useContract from "@/hooks/useContract";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
 import { Accordion, AccordionItem, Button, Divider, Image, Input, Tab, Tabs } from "@nextui-org/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
@@ -15,6 +15,9 @@ export default function SwapCard() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { write: writeContract } = useContract();
+
+  const [ tokenA,setTokenA ] = useState();
+  const [ tokenB,setTokenB ] = useState();
 
   const {
     swapData,
@@ -32,10 +35,16 @@ export default function SwapCard() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
+    setCurrencyList,
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
   });
+
+  useEffect(() => {
+    if (!chainId) return;
+    setCurrencyList(SwapCurrencyList[chainId]);
+  },[chainId])
 
   const blockExplore = useMemo(() => {
     return BlockExplorers[chainId];
@@ -95,7 +104,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={currencySelectList}
+                      tokenList={SwapCurrencyList[chainId]}
                       token={swapData.token0}
                       tokenDisable={swapData.token1}
                       onSelect={setToken0}
@@ -134,7 +143,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={currencySelectList}
+                      tokenList={SwapCurrencyList[chainId]}
                       tokenDisable={swapData.token0}
                       token={swapData.token1}
                       onSelect={setToken1}

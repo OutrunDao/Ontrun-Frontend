@@ -43,12 +43,14 @@ export const addressMap = {
   [ChainId.BSC_TESTNET]: {
     [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
     [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
-    [ContractName.slisBNB]: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
+    [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
     [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
+    [ContractName.SWAP_FACTORY]: "0x9ef195740a75a76B0F1fE6909964E35123858521",
   }
 } as Record<number, ContractAddressMap>;
 
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
+  [ChainId.BSC_TESTNET]: "0xbb65f8787019bff9b5ceea542ada5455427942f90df3316ff4c58179de6d6768",
 } as Record<number, `0x${string}`>;
 

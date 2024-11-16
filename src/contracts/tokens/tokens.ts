@@ -70,6 +70,7 @@ export const ORETH: { [chainId: number]: Token } = {
   ),
   // blast mainnet
   [ChainId.BLAST]: new Token(ChainId.BLAST, "0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5", 18, "orETH", "Outrun ETH"),
+  [ChainId.BSC_TESTNET]: new Token(ChainId.BSC_TESTNET, "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", 18, "WBNB", "Wrapped BNB"),
 };
 
 export const OSUSD: { [chainId: number]: Token } = {

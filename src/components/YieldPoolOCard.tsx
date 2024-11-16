@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import YieldPoolOTab from "./YieldPoolOTab";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { Currency } from "@/packages/core";
@@ -10,6 +10,7 @@ import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { ethers, parseEther } from "ethers";
 import { set } from "radash";
 import { POT } from "@/contracts/tokens/POT";
+import { usePOT } from "@/hooks/usePOT";
 
 export default function YieldPoolOCard() {
 
@@ -22,14 +23,37 @@ export default function YieldPoolOCard() {
     const account = useAccount();
     const publicClient = usePublicClient();
     const [isLoading, setIsLoading] = useState(false);
-    const [SY, setSY] = useState<Currency>();
+    // const [SY, setSY] = useState<Currency>();
     const [YT, setYT] = useState<Currency>();
     const [RT, setRT] = useState<Currency>();
     const [POT, setPOT] = useState<POT>();
     const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
     // const [SYBalance, setSYBalance] = useState<Decimal>(new Decimal(0));
+    const [YieldsNow, setYieldsNow] = useState("");
+    const [rateNow, setRateNow] = useState("");
     const [APY, setAPY] = useState<string | undefined>("");
+    const [impliedStakingDays, setImpliedStakingDays] = useState("");
     const UseYT = useYT();
+    const UsePOT = usePOT();
+
+    useMemo(async () => {
+        if (!POT) return;
+        const _impliedStakingDays = await UsePOT.POTRead.impliedStakingDays({POT:POT});
+        setImpliedStakingDays(_impliedStakingDays.toString());
+    }, [POT])
+
+    useMemo(async () => {
+        if (!YT) return;
+        const _YieldsNow = await UseYT.YTView.previewWithdrawYield({YT:YT, amountInBurnedYT:parseEther("0.01")});
+        const a = ethers.formatEther(_YieldsNow*BigInt(100));
+        setYieldsNow(a);
+        
+    },[YT])
+
+    useMemo(() => {
+        const _rateNow = String(Number(YieldsNow)*36500);
+        setRateNow(_rateNow);
+    },[YieldsNow])
 
     useEffect(() => {
         if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
@@ -38,7 +62,7 @@ export default function YieldPoolOCard() {
         const tokens = StakeCurrencyListMap[chainId][tokenName];
         if (tokens) {
         //   setNT(tokens.NT.onChain(chainId));
-          setSY(tokens.SY[chainId]);
+        //   setSY(tokens.SY[chainId]);
         //   setPT(tokens.UPT[chainId]);
 
           setYT(tokens.YT[chainId]);
@@ -79,12 +103,12 @@ export default function YieldPoolOCard() {
     useEffect(() => {
 
         async function APY() {
-            if (!YT || !SY) return;
-            return UseYT.YTView.APY({YT:YT,SY:SY});
+            if (!YT) return;
+            return UseYT.YTView.APY({YT:YT});
         }
         
         APY().then(setAPY);
-    },[YT,SY])
+    },[YT])
 
     useEffect(() => {
         async function _() {
@@ -92,7 +116,7 @@ export default function YieldPoolOCard() {
             const _withdrawAmount = withdrawAmount === "" ? new Decimal(0) : new Decimal(withdrawAmount);
             const result = await UseYT.YTView.previewWithdrawYield({
                 YT:YT,
-                amountInBurnedYT:BigInt(parseEther(_withdrawAmount.toFixed(18)) || "")
+                amountInBurnedYT:parseEther(_withdrawAmount.toFixed(18))
             });
             return ethers.formatEther(result.toString());
         }
@@ -111,6 +135,7 @@ export default function YieldPoolOCard() {
             
         } finally {
             setIsLoading(false);
+            setWithdrawAmount("");
         }
         
     }
@@ -124,7 +149,7 @@ export default function YieldPoolOCard() {
     }
 
     return (
-        <div className="flex flex-col items-center w-[38.44rem] h-[31.56rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card">
+        <div className="flex flex-col items-center w-[38.44rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card">
             <span className="w-full text-transparent bg-clip-text bg-title font-kronaOne text-[2rem] leading-[2.3rem] text-center mt-6 mb-6">{YT?.symbol}</span>
             {/* <YieldPoolOTab
                 type={YT?.symbol || ""}
@@ -141,22 +166,26 @@ export default function YieldPoolOCard() {
                 RTSymbol={RT?.symbol || ""}
             /> */}
             <div className="flex flex-col items-center text-white font-avenir">
-            <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] rounded-[0.25rem] flex gap-x-12 items-center">
+            <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] rounded-[0.25rem] flex gap-x-5 items-center">
                 <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
-                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
+                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{impliedStakingDays}</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{0}</span>
+                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{YieldsNow}</span>
+                </div>
+                <div className="flex flex-col gap-5 items-center">
+                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
+                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{rateNow}</span>
                 </div>
                 <div className="flex flex-col gap-5 ml-[1.13rem]">
-                    <span className="text-[1.13rem] leading-[1.56rem] opacity-30">APR</span>
+                    <span className="text-[1rem] leading-[1.56rem] opacity-30">APR</span>
                     <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{APY}%</span>
                 </div>
             </div>
             <span className="text-[1.13rem] leading-[1.56rem] font-medium mt-[2.5rem]">
-                Burn {YT?.symbol} To Claim {RT?.symbol}
+                Burn {YT?.symbol} To Redeem {RT?.symbol}
             </span>
             <Input
                 value={withdrawAmount}
@@ -202,9 +231,9 @@ export default function YieldPoolOCard() {
             <Button
                 isLoading={isLoading}
                 isDisabled={!Number(withdrawAmount)}
-                className="mt-[2.88rem] bg-button-gradient w-[12.13rem] h-[3.81rem] rounded-[4.38rem] text-[1.25rem] text-white leading-6"
+                className="mb-[2.88rem] mt-[2.88rem] bg-button-gradient w-[12.13rem] h-[3.81rem] rounded-[4.38rem] text-[1.25rem] text-white leading-6"
                 onClick={() => handleWithdraw(BigInt(parseEther(withdrawAmount || "")))}>
-                Burn
+                Redeem
             </Button>
             </div>
         </div>

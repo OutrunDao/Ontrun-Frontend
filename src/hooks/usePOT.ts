@@ -88,6 +88,15 @@ export function usePOT() {
         return result;
     }
 
+    async function impliedStakingDays({POT}:{POT:POT}) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        // const signer = await provider.getSigner();
+        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
+        const result = await POTContract.impliedStakingDays();
+        return result;
+    }
+
     async function getAllPOT(POT:POT,account:string) {
         if (!POT) return;
         const client = new ApolloClient({
@@ -161,6 +170,7 @@ export function usePOT() {
             previewRedeem,
             getAllPOT,
             positions,
+            impliedStakingDays,
         }
     }
 

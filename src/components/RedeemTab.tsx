@@ -5,7 +5,7 @@ import { useAccount, useChainId, usePublicClient } from "wagmi";
 import ToastCustom from "./ToastCustom";
 import TokenSelect from "./TokenSelect";
 import TokenSure from "./TokenSure";
-import { Currency } from "@/packages/core";
+import { Currency, Token} from "@/packages/core";
 import { useSearchParams } from "next/navigation";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { POT } from "@/contracts/tokens/POT";
@@ -14,6 +14,7 @@ import { set } from "radash";
 import { usePOT } from "@/hooks/usePOT";
 import { ethers, parseEther } from "ethers";
 import TokenTab from "./TokenTab";
+import { useStakeRouter } from "@/hooks/useStakeRouter";
 
 export default function RedeemTab({
   // tokenName,
@@ -38,8 +39,10 @@ export default function RedeemTab({
   const [POTBalance, setPOTBalance] = useState<Decimal>(new Decimal(0));
   const [PTPOTAmount, setPTPOTAmount] = useState("");
   const [RTAmount, setRTAmount] = useState<Decimal>(new Decimal(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const UsePOT = usePOT();
+  const UseStakeRouter = useStakeRouter();
 
   useEffect(() => {
     if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
@@ -96,27 +99,55 @@ export default function RedeemTab({
 
 
   async function redeem() {
+    if (!PT || !POT || !RT || !PTPOTAmount) return;
+
     if (!account.address)
       return toast.custom(<ToastCustom content="Please Connect Wallet" />);
 
-    // Mock redeem function
-    toast.custom(() => (
-      <ToastCustom
-        content={
-          <>
-            {`You have successfully redeemed ${PTPOTAmount} ${PT?.symbol}`}
-            . View on <Link href="#">BlockExplorer</Link>
-          </>
-        }
-      />
-    ));
+    setIsLoading(true);
+      // try {
+        const receipt = await UseStakeRouter.redeemPPToToken({
+          SYAddress: (POT.SY as Token).address, // Replace with the actual value
+          PTAddress: (PT as Token).address, // Replace with the actual value
+          UPTAddress: "0x0000000000000000000000000000000000000000", // Replace with the actual value
+          POTAddress: POT.address, // Replace with the actual value
+          receiverAddress: account.address, // Replace with the actual value
+          positionId: BigInt(PositionId), // Replace with the actual value
+          positionShare: BigInt(parseEther(PTPOTAmount)), // Replace with the actual value
+          minRedeemedSyAmount: BigInt(0), // Replace with the actual value
+        });
 
+        toast.custom(() => (
+          <ToastCustom
+            content={
+              receipt.status === 1 ? (
+                <>
+                  {`You have successfully redeemed ${PTPOTAmount} ${PT?.symbol}`}
+                  . View on <Link href="#">BlockExplorer</Link>
+                </>
+              ) : (
+                "Transaction failed"
+              )
+            }
+          />
+        ));
+      // } catch (error) {
+      //   toast.custom(() => (
+      //     <ToastCustom
+      //       content={`Transaction failed: ${error.message}`}
+      //     />
+      //   ));
+      // } finally {
+      //   setIsLoading(false);
+      //   setPTPOTAmount("");
+      // }
 
   }
 
   return (
     <div className="flex flex-col items-center">
       <span>Deadline:{positionData.deadline}{" "}days</span>
+      {/* <span>{PositionId}</span> */}
       <TokenTab Balance={PTBalance} InputValue={PTPOTAmount} onValueChange={setPTPOTAmount} token={PT}/>
       <div className="text-white flex m-1 w-full justify-around items-center"></div>
         {/* <Divider className="w-[30.85rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-10 ml-[-2rem]" /> */}

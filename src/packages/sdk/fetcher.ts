@@ -83,9 +83,10 @@ export abstract class Fetcher {
    * @param provider the provider to use to fetch the data
    */
   public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient): Promise<Pair> {
+    // console.log(tokenA, tokenB);
     invariant(tokenA.chainId === tokenB.chainId, "CHAIN_ID");
     const address = Pair.getAddress(tokenA, tokenB) as Address;
-    // console.log(address);
+    console.log(address);
 
     const pairContract = getContract({
       abi: PairABI,

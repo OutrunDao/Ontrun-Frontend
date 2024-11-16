@@ -41,6 +41,10 @@ export enum ContractName {
     slisBNB = "slisBNB",
 }
 
+export const SwapCurrencyList = {
+    [ChainId.BSC_TESTNET]: [UBNB, Ether],
+}
+
 export const StakeCurrencyListMap = {
     [ChainId.BSC_TESTNET]: {
       [ContractName.slisBNB]: slisBNBCurrencyList,

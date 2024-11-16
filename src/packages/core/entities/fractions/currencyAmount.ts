@@ -20,6 +20,7 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
    * @param rawAmount the raw token or ether amount
    */
   public static fromRawAmount<T extends Currency>(currency: T, rawAmount: BigintIsh): CurrencyAmount<T> {
+    // console.log("CurrencyAmount fromRawAmount", currency, rawAmount);
     return new CurrencyAmount(currency, rawAmount);
   }
 
