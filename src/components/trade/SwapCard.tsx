@@ -185,7 +185,7 @@ export default function SwapCard() {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-opacity-50 text-white">Refursh Time:</span>
+                        <span className="text-opacity-50 text-white">Refresh Time:</span>
                         <span className="font-extrabold">{swapData.countdown}s</span>
                       </div>
                       <div className="flex justify-between">
