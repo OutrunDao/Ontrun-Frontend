@@ -49,6 +49,21 @@ export const addressMap = {
   }
 } as Record<number, ContractAddressMap>;
 
+export const factoryAddressMap = {
+  [ChainId.BLAST_SEPOLIA]: [
+    "0x7388d4A76D6Ec12946652c2953cd17B70E457f03",
+  ],
+  [ChainId.BSC_TESTNET]: [
+    "0x9ef195740a75a76B0F1fE6909964E35123858521",//0.3% Fee
+    "0xaFc3F13b0C775c2539ad325c1DdAdfa50176535e",//1% Fee
+  ],
+};
+
+export function getFactoryAddresses(chainId: number): `0x${string}`[] {
+  // @ts-ignore
+  return factoryAddressMap[chainId] || [];
+}
+
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
   [ChainId.BSC_TESTNET]: "0xbb65f8787019bff9b5ceea542ada5455427942f90df3316ff4c58179de6d6768",

@@ -1,4 +1,4 @@
-import { addressMap } from "@/contracts/addressMap/addressMap";
+import { addressMap, factoryAddressMap, getFactoryAddresses } from "@/contracts/addressMap/addressMap";
 import { SUPPORTED_CHAINS } from "@/contracts/chains";
 import { getERC20Token } from "@/contracts/getTokenContract/getTokenContract";
 import { ORETH, ORUSD, USDB } from "@/contracts/tokens/tokens";
@@ -13,6 +13,7 @@ import { Address, PublicClient, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
 import { CurrencySelectListType } from "@/contracts/currencys";
+import { useSwapFactory } from "./useSwapFactory";
 
 export enum BtnAction {
   disable,
@@ -47,9 +48,13 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   const chainId = publicClient.chain!.id;
   let pairs: Pair[] = [];
   if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
-  let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient);
-  console.log("p", p);
-  if (p) pairs.push(p);
+
+  for (let i = 0;i < getFactoryAddresses(chainId).length;i++) {
+    const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getFactoryAddresses(chainId)[i]);
+    let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getFactoryAddresses(chainId)[i]);
+    if (p) pairs.push(p);    
+  }
+
   // await map([[ORETH[chainId], ORUSD[chainId]]], async (rawPair) => {
   //   let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null);
   //   if (p) pairs.push(p);
@@ -116,6 +121,12 @@ export function useSwap(swapOpts: SwapOptions) {
     _().then(setToken0Balance);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, account.address, token0?.name]);
+
+  // useEffect(() => {
+  //   async function _() {
+  //     token0AmountInputHandler(token0AmountInput);
+  //   }
+  // },[token0AmountInput]);
 
   useEffect(() => {
     setToken0AmountInput("");

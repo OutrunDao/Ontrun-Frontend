@@ -5,6 +5,7 @@ import { Address, getContract, PublicClient } from "viem";
 import { erc20ABI } from "./abis/ERC20";
 import { PairABI } from "./abis/Pair";
 import { Pair } from "./entities/pair";
+import { useSwapFactory } from "@/hooks/useSwapFactory";
 
 let TOKEN_DECIMALS_CACHE: { [chainId: number]: { [address: string]: number } } = {
   [ChainId.BLAST_SEPOLIA]: {},
@@ -82,12 +83,12 @@ export abstract class Fetcher {
    * @param tokenB second token
    * @param provider the provider to use to fetch the data
    */
-  public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient): Promise<Pair> {
-    // console.log(tokenA, tokenB);
+  public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient, swapFeeRate:BigInt, factoryAddress?: Address): Promise<Pair> {
+    // console.log(tokenA, tokenB)
     invariant(tokenA.chainId === tokenB.chainId, "CHAIN_ID");
     const address = Pair.getAddress(tokenA, tokenB) as Address;
     console.log(address);
-
+    // const swapFeeRate = factoryAddress ? await useSwapFactory().swapFactoryView.swapFeeRate(factoryAddress) : 0;
     const pairContract = getContract({
       abi: PairABI,
       address,
@@ -98,6 +99,8 @@ export abstract class Fetcher {
     return new Pair(
       CurrencyAmount.fromRawAmount(tokenA, balances[0].toString()),
       CurrencyAmount.fromRawAmount(tokenB, balances[1].toString()),
+      String(BigInt(1000)-BigInt(Number(swapFeeRate)/10)),
+
     );
   }
 }

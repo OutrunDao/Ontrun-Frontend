@@ -2,7 +2,7 @@ import { addressMap, initCodeHashMap } from "@/contracts/addressMap/addressMap";
 import { BigintIsh, CurrencyAmount, Percent, Price, sqrt, Token } from "@/packages/core";
 import JSBI from "jsbi";
 import invariant from "tiny-invariant";
-import { encodePacked, getAddress, getContractAddress, keccak256 } from "viem";
+import { Address, encodePacked, getAddress, getContractAddress, keccak256 } from "viem";
 import {
   _1000,
   _997,
@@ -42,16 +42,16 @@ export const computePairAddress = ({
 };
 export class Pair {
   public readonly liquidityToken: Token;
-  public readonly swapFeeRate!: BigInt;
+  public readonly swapFeeRate!: string;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
-  public static getAddress(tokenA: Token, tokenB: Token,): string {
-    const factoryAddress = addressMap[tokenA.chainId].SWAP_FACTORY;
+  public static getAddress(tokenA: Token, tokenB: Token, factoryAddress?: Address): string {
+    const _factoryAddress = factoryAddress ? factoryAddress : addressMap[tokenA.chainId].SWAP_FACTORY;
     console.log("Pair getAddress", factoryAddress, tokenA, tokenB);
-    return computePairAddress({ factoryAddress, tokenA, tokenB });
+    return computePairAddress({ factoryAddress: _factoryAddress, tokenA, tokenB });
   }
 
-  public constructor(currencyAmountA: CurrencyAmount<Token>, tokenAmountB: CurrencyAmount<Token>, swapFeeRate: BigInt = BigInt(0)) {
+  public constructor(currencyAmountA: CurrencyAmount<Token>, tokenAmountB: CurrencyAmount<Token>, swapFeeRate: string = '0') {
     const tokenAmounts = currencyAmountA.currency.sortsBefore(tokenAmountB.currency) // does safety checks
       ? [currencyAmountA, tokenAmountB]
       : [tokenAmountB, currencyAmountA];
@@ -206,7 +206,7 @@ export class Pair {
         )
       : inputAmount;
 
-    const inputAmountWithFeeAndAfterTax = JSBI.multiply(inputAmountAfterTax.quotient, _997);
+    const inputAmountWithFeeAndAfterTax = JSBI.multiply(inputAmountAfterTax.quotient, JSBI.BigInt(this.swapFeeRate));
     const numerator = JSBI.multiply(inputAmountWithFeeAndAfterTax, outputReserve.quotient);
     const denominator = JSBI.add(JSBI.multiply(inputReserve.quotient, _1000), inputAmountWithFeeAndAfterTax);
     const outputAmount = CurrencyAmount.fromRawAmount(
@@ -303,7 +303,7 @@ export class Pair {
     const inputReserve = this.reserveOf(outputAmount.currency.equals(this.token0) ? this.token1 : this.token0);
 
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.quotient, outputAmountBeforeTax.quotient), _1000);
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.quotient, outputAmountBeforeTax.quotient), _997);
+    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.quotient, outputAmountBeforeTax.quotient), JSBI.BigInt(this.swapFeeRate));
     const inputAmount = CurrencyAmount.fromRawAmount(
       outputAmount.currency.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE), // add 1 here is part of the formula, no rounding needed here, since there will not be decimal at this point

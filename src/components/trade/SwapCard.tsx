@@ -92,7 +92,7 @@ export default function SwapCard() {
                   placeholder="0.00"
                   value={swapData.token0AmountInput}
                   onValueChange={(value) => {
-                    setToken0AmountInput(value);
+                    token0AmountInputHandler(value);
                   }}
                   classNames={{
                     base: "h-[2.5rem] text-white",
