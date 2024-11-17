@@ -21,17 +21,19 @@ export const computePairAddress = ({
   factoryAddress,
   tokenA,
   tokenB,
+  swapFeeRate,
 }: {
   factoryAddress: string;
   tokenA: Token;
   tokenB: Token;
+  swapFeeRate?: string;
 }): string => {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
-  console.log("computePairAddress", initCodeHashMap[token0.chainId], getAddress(factoryAddress), token0.chainId, getAddress(token0.address), getAddress(token1.address), BigInt(30));
+  // console.log("computePairAddress", initCodeHashMap[token0.chainId], getAddress(factoryAddress), token0.chainId, getAddress(token0.address), getAddress(token1.address), BigInt(30));
   
   const initCodeHash = initCodeHashMap[token0.chainId];
   const from = getAddress(factoryAddress);
-  const salt = keccak256(encodePacked(["address", "address", "uint256"], [getAddress(token0.address), getAddress(token1.address), BigInt(30)]));
+  const salt = keccak256(encodePacked(["address", "address", "uint256"], [getAddress(token0.address), getAddress(token1.address), BigInt(swapFeeRate || '30')]));
   return getCreate2Address(from, salt, initCodeHash);
   // return getContractAddress({
   //   bytecodeHash: initCodeHashMap[token0.chainId],
@@ -45,10 +47,10 @@ export class Pair {
   public readonly swapFeeRate!: string;
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
-  public static getAddress(tokenA: Token, tokenB: Token, factoryAddress?: Address): string {
+  public static getAddress(tokenA: Token, tokenB: Token, factoryAddress?: Address, swapFeeRate?: string): string {
     const _factoryAddress = factoryAddress ? factoryAddress : addressMap[tokenA.chainId].SWAP_FACTORY;
-    console.log("Pair getAddress", factoryAddress, tokenA, tokenB);
-    return computePairAddress({ factoryAddress: _factoryAddress, tokenA, tokenB });
+    // console.log("Pair getAddress", factoryAddress, tokenA, tokenB);
+    return computePairAddress({ factoryAddress: _factoryAddress, tokenA, tokenB, swapFeeRate});
   }
 
   public constructor(currencyAmountA: CurrencyAmount<Token>, tokenAmountB: CurrencyAmount<Token>, swapFeeRate: string = '0') {

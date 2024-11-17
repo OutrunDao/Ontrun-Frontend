@@ -50,6 +50,7 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
 
   for (let i = 0;i < getFactoryAddresses(chainId).length;i++) {
+    console.log("getFactoryAddresses(chainId)[i]", i, getFactoryAddresses(chainId)[i]);
     const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getFactoryAddresses(chainId)[i]);
     let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getFactoryAddresses(chainId)[i]);
     if (p) pairs.push(p);    
@@ -70,6 +71,7 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   //     if (p2) pairs.push(p2);
   //   }
   // });
+  // console.log("pairs", pairs);
   return pairs;
 }
 
@@ -90,6 +92,7 @@ export function useSwap(swapOpts: SwapOptions) {
   const [transactionDeadline, setTransactionDeadline] = useState<number>(10);
   const [unlimitedAmount, setUnlimitedAmount] = useState<boolean>(false);
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
+  const [countdown, setCountdown] = useState(60);
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -134,6 +137,27 @@ export function useSwap(swapOpts: SwapOptions) {
     setTradeRoute(undefined);
     setRouteNotExist(false);
   }, [token0?.name, token1?.name]);
+
+  useEffect(() => {
+    if (!token0AmountInput) return;
+    function _() {
+      token0AmountInputHandler(token0AmountInput);
+    }
+
+    const intervalId = setInterval(() => {
+      _();
+      setCountdown(60);
+    }, 60000);
+
+    const countdownIntervalId = setInterval(() => {
+      setCountdown(prevCountdown => prevCountdown > 0 ? prevCountdown - 1 : 10);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(countdownIntervalId);
+    };
+  }, [token0AmountInput]);
 
   const priceImpact = useMemo(() => {
     return tradeRoute && tradeRoute.priceImpact.toFixed();
@@ -276,7 +300,7 @@ export function useSwap(swapOpts: SwapOptions) {
           await makePairs(token0!, token1!, publicClient),
           CurrencyAmount.fromRawAmount(tokenConvert(token0!), parseUnits(value, token0!.decimals).toString()),
           tokenConvert(token1!),
-          { maxNumResults: 1 },
+          { maxNumResults: 3 },
         );
         if (!result || !result.length) {
           setTradeRoute(undefined);
@@ -285,13 +309,14 @@ export function useSwap(swapOpts: SwapOptions) {
         }
         setToken1AmountInput(result[0].outputAmount.toFixed(8));
         setTradeRoute(result[0]);
+        console.log("result[]", result[0].outputAmount.toFixed(8), result[1].outputAmount.toFixed(8));
       } else {
         const result = Trade.bestTradeExactOut(
           await makePairs(token0!, token1!, publicClient!),
           tokenConvert(token0!),
           CurrencyAmount.fromRawAmount(tokenConvert(token1!), parseUnits(value, token1!.decimals).toString()),
           {
-            maxNumResults: 1,
+            maxNumResults: 3,
           },
         );
         if (!result || !result.length) {
@@ -301,6 +326,7 @@ export function useSwap(swapOpts: SwapOptions) {
         }
         setToken0AmountInput(result[0].inputAmount.toFixed(8));
         setTradeRoute(result[0]);
+        console.log("result[]", result);
       }
     }
   }
@@ -360,6 +386,7 @@ export function useSwap(swapOpts: SwapOptions) {
       transactionDeadline,
       unlimitedAmount,
       CurrencyList,
+      countdown,
     },
     loading,
     setLoading,

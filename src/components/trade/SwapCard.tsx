@@ -185,6 +185,10 @@ export default function SwapCard() {
                         </span>
                       </div>
                       <div className="flex justify-between">
+                        <span className="text-opacity-50 text-white">Refursh Time:</span>
+                        <span className="font-extrabold">{swapData.countdown}s</span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Min.received:</span>
                         <span className="font-extrabold">{`${swapData.minimalReceive} ${swapData.token1.symbol}`}</span>
                       </div>

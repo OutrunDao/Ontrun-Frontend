@@ -83,10 +83,10 @@ export abstract class Fetcher {
    * @param tokenB second token
    * @param provider the provider to use to fetch the data
    */
-  public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient, swapFeeRate:BigInt, factoryAddress?: Address): Promise<Pair> {
+  public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient, swapFeeRate?:BigInt, factoryAddress?: Address): Promise<Pair> {
     // console.log(tokenA, tokenB)
     invariant(tokenA.chainId === tokenB.chainId, "CHAIN_ID");
-    const address = Pair.getAddress(tokenA, tokenB) as Address;
+    const address = Pair.getAddress(tokenA, tokenB, factoryAddress, swapFeeRate?.toString()) as Address;
     console.log(address);
     // const swapFeeRate = factoryAddress ? await useSwapFactory().swapFactoryView.swapFeeRate(factoryAddress) : 0;
     const pairContract = getContract({
@@ -100,6 +100,7 @@ export abstract class Fetcher {
       CurrencyAmount.fromRawAmount(tokenA, balances[0].toString()),
       CurrencyAmount.fromRawAmount(tokenB, balances[1].toString()),
       String(BigInt(1000)-BigInt(Number(swapFeeRate)/10)),
+      // String(BigInt(1000)-swapFeeRate/BigInt(10)),
 
     );
   }

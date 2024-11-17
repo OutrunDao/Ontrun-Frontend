@@ -251,6 +251,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       let amountOut: CurrencyAmount<Token>;
       try {
         [amountOut] = pair.getOutputAmount(amountIn);
+        console.log("amountOut", amountOut);
       } catch (error: any) {
         // input too low
         if (error.isInsufficientInputAmountError) {
@@ -287,6 +288,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           bestTrades,
         );
       }
+      console.log("bestTrades", bestTrades);
     }
 
     return bestTrades;
@@ -381,6 +383,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           bestTrades,
         );
       }
+
     }
 
     return bestTrades;
