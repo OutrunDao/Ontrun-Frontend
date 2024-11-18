@@ -206,8 +206,8 @@ export default function StakeTab() {
       return toast.custom(<ToastCustom content="Please Connect Wallet" />);
 
     if (POT && PT && YT && SYAmount && NT) {
-      setIsLoading(true);
       try {
+        setIsLoading(true);
         const minPTGenerated = Number(parseEther(PTAmount)) * (1 - slippage/100);
         const receipt = await UseStakeRouter.mintYieldTokensFromToken({
           SYAddress: (SY as Token).address,

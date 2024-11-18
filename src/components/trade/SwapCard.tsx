@@ -1,6 +1,6 @@
 "use client";
 import { BlockExplorers } from "@/contracts/chains";
-import { SwapCurrencyList } from "@/contracts/currencys";
+import { SwapCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import useContract from "@/hooks/useContract";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
 import { Accordion, AccordionItem, Button, Divider, Image, Input, Tab, Tabs } from "@nextui-org/react";
@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
+import toast from "react-hot-toast";
+import ToastCustom from "../ToastCustom";
 
 export default function SwapCard() {
   const chainId = useChainId();
@@ -25,7 +27,6 @@ export default function SwapCard() {
     setToken0,
     setToken1,
     setLoading,
-    approveTokens,
     setSlippage,
     setTransactionDeadline,
     setUnlimitedAmount,
@@ -35,16 +36,14 @@ export default function SwapCard() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
-    setCurrencyList,
+    approveToken0,
+    approveToken1,
+    addLiquidity,
+
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
   });
-
-  useEffect(() => {
-    if (!chainId) return;
-    setCurrencyList(SwapCurrencyList[chainId]);
-  },[chainId])
 
   const blockExplore = useMemo(() => {
     return BlockExplorers[chainId];
@@ -104,7 +103,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={SwapCurrencyList[chainId]}
+                      tokenList={swapData.CurrencyList}
                       token={swapData.token0}
                       tokenDisable={swapData.token1}
                       onSelect={setToken0}
@@ -143,7 +142,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={SwapCurrencyList[chainId]}
+                      tokenList={swapData.CurrencyList}
                       tokenDisable={swapData.token0}
                       token={swapData.token1}
                       onSelect={setToken1}
@@ -181,7 +180,7 @@ export default function SwapCard() {
                           Price Impact: <Image alt="notice" src="/images/error.svg" className="w-[1rem] h-[1rem]" />
                         </span>
                         <span className="font-extrabold">
-                          {swapData.priceImpact ? `${swapData.priceImpact}%` : "---"}
+                          {Number(swapData.token0AmountInput)!=0?`${swapData.priceImpact}%`:"---"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -190,7 +189,7 @@ export default function SwapCard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Min.received:</span>
-                        <span className="font-extrabold">{`${swapData.minimalReceive} ${swapData.token1.symbol}`}</span>
+                        <span className="font-extrabold">{Number(swapData.token0AmountInput)!=0?`${swapData.minimalReceive} ${swapData.token1.symbol}`:"---"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Max.Slippage:</span>

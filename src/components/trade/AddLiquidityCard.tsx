@@ -3,25 +3,109 @@ import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
 import { Button, Image, Input, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import ToastCustom from "../ToastCustom";
 
 export default function AddLiquidityCard() {
   const {
     swapData,
-    loading,
     setToken0,
     setToken1,
-    setLoading,
     token0AmountInputHandler,
     token1AmountInputHandler,
     setToken0AmountInput,
     setToken1AmountInput,
-    approveTokens,
     maxHandler,
+    setswapFeeRate,
+    approveToken0,
+    approveToken1,
+    addLiquidity,
+    
   } = useSwap({
     view: SwapView.addLiquidity,
     fetchPair: true,
     approve2Tokens: true,
   });
+
+  const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
+  const [isApproveToken1Loading, setIsApproveToken1Loading] = useState(false);
+  const [isAddLiquidityLoading, setIsAddLiquidityLoading] = useState(false);
+
+  async function handleApproveToken0() {
+    try {
+      setIsApproveToken0Loading(true);
+      const receipt = await approveToken0();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Approve Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsApproveToken0Loading(false);
+    }
+  }
+
+  async function handleApproveToken1() {
+    try {
+      setIsApproveToken1Loading(true);
+      const receipt = await approveToken1();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Approve Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsApproveToken1Loading(false);
+    }
+  }
+
+  async function handleAddLiquidity() {
+    try {
+      setIsAddLiquidityLoading(true);
+      const receipt = await addLiquidity();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Add Liquidity Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsAddLiquidityLoading(false);
+    }
+  }
 
   return (
     <div className="w-[34rem] min-h-[26.59rem]">
@@ -59,6 +143,7 @@ export default function AddLiquidityCard() {
               <div className="flex justify-between">
                 <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] rounded-[1.88rem] px-4 py-2">
                   <TokenSelect
+                    tokenList={swapData.CurrencyList}
                     token={swapData.token0}
                     tokenDisable={swapData.token1}
                     onSelect={(token) => setToken0(token)}
@@ -66,6 +151,7 @@ export default function AddLiquidityCard() {
                 </div>
                 <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] rounded-[1.88rem] px-4 py-2">
                   <TokenSelect
+                    tokenList={swapData.CurrencyList}
                     token={swapData.token1}
                     tokenDisable={swapData.token0}
                     onSelect={(token) => setToken1(token)}
@@ -73,13 +159,15 @@ export default function AddLiquidityCard() {
                 </div>
               </div>
               <Select
+                onChange={(event) => setswapFeeRate(Number(event.target.value))}
                 classNames={{
                   trigger:
                     "bg-transparent data-[hover=true]:bg-transparent rounded-[1.88rem] border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5]",
                   value: "group-data-[has-value=true]:text-white ml-2",
                   popoverContent: "bg-[#4A325D]",
                   listboxWrapper: "text-white",
-                }}>
+                }}
+                >
                 <SelectItem key="0.3" value={0.3}>
                   0.30% fee tier
                 </SelectItem>
@@ -168,10 +256,26 @@ export default function AddLiquidityCard() {
                   </span>
                 </div>
               </div>
+              <div className="flex justify-center space-x-4 mt-4">
+                <Button
+                  onPress={handleApproveToken0}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable}
+                  isLoading={isAddLiquidityLoading}
+                  className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  Approve Token0
+                </Button>
+                <Button
+                  onPress={handleApproveToken1}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable}
+                  isLoading={isAddLiquidityLoading}
+                  className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  Approve Token1
+                </Button>
+              </div>
               <Button
-                onPress={() => {}}
+                onPress={handleAddLiquidity}
                 isDisabled={swapData.submitButtonStatus === BtnAction.disable}
-                isLoading={loading}
+                isLoading={isAddLiquidityLoading}
                 className="bg-button-gradient ml-[10rem] mt-4 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
                 Add Liquidity
               </Button>

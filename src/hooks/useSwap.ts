@@ -1,19 +1,19 @@
-import { addressMap, factoryAddressMap, getFactoryAddresses } from "@/contracts/addressMap/addressMap";
+import { addressMap, getFactoryAddresses, getRouterAddresses } from "@/contracts/addressMap/addressMap";
 import { SUPPORTED_CHAINS } from "@/contracts/chains";
-import { getERC20Token } from "@/contracts/getTokenContract/getTokenContract";
-import { ORETH, ORUSD, USDB } from "@/contracts/tokens/tokens";
 import { Currency, CurrencyAmount, Ether, Percent, Token, TradeType } from "@/packages/core";
 import { Native, Pair, Trade } from "@/packages/sdk";
 import { Fetcher } from "@/packages/sdk/fetcher";
 import { useQuery } from "@tanstack/react-query";
 import Decimal from "decimal.js-light";
-import { debounce, map } from "radash";
+import { debounce, map, set } from "radash";
 import { useEffect, useMemo, useState } from "react";
 import { Address, PublicClient, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
-import { CurrencySelectListType } from "@/contracts/currencys";
+import { CurrencySelectListType, getSwapCurrencyList } from "@/contracts/currencys";
 import { useSwapFactory } from "./useSwapFactory";
+import { useERC20 } from "./useERC20";
+import { useSwapRouter } from "./useSwapRouter";
 
 export enum BtnAction {
   disable,
@@ -93,6 +93,12 @@ export function useSwap(swapOpts: SwapOptions) {
   const [unlimitedAmount, setUnlimitedAmount] = useState<boolean>(false);
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
   const [countdown, setCountdown] = useState(60);
+  const [swapFeeRate, setswapFeeRate] = useState<number>();
+  // const [factoryAddress, setFactoryAddress] = useState<Address>();
+  const [routerAddress, setRouterAddress] = useState<Address>();
+
+  const UseERC20 = useERC20();
+  const UseSwapRouter = useSwapRouter();
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -107,6 +113,12 @@ export function useSwap(swapOpts: SwapOptions) {
   const V2_ROUTER_ADDRESSES = useMemo(() => {
     return addressMap[chainId].SWAP_ROUTER;
   }, [chainId]);
+
+  useEffect(() => {
+    if (!chainId) return;
+    setCurrencyList(getSwapCurrencyList(chainId));
+  },[chainId]);
+
   useEffect(() => {
     async function _() {
       if (!account.address || !token1 || !publicClient) return new Decimal(0);
@@ -139,7 +151,21 @@ export function useSwap(swapOpts: SwapOptions) {
   }, [token0?.name, token1?.name]);
 
   useEffect(() => {
-    if (!token0AmountInput) return;
+    if (!swapFeeRate) return;
+    switch (swapFeeRate) {
+      case 0.3:
+        setRouterAddress(getRouterAddresses(chainId)[0]);
+        break;
+      case 1:
+        setRouterAddress(getRouterAddresses(chainId)[1]);
+        break;
+    }
+  }, [swapFeeRate]);
+
+  useEffect(() => {
+
+    setCountdown(60);
+    if (!Number(token0AmountInput)) return;
     function _() {
       token0AmountInputHandler(token0AmountInput);
     }
@@ -215,7 +241,7 @@ export function useSwap(swapOpts: SwapOptions) {
       return BtnAction.disable;
     }
 
-    return BtnAction.available;
+    return BtnAction.available; 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     chainId,
@@ -230,49 +256,77 @@ export function useSwap(swapOpts: SwapOptions) {
     priceImpact,
   ]);
 
-  async function approveTokens(to: Address) {
+  async function approveToken0() {
     if (!account.address) return console.log("wallet account is not connected");
-    if (!token0 || !token1) return;
-    try {
-      if (!token0.isNative) {
-        const allowanceToken0 = await (token0 as Token).allowance(account.address, to, publicClient!);
-        if (allowanceToken0.lessThan(token0AmountInput || 0)) {
-          await writeContract(
-            // @ts-ignore
-            getERC20Token((token0 as Token).address, publicClient!, walletClient),
-            {
-              actionTitle: "Approve Token " + token0.symbol,
-            },
-            "approve",
-            [to, parseUnits(token0AmountInput!.toString(), token0.decimals)],
-            {
-              account,
-            },
-          );
-        }
-      }
+    if (!token0 || !routerAddress) return;
+    if (token0.isNative) return;
+    const allowanceToken0 = await (token0 as Token).allowance(account.address, routerAddress, publicClient!);
+    if (allowanceToken0.lessThan(token0AmountInput || 0)) {
+      const receipt = await UseERC20.ERC20Write.approve({
+        erc20Address: (token0 as Token).address,
+        spender: routerAddress,
+        amount: parseUnits(token0AmountInput!.toString(), token0.decimals),
+      });
+      return receipt;
+    }
+  }
 
-      if (swapOpts.approve2Tokens) {
-        // check token1
-        if (!token1.isNative) {
-          const allowanceToken1 = await (token1 as Token).allowance(account.address, to, publicClient!);
-          if (allowanceToken1.lessThan(token1AmountInput || 0)) {
-            await writeContract(
-              // @ts-ignore
-              getERC20Token((token1 as Token).address, publicClient!, walletClient),
-              {
-                actionTitle: "Approve Token " + token1.symbol,
-              },
-              "approve",
-              [to, parseUnits(token1AmountInput!.toString(), token1.decimals)],
-              {
-                account,
-              },
-            );
-          }
-        }
-      }
-    } catch (e) {}
+  async function approveToken1() {
+    if (!account.address) return console.log("wallet account is not connected");
+    if (!token1 || !routerAddress) return;
+    if (token1.isNative) return;
+    const allowanceToken1 = await (token1 as Token).allowance(account.address, routerAddress, publicClient!);
+    if (allowanceToken1.lessThan(token1AmountInput || 0)) {
+      const receipt = await UseERC20.ERC20Write.approve({
+        erc20Address: (token1 as Token).address,
+        spender: routerAddress,
+        amount: parseUnits(token1AmountInput!.toString(), token1.decimals),
+      });
+      return receipt;
+    }
+  }
+
+  async function addLiquidity() {
+    if (!account.address) return console.log("wallet account is not connected");
+    if (!token0 || !token1 || !routerAddress) return;
+    if (token0.isNative) {
+      const receipt = await UseSwapRouter.swapRouterWrite.addLiquidityETH({
+        routerAddress: routerAddress,
+        value: BigInt(token0AmountInput),
+        tokenAddress: (token1 as Token).address,
+        amountTokenDesired: BigInt(token1AmountInput),
+        amountTokenMin: BigInt(0),
+        amountETHMin: BigInt(0),
+        toAddress: account.address,
+        deadline: BigInt(0),
+      });
+      return receipt;
+    } else if (token1.isNative) {
+      const receipt = await UseSwapRouter.swapRouterWrite.addLiquidityETH({
+        routerAddress: routerAddress,
+        value: BigInt(token1AmountInput),
+        tokenAddress: (token0 as Token).address,
+        amountTokenDesired: BigInt(token0AmountInput),
+        amountTokenMin: BigInt(0),
+        amountETHMin: BigInt(0),
+        toAddress: account.address,
+        deadline: BigInt(0),
+      });
+      return receipt;
+    } else {
+      const receipt = await UseSwapRouter.swapRouterWrite.addLiquidity({
+        routerAddress: routerAddress,
+        tokenAAddress: (token0 as Token).address,
+        tokenBAddress: (token1 as Token).address,
+        amountADesired: BigInt(token0AmountInput),
+        amountBDesired: BigInt(token1AmountInput),
+        amountAMin: BigInt(0),
+        amountBMin: BigInt(0),
+        toAddress: account.address,
+        deadline: BigInt(0),
+      })
+      return receipt;
+    }
   }
 
   async function setSwapDataWhenInput(tradeType: TradeType, value: string) {
@@ -364,7 +418,7 @@ export function useSwap(swapOpts: SwapOptions) {
     setToken1Balance(ba1);
     setToken0Balance(ba0);
   }
-
+ 
   return {
     swapData: {
       token0,
@@ -387,6 +441,8 @@ export function useSwap(swapOpts: SwapOptions) {
       unlimitedAmount,
       CurrencyList,
       countdown,
+      swapFeeRate,
+
     },
     loading,
     setLoading,
@@ -398,10 +454,14 @@ export function useSwap(swapOpts: SwapOptions) {
     setTransactionDeadline,
     setUnlimitedAmount,
     updateTokenBalance,
-    approveTokens,
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
     setCurrencyList,
+    setswapFeeRate,
+    approveToken0,
+    approveToken1,
+    addLiquidity,
+
   };
 }

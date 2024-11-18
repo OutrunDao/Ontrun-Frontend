@@ -64,6 +64,21 @@ export function getFactoryAddresses(chainId: number): `0x${string}`[] {
   return factoryAddressMap[chainId] || [];
 }
 
+export const routerAddressMap = {
+  [ChainId.BLAST_SEPOLIA]: [
+    "0xff5Ca5f867a03cE04f6ac146d16aF23224518604",
+  ],
+  [ChainId.BSC_TESTNET]: [
+    "0x1c043c58DE8e9bC23cBE72D1bC96c88770B66544",//0.3% Fee
+    "0xa9f423843a1066e91bb31fF09295945EAe1Fa699",//1% Fee
+  ],
+}
+
+export function getRouterAddresses(chainId: number): `0x${string}`[] {
+  // @ts-ignore
+  return routerAddressMap[chainId] || [];
+}
+
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
   [ChainId.BSC_TESTNET]: "0xbb65f8787019bff9b5ceea542ada5455427942f90df3316ff4c58179de6d6768",

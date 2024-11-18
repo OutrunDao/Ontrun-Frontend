@@ -50,3 +50,8 @@ export const StakeCurrencyListMap = {
       [ContractName.slisBNB]: slisBNBCurrencyList,
     }
 } as Record<number, StakeCurrencyListMapType>;
+
+export function getSwapCurrencyList(chainId: number): [] {
+    // @ts-ignore
+    return SwapCurrencyList[chainId];
+  }
