@@ -21,6 +21,9 @@ export default function AddLiquidityCard() {
     approveToken0,
     approveToken1,
     addLiquidity,
+    setSlippage,
+    setTransactionDeadline,
+    setUnlimitedAmount,
     
   } = useSwap({
     view: SwapView.addLiquidity,
@@ -55,6 +58,7 @@ export default function AddLiquidityCard() {
     } finally {
       setIsApproveToken0Loading(false);
     }
+    // setIsApproveToken0Loading(false);
   }
 
   async function handleApproveToken1() {
@@ -118,12 +122,12 @@ export default function AddLiquidityCard() {
       <div className="w-[34rem] min-h-[39.13rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card relative">
         <div className="absolute z-10 text-white top-[2.29rem] right-[2rem]">
           <SwapSetting
-            slippage={0}
-            setSlipPage={() => {}}
-            deadline={0}
-            setDeadline={() => {}}
-            unlimit={false}
-            setUnlimit={() => {}}
+            slippage={swapData.slippage}
+            setSlipPage={setSlippage}
+            deadline={swapData.transactionDeadline}
+            setDeadline={setTransactionDeadline}
+            unlimit={swapData.unlimitedAmount}
+            setUnlimit={setUnlimitedAmount}
           />
         </div>
         <Tabs
@@ -259,25 +263,25 @@ export default function AddLiquidityCard() {
               <div className="flex justify-center space-x-4 mt-4">
                 <Button
                   onPress={handleApproveToken0}
-                  isDisabled={swapData.submitButtonStatus === BtnAction.disable}
-                  isLoading={isAddLiquidityLoading}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken0Approved}
+                  isLoading={isApproveToken0Loading}
                   className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                  Approve Token0
+                  {swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken0Approved ? "Approved" : "Approve Token0"}
                 </Button>
                 <Button
                   onPress={handleApproveToken1}
-                  isDisabled={swapData.submitButtonStatus === BtnAction.disable}
-                  isLoading={isAddLiquidityLoading}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken1Approved}
+                  isLoading={isApproveToken1Loading}
                   className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                  Approve Token1
+                  {swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken1Approved ? "Approved" : "Approve Token1"}
                 </Button>
               </div>
               <Button
                 onPress={handleAddLiquidity}
-                isDisabled={swapData.submitButtonStatus === BtnAction.disable}
+                isDisabled={swapData.submitButtonStatus === BtnAction.disable || !swapData.isToken0Approved || !swapData.isToken1Approved}
                 isLoading={isAddLiquidityLoading}
                 className="bg-button-gradient ml-[10rem] mt-4 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                Add Liquidity
+                  {swapData.submitButtonStatus === BtnAction.disable? "Input Please" : swapData.isToken0Approved && swapData.isToken1Approved ? "AddLiquidity" : "Approve Please"}
               </Button>
             </div>
           </Tab>

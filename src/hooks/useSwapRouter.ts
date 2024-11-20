@@ -5,7 +5,14 @@ import { Address } from "viem";
 
 export function useSwapRouter() {
 
-    async function getSwapRouter(SwapRouterAddress: Address) {
+    async function getSwapRouterwrite(SwapRouterAddress: Address) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(SwapRouterAddress, swapRouter, signer);
+    }
+
+    async function getSwapRouterread(SwapRouterAddress: Address) {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.BrowserProvider(window.ethereum);
         return new ethers.Contract(SwapRouterAddress, swapRouter, provider);
@@ -32,7 +39,7 @@ export function useSwapRouter() {
         toAddress: Address;
         deadline: BigInt;
     }) {
-        const swapRouterContract = await getSwapRouter(routerAddress);
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
         const tx = await swapRouterContract.addLiquidity(
             tokenAAddress,
             tokenBAddress,
@@ -66,7 +73,7 @@ export function useSwapRouter() {
         toAddress: Address;
         deadline: BigInt;
     }) {
-        const swapRouterContract = await getSwapRouter(routerAddress);
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
         const tx = await swapRouterContract.addLiquidityETH(
             tokenAddress,
             amountTokenDesired,

@@ -3,10 +3,17 @@ import { ethers } from "ethers";
 import { Address } from "viem";
 
 export function useERC20() {
-    async function getERC20(ERC20Address: string) {
+    async function getERC20read(ERC20Address: string) {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.BrowserProvider(window.ethereum);
         return new ethers.Contract(ERC20Address, erc20, provider);
+    }
+
+    async function getERC20write(ERC20Address: string) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(ERC20Address, erc20, signer);
     }
 
     async function approve({
@@ -18,7 +25,7 @@ export function useERC20() {
         spender: Address;
         amount: BigInt;
     }) {
-        const erc20Contract = await getERC20(erc20Address);
+        const erc20Contract = await getERC20write(erc20Address);
         const tx = await erc20Contract.approve(spender, amount);
         const receipt = await tx.wait();
         return receipt;
@@ -31,7 +38,7 @@ export function useERC20() {
         ownerAddress: Address;
         spenderAddress: Address;
     }) {
-        const erc20Contract = await getERC20(ownerAddress);
+        const erc20Contract = await getERC20read(ownerAddress);
         const allowance = await erc20Contract.allowance(ownerAddress, spenderAddress);
         return allowance;   
     }
@@ -45,7 +52,7 @@ export function useERC20() {
         to: Address;
         amount: BigInt;
     }) {
-        const erc20Contract = await getERC20(erc20Address);
+        const erc20Contract = await getERC20write(erc20Address);
         const tx = await erc20Contract.transfer(to, amount);
         const receipt = await tx.wait();
         return receipt;

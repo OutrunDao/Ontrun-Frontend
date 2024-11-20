@@ -239,7 +239,7 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     invariant(pairs.length > 0, "PAIRS");
     invariant(maxHops > 0, "MAX_HOPS");
     invariant(currencyAmountIn === nextAmountIn || currentPairs.length > 0, "INVALID_RECURSION");
-
+    
     const amountIn = nextAmountIn.wrapped;
     const tokenOut = currencyOut.wrapped;
     for (let i = 0; i < pairs.length; i++) {
@@ -251,7 +251,6 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       let amountOut: CurrencyAmount<Token>;
       try {
         [amountOut] = pair.getOutputAmount(amountIn);
-        console.log("amountOut", amountOut);
       } catch (error: any) {
         // input too low
         if (error.isInsufficientInputAmountError) {

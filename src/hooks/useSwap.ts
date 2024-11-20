@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Address, PublicClient, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
-import { CurrencySelectListType, getSwapCurrencyList } from "@/contracts/currencys";
+import { CurrencySelectListType, getBaseCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import { useSwapFactory } from "./useSwapFactory";
 import { useERC20 } from "./useERC20";
 import { useSwapRouter } from "./useSwapRouter";
@@ -53,26 +53,27 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
     console.log("getFactoryAddresses(chainId)[i]", i, getFactoryAddresses(chainId)[i]);
     const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getFactoryAddresses(chainId)[i]);
     let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getFactoryAddresses(chainId)[i]);
-    if (p) pairs.push(p);    
+    if (p) pairs.push(p);
+    for (let j = 0; j < getBaseCurrencyList(chainId).length; j++) {
+      if (!tokenA.equals(getBaseCurrencyList(chainId)[j][chainId])) {
+        p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenA), publicClient, swapFeeRate, getFactoryAddresses(chainId)[i]);
+        if (p) pairs.push(p);
+      };
+      if (!tokenB.equals(getBaseCurrencyList(chainId)[j][chainId])) {
+        p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenB), publicClient, swapFeeRate, getFactoryAddresses(chainId)[i]);
+        if (p) pairs.push(p);
+      };
+    }
   }
 
-  // await map([[ORETH[chainId], ORUSD[chainId]]], async (rawPair) => {
-  //   let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null);
-  //   if (p) pairs.push(p);
-  // });
-
-  // await map([ORETH[chainId], ORUSD[chainId]], async (token) => {
-  //   if (!tokenA.equals(token)) {
-  //     let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null);
-  //     if (p1) pairs.push(p1);
-  //   }
-  //   if (!tokenB.equals(token)) {
-  //     let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null);
-  //     if (p2) pairs.push(p2);
-  //   }
-  // });
-  // console.log("pairs", pairs);
-  return pairs;
+  console.log("pairs", pairs);
+  const uniquePairs = pairs.filter((pair, index, self) =>
+    index === self.findIndex((p) => (
+      p.token0.equals(pair.token0) && p.token1.equals(pair.token1)
+    ))
+  );
+  console.log("uniquePairs", uniquePairs);
+  return uniquePairs;
 }
 
 export function useSwap(swapOpts: SwapOptions) {
@@ -92,10 +93,11 @@ export function useSwap(swapOpts: SwapOptions) {
   const [transactionDeadline, setTransactionDeadline] = useState<number>(10);
   const [unlimitedAmount, setUnlimitedAmount] = useState<boolean>(false);
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
-  const [countdown, setCountdown] = useState(60);
   const [swapFeeRate, setswapFeeRate] = useState<number>();
   // const [factoryAddress, setFactoryAddress] = useState<Address>();
   const [routerAddress, setRouterAddress] = useState<Address>();
+  const [isToken0Approved, setIsToken0Approved] = useState<boolean>(false);
+  const [isToken1Approved, setIsToken1Approved] = useState<boolean>(false);
 
   const UseERC20 = useERC20();
   const UseSwapRouter = useSwapRouter();
@@ -151,6 +153,43 @@ export function useSwap(swapOpts: SwapOptions) {
   }, [token0?.name, token1?.name]);
 
   useEffect(() => {
+    async function _() {
+      if (!token0 || !token1 || !routerAddress || !account.address) return;
+      if (token0.isNative) {
+        setIsToken0Approved(true);
+        const _result = await (token1 as Token).allowance(account.address, routerAddress, publicClient!)
+        if (_result.lessThan(token1AmountInput || 0)) {
+          setIsToken1Approved(false);
+        } else{
+          setIsToken1Approved(true);
+        }
+      } else if (token1.isNative) {
+        setIsToken1Approved(true);
+        const _result = await (token0 as Token).allowance(account.address, routerAddress, publicClient!)
+        if (_result.lessThan(token0AmountInput || 0)) {
+          setIsToken0Approved(false);
+        } else{
+          setIsToken0Approved(true);
+        }
+      } else {
+        const _result0 = await (token0 as Token).allowance(account.address, routerAddress, publicClient!)
+        const _result1 = await (token1 as Token).allowance(account.address, routerAddress, publicClient!)
+        if (_result0.lessThan(token0AmountInput || 0)) {
+          setIsToken0Approved(false);
+        } else{
+          setIsToken0Approved(true);
+        }
+        if (_result1.lessThan(token1AmountInput || 0)) {
+          setIsToken1Approved(false);
+        } else{
+          setIsToken1Approved(true);
+        }
+      }
+    }
+    _();
+  },[token0AmountInput, token1AmountInput, token0, token1, routerAddress, account]);
+
+  useEffect(() => {
     if (!swapFeeRate) return;
     switch (swapFeeRate) {
       case 0.3:
@@ -162,28 +201,7 @@ export function useSwap(swapOpts: SwapOptions) {
     }
   }, [swapFeeRate]);
 
-  useEffect(() => {
 
-    setCountdown(60);
-    if (!Number(token0AmountInput)) return;
-    function _() {
-      token0AmountInputHandler(token0AmountInput);
-    }
-
-    const intervalId = setInterval(() => {
-      _();
-      setCountdown(60);
-    }, 60000);
-
-    const countdownIntervalId = setInterval(() => {
-      setCountdown(prevCountdown => prevCountdown > 0 ? prevCountdown - 1 : 10);
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
-      clearInterval(countdownIntervalId);
-    };
-  }, [token0AmountInput]);
 
   const priceImpact = useMemo(() => {
     return tradeRoute && tradeRoute.priceImpact.toFixed();
@@ -222,7 +240,7 @@ export function useSwap(swapOpts: SwapOptions) {
     if ([SwapView.addLiquidity, SwapView.createPoll].includes(swapOpts.view) && isTransformView) {
       return BtnAction.invalidPair;
     }
-    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) {
+    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput || !routerAddress) {
       return BtnAction.disable;
     }
 
@@ -289,28 +307,31 @@ export function useSwap(swapOpts: SwapOptions) {
   async function addLiquidity() {
     if (!account.address) return console.log("wallet account is not connected");
     if (!token0 || !token1 || !routerAddress) return;
+    const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
+    const token0AmountInputMin = Number(token0AmountInput)*(1-slippage)/100;
+    const token1AmountInputMin = Number(token1AmountInput)*(1-slippage)/100;
     if (token0.isNative) {
       const receipt = await UseSwapRouter.swapRouterWrite.addLiquidityETH({
         routerAddress: routerAddress,
-        value: BigInt(token0AmountInput),
+        value: parseUnits(token0AmountInput!.toString(), token0.decimals),
         tokenAddress: (token1 as Token).address,
-        amountTokenDesired: BigInt(token1AmountInput),
-        amountTokenMin: BigInt(0),
-        amountETHMin: BigInt(0),
+        amountTokenDesired: parseUnits(token1AmountInput!.toString(), token1.decimals),
+        amountTokenMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        amountETHMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
         toAddress: account.address,
-        deadline: BigInt(0),
+        deadline: BigInt(deadline),
       });
       return receipt;
     } else if (token1.isNative) {
       const receipt = await UseSwapRouter.swapRouterWrite.addLiquidityETH({
         routerAddress: routerAddress,
-        value: BigInt(token1AmountInput),
+        value: parseUnits(token1AmountInput!.toString(), token1.decimals),
         tokenAddress: (token0 as Token).address,
-        amountTokenDesired: BigInt(token0AmountInput),
-        amountTokenMin: BigInt(0),
-        amountETHMin: BigInt(0),
+        amountTokenDesired: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amountTokenMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
+        amountETHMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
         toAddress: account.address,
-        deadline: BigInt(0),
+        deadline: BigInt(deadline),
       });
       return receipt;
     } else {
@@ -318,12 +339,12 @@ export function useSwap(swapOpts: SwapOptions) {
         routerAddress: routerAddress,
         tokenAAddress: (token0 as Token).address,
         tokenBAddress: (token1 as Token).address,
-        amountADesired: BigInt(token0AmountInput),
-        amountBDesired: BigInt(token1AmountInput),
-        amountAMin: BigInt(0),
-        amountBMin: BigInt(0),
+        amountADesired: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amountBDesired: parseUnits(token1AmountInput!.toString(), token1.decimals),
+        amountAMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
+        amountBMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
         toAddress: account.address,
-        deadline: BigInt(0),
+        deadline: BigInt(deadline),
       })
       return receipt;
     }
@@ -363,7 +384,9 @@ export function useSwap(swapOpts: SwapOptions) {
         }
         setToken1AmountInput(result[0].outputAmount.toFixed(8));
         setTradeRoute(result[0]);
-        console.log("result[]", result[0].outputAmount.toFixed(8), result[1].outputAmount.toFixed(8));
+        for (let i = 0; i < result.length; i++) {
+          console.log(`result[${i}]`, result[i].outputAmount.toFixed(8));
+        }
       } else {
         const result = Trade.bestTradeExactOut(
           await makePairs(token0!, token1!, publicClient!),
@@ -440,8 +463,9 @@ export function useSwap(swapOpts: SwapOptions) {
       transactionDeadline,
       unlimitedAmount,
       CurrencyList,
-      countdown,
       swapFeeRate,
+      isToken0Approved,
+      isToken1Approved,
 
     },
     loading,

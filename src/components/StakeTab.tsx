@@ -6,7 +6,6 @@ import ToastCustom from "./ToastCustom";
 import TokenSelect from "./TokenSelect";
 import { Currency, Ether, Token } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
-import { USDB, tBNB } from "@/contracts/tokens/tokens";
 import { CurrencySelectListType, StakeCurrencyListMap } from "@/contracts/currencys";
 import TokenSure from "./TokenSure";
 import Decimal from "decimal.js-light";

@@ -94,14 +94,19 @@ export abstract class Fetcher {
       address,
       client: publicClient,
     });
-    const [reserves0, reserves1] = await pairContract.read.getReserves();
-    const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
-    return new Pair(
-      CurrencyAmount.fromRawAmount(tokenA, balances[0].toString()),
-      CurrencyAmount.fromRawAmount(tokenB, balances[1].toString()),
-      String(BigInt(1000)-BigInt(Number(swapFeeRate)/10)),
-      // String(BigInt(1000)-swapFeeRate/BigInt(10)),
+    try {
+      const [reserves0, reserves1] = await pairContract.read.getReserves();
+      const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
+      return new Pair(
+        CurrencyAmount.fromRawAmount(tokenA, balances[0].toString()),
+        CurrencyAmount.fromRawAmount(tokenB, balances[1].toString()),
+        String(BigInt(1000)-BigInt(Number(swapFeeRate)/10)),
+        // String(BigInt(1000)-swapFeeRate/BigInt(10)),
+      );
+    } catch (error) {
+      //@ts-ignore
+      return undefined;
+    }
 
-    );
   }
 }

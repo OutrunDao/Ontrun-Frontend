@@ -17,6 +17,7 @@ export default function SwapCard() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { write: writeContract } = useContract();
+  const [countdown, setCountdown] = useState(60);
 
   const [ tokenA,setTokenA ] = useState();
   const [ tokenB,setTokenB ] = useState();
@@ -44,6 +45,29 @@ export default function SwapCard() {
     view: SwapView.swap,
     getTradeRoute: true,
   });
+
+  useEffect(() => {
+
+    setCountdown(60);
+    if (!Number(swapData.token0AmountInput)) return;
+    function _() {
+      token0AmountInputHandler(swapData.token0AmountInput);
+    }
+
+    const intervalId = setInterval(() => {
+      _();
+      setCountdown(60);
+    }, 60000);
+
+    const countdownIntervalId = setInterval(() => {
+      setCountdown(prevCountdown => prevCountdown > 0 ? prevCountdown - 1 : 10);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(countdownIntervalId);
+    };
+  }, [swapData.token0AmountInput]);
 
   const blockExplore = useMemo(() => {
     return BlockExplorers[chainId];
@@ -131,7 +155,6 @@ export default function SwapCard() {
                 <Input
                   placeholder="0.00"
                   value={swapData.token1AmountInput}
-                  onValueChange={(value) => setToken1AmountInput(value)}
                   classNames={{
                     base: "h-[2.5rem] text-white",
                     input:
@@ -185,7 +208,7 @@ export default function SwapCard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Refresh Time:</span>
-                        <span className="font-extrabold">{swapData.countdown}s</span>
+                        <span className="font-extrabold">{countdown}s</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Min.received:</span>
