@@ -87,10 +87,105 @@ export function useSwapRouter() {
         return receipt;
     }
 
+    async function swapExactTokensForTokens({
+        routerAddress,
+        amountIn,
+        amountOutMin,
+        path,
+        to,
+        referrer,
+        deadline,
+    }: {
+        routerAddress: Address;
+        amountIn: BigInt;
+        amountOutMin: BigInt;
+        path: string[];
+        to: Address;
+        referrer: Address;
+        deadline: BigInt;
+    }) {
+        console.log([routerAddress, amountIn, amountOutMin, path, to, referrer, deadline]);
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
+        const tx = await swapRouterContract.swapExactTokensForTokens(
+            amountIn,
+            amountOutMin,
+            path,
+            to,
+            referrer,
+            deadline,
+        );
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
+    async function swapExactETHForTokens({
+        routerAddress,
+        amountIn,
+        amountOutMin,
+        path,
+        to,
+        referrer,
+        deadline,
+    }: {
+        routerAddress: Address;
+        amountIn: BigInt;
+        amountOutMin: BigInt;
+        path: string[];
+        to: Address;
+        referrer: Address;
+        deadline: BigInt;
+    }) {
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
+        const tx = await swapRouterContract.swapExactETHForTokens(
+            amountOutMin,
+            path,
+            to,
+            referrer,
+            deadline,
+            { value: amountIn }
+        );
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
+    async function swapExactTokensForETH({
+        routerAddress,
+        amountIn,
+        amountOutMin,
+        path,
+        to,
+        referrer,
+        deadline,
+    }: {
+        routerAddress: Address;
+        amountIn: BigInt;
+        amountOutMin: BigInt;
+        path: string[];
+        to: Address;
+        referrer: Address;
+        deadline: BigInt;
+    }) {
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
+        const tx = await swapRouterContract.swapExactTokensForETH(
+            amountIn,
+            amountOutMin,
+            path,
+            to,
+            referrer,
+            deadline
+        );
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
     return {
+        getSwapRouterwrite,
         swapRouterWrite: {
             addLiquidity,
             addLiquidityETH,
+            swapExactTokensForTokens,
+            swapExactETHForTokens,
+            swapExactTokensForETH,
         }
     }
 

@@ -87,8 +87,8 @@ export default function AddLiquidityCard() {
   }
 
   async function handleAddLiquidity() {
-    try {
-      setIsAddLiquidityLoading(true);
+    // try {
+    //   setIsAddLiquidityLoading(true);
       const receipt = await addLiquidity();
       toast.custom(() => (
         <ToastCustom
@@ -100,15 +100,15 @@ export default function AddLiquidityCard() {
           }
         />
       ));
-    } catch (error) {
-      toast.custom(() => (
-        <ToastCustom
-          content={"Transaction failed"}
-        />
-      ));
-    } finally {
-      setIsAddLiquidityLoading(false);
-    }
+    // } catch (error) {
+    //   toast.custom(() => (
+    //     <ToastCustom
+    //       content={"Transaction failed"}
+    //     />
+    //   ));
+    // } finally {
+    //   setIsAddLiquidityLoading(false);
+    // }
   }
 
   return (

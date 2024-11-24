@@ -31,16 +31,10 @@ export default function SwapCard() {
     setSlippage,
     setTransactionDeadline,
     setUnlimitedAmount,
-    setToken0AmountInput,
-    setToken1AmountInput,
-    updateTokenBalance,
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
-    approveToken0,
-    approveToken1,
-    addLiquidity,
-
+    swap,
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
@@ -80,6 +74,32 @@ export default function SwapCard() {
     token0AmountInputHandler("");
     token1AmountInputHandler("");
   };
+
+  async function handleSwap() {
+    // try {
+      // setLoading(true);
+      const receipt = await swap();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Swap Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    // } catch (error) {
+      // toast.custom(() => (
+      //   <ToastCustom
+      //     content={"Transaction failed"}
+      //   />
+      // ));
+    // } finally {
+    //   setLoading(false);
+    // }
+    // setIsApproveToken0Loading(false);
+  }
 
   return (
     <div className="w-[34.18rem] min-h-[26.59rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card relative">
@@ -220,7 +240,19 @@ export default function SwapCard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Route:</span>
-                        <span className="font-extrabold">view Route</span>
+                        <div className="flex font-extrabold">
+                          {swapData.tradeRoutePath.map((token, index) => (
+                            <a 
+                              key={index}
+                              href={`https://testnet.bscscan.com/address/${swapData.tradeRouteAddressPath[index]}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-white"
+                            >
+                              {index == swapData.tradeRoutePath.length - 1 ? token : token + " -> "}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </AccordionItem>
@@ -234,7 +266,7 @@ export default function SwapCard() {
               </Button>
             ) : (
               <Button
-                onPress={() => {}}
+                onPress={handleSwap}
                 isDisabled={swapData.submitButtonStatus === BtnAction.disable}
                 isLoading={loading}
                 className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">

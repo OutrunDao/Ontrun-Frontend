@@ -208,7 +208,7 @@ export class Pair {
         )
       : inputAmount;
 
-    const inputAmountWithFeeAndAfterTax = JSBI.multiply(inputAmountAfterTax.quotient, JSBI.BigInt(this.swapFeeRate));
+    const inputAmountWithFeeAndAfterTax = JSBI.multiply(inputAmountAfterTax.quotient, JSBI.BigInt(String(BigInt(1000)-BigInt(Number(this.swapFeeRate)/10))));
     const numerator = JSBI.multiply(inputAmountWithFeeAndAfterTax, outputReserve.quotient);
     const denominator = JSBI.add(JSBI.multiply(inputReserve.quotient, _1000), inputAmountWithFeeAndAfterTax);
     const outputAmount = CurrencyAmount.fromRawAmount(
@@ -305,7 +305,7 @@ export class Pair {
     const inputReserve = this.reserveOf(outputAmount.currency.equals(this.token0) ? this.token1 : this.token0);
 
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.quotient, outputAmountBeforeTax.quotient), _1000);
-    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.quotient, outputAmountBeforeTax.quotient), JSBI.BigInt(this.swapFeeRate));
+    const denominator = JSBI.multiply(JSBI.subtract(outputReserve.quotient, outputAmountBeforeTax.quotient), JSBI.BigInt(String(BigInt(1000)-BigInt(Number(this.swapFeeRate)/10))));
     const inputAmount = CurrencyAmount.fromRawAmount(
       outputAmount.currency.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(JSBI.divide(numerator, denominator), ONE), // add 1 here is part of the formula, no rounding needed here, since there will not be decimal at this point

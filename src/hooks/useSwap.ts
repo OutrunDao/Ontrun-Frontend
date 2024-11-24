@@ -1,4 +1,4 @@
-import { addressMap, getFactoryAddresses, getRouterAddresses } from "@/contracts/addressMap/addressMap";
+import { addressMap, getFactoryAddresses, getRouterAddress } from "@/contracts/addressMap/addressMap";
 import { SUPPORTED_CHAINS } from "@/contracts/chains";
 import { Currency, CurrencyAmount, Ether, Percent, Token, TradeType } from "@/packages/core";
 import { Native, Pair, Trade } from "@/packages/sdk";
@@ -7,13 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 import Decimal from "decimal.js-light";
 import { debounce, map, set } from "radash";
 import { useEffect, useMemo, useState } from "react";
-import { Address, PublicClient, parseUnits } from "viem";
+import { Address, PublicClient, encodeFunctionData, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
 import { CurrencySelectListType, getBaseCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import { useSwapFactory } from "./useSwapFactory";
 import { useERC20 } from "./useERC20";
 import { useSwapRouter } from "./useSwapRouter";
+import { useMulticall } from "./useMulticall";
+import { call } from "viem/actions";
 
 export enum BtnAction {
   disable,
@@ -44,13 +46,13 @@ function tokenConvert(token: Currency): Token {
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
-async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: PublicClient): Promise<Pair[]> {
+async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: PublicClient): Promise<any[]> {
   const chainId = publicClient.chain!.id;
-  let pairs: Pair[] = [];
+  let pairs: any[] = [];
   if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
 
   for (let i = 0;i < getFactoryAddresses(chainId).length;i++) {
-    console.log("getFactoryAddresses(chainId)[i]", i, getFactoryAddresses(chainId)[i]);
+    // console.log("getFactoryAddresses(chainId)[i]", i, getFactoryAddresses(chainId)[i]);
     const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getFactoryAddresses(chainId)[i]);
     let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getFactoryAddresses(chainId)[i]);
     if (p) pairs.push(p);
@@ -69,7 +71,7 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   console.log("pairs", pairs);
   const uniquePairs = pairs.filter((pair, index, self) =>
     index === self.findIndex((p) => (
-      p.token0.equals(pair.token0) && p.token1.equals(pair.token1)
+      p.token0.equals(pair.token0) && p.token1.equals(pair.token1) && p.swapFeeRate===pair.swapFeeRate
     ))
   );
   console.log("uniquePairs", uniquePairs);
@@ -95,12 +97,15 @@ export function useSwap(swapOpts: SwapOptions) {
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
   const [swapFeeRate, setswapFeeRate] = useState<number>();
   // const [factoryAddress, setFactoryAddress] = useState<Address>();
+  const [bestTradeRouter, setBestTradeRouter] = useState<{trade:Trade<Currency, Currency, TradeType>,swapFeeRates:string[]}>();
   const [routerAddress, setRouterAddress] = useState<Address>();
+  const [routerAddressPath, setRouterAddressPath] = useState<Address[]>();
   const [isToken0Approved, setIsToken0Approved] = useState<boolean>(false);
   const [isToken1Approved, setIsToken1Approved] = useState<boolean>(false);
 
   const UseERC20 = useERC20();
   const UseSwapRouter = useSwapRouter();
+  const UseMulticall = useMulticall();
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -191,15 +196,18 @@ export function useSwap(swapOpts: SwapOptions) {
 
   useEffect(() => {
     if (!swapFeeRate) return;
-    switch (swapFeeRate) {
-      case 0.3:
-        setRouterAddress(getRouterAddresses(chainId)[0]);
-        break;
-      case 1:
-        setRouterAddress(getRouterAddresses(chainId)[1]);
-        break;
-    }
+    setRouterAddress(getRouterAddress(chainId, Number(swapFeeRate*100).toString())![0]);
   }, [swapFeeRate]);
+
+  useEffect(() => {
+    if (!bestTradeRouter) return;
+    let _routerAddressPath: Address[] = [];
+    for (let i = 0; i < bestTradeRouter.swapFeeRates.length; i++) {
+      _routerAddressPath.push(getRouterAddress(chainId, bestTradeRouter.swapFeeRates[i])![0]);
+    }
+    console.log("_routerAddressPath", _routerAddressPath);
+    setRouterAddressPath(_routerAddressPath);
+  }, [bestTradeRouter]);
 
 
 
@@ -213,18 +221,31 @@ export function useSwap(swapOpts: SwapOptions) {
     return tradeRoute && tradeRoute.minimumAmountOut(new Percent(slippage * 10, 1000)).toFixed(6); 
     // return tradeRoute && tradeRoute.minimumAmountOut(new Percent(slippage, 100)).toFixed(6);//slippage不能<1
   }, [tradeRoute, slippage]);
-  const tradeRoutePath = useMemo(() => {
-    return (
-      tradeRoute &&
-      tradeRoute.route.path
-        .map((token, index) => {
-          if (index === 0) return token0?.symbol;
-          if (index === tradeRoute.route.path.length - 1) return token1!.symbol;
-          return token.symbol;
-        })
-        .join(" -> ")
-    );
+
+  const tradeRouteAddressPath = useMemo(() => {
+    if (!tradeRoute) return [];
+    return tradeRoute.route.path.map((token, index) => {
+      if (index === 0) return (token0 as Token).address;
+      if (index === tradeRoute.route.path.length - 1) return (token1 as Token).address;
+      return (token as Token).address;
+    });
   }, [tradeRoute, token0, token1]);
+
+  const tradeRoutePath = useMemo(() => {
+    if (!tradeRoute) return [];
+    return tradeRoute.route.path.map((token, index) => {
+      if (index === 0) return token0?.symbol;
+      if (index === tradeRoute.route.path.length - 1) return token1!.symbol;
+      return token.symbol;
+    });
+  }, [tradeRoute, token0, token1]);
+
+  // const routerAddressPath = useMemo(() => {
+  //   if (!bestTradeRouter) return [];
+  //   return bestTradeRouter.swapFeeRates.map((swapFeeRate, index) => {
+  //     return getRouterAddress(chainId, Number(Number(swapFeeRate)*100).toString())![0];
+  //   });
+  // }, [bestTradeRouter,token0, token1]);
 
   const isTransformView = useMemo(() => {
     if (!token0 || !token1) return false;
@@ -240,7 +261,8 @@ export function useSwap(swapOpts: SwapOptions) {
     if ([SwapView.addLiquidity, SwapView.createPoll].includes(swapOpts.view) && isTransformView) {
       return BtnAction.invalidPair;
     }
-    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput || !routerAddress) {
+    
+    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput || !(routerAddress || routerAddressPath)) {
       return BtnAction.disable;
     }
 
@@ -272,6 +294,8 @@ export function useSwap(swapOpts: SwapOptions) {
     tradeRoute,
     swapOpts.view,
     priceImpact,
+    routerAddress,
+    routerAddressPath
   ]);
 
   async function approveToken0() {
@@ -308,8 +332,8 @@ export function useSwap(swapOpts: SwapOptions) {
     if (!account.address) return console.log("wallet account is not connected");
     if (!token0 || !token1 || !routerAddress) return;
     const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
-    const token0AmountInputMin = Number(token0AmountInput)*(1-slippage)/100;
-    const token1AmountInputMin = Number(token1AmountInput)*(1-slippage)/100;
+    const token0AmountInputMin = Number(token0AmountInput)*(100-slippage)/100;
+    const token1AmountInputMin = Number(token1AmountInput)*(100-slippage)/100;
     if (token0.isNative) {
       const receipt = await UseSwapRouter.swapRouterWrite.addLiquidityETH({
         routerAddress: routerAddress,
@@ -350,6 +374,142 @@ export function useSwap(swapOpts: SwapOptions) {
     }
   }
 
+  async function swap() {
+    if (!account.address) return console.log("wallet account is not connected");
+    if (!token0 || !token1 || !routerAddressPath) return;
+    const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
+    const token1AmountInputMin = Number(token1AmountInput)*(100-slippage)/100;
+    if (token0.isNative) {
+
+      const receipt = await UseSwapRouter.swapRouterWrite.swapExactETHForTokens({
+        routerAddress: routerAddressPath[0],
+        amountIn: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amountOutMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        path: tradeRouteAddressPath,
+        to: account.address,
+        referrer: "0x0000000000000000000000000000000000000000",
+        deadline: BigInt(deadline),
+      });
+      return receipt;
+    } else if (token1.isNative) {
+      const receipt = await UseSwapRouter.swapRouterWrite.swapExactTokensForETH({
+        routerAddress: routerAddressPath[0],
+        amountIn: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amountOutMin: BigInt(0),
+        path: tradeRouteAddressPath,
+        to: account.address,
+        referrer: "0x0000000000000000000000000000000000000000",
+        deadline: BigInt(deadline),
+      });
+      return receipt;
+    } else {
+      console.log("routerAddressPath", routerAddressPath[0]);
+      console.log("token0AmountInput", parseUnits(token0AmountInput!.toString(), token0.decimals));
+      console.log("token1AmountInputMin", parseUnits(token1AmountInputMin!.toString(), token1.decimals));
+      console.log("tradeRouteAddressPath", tradeRouteAddressPath);
+      console.log("account.address", account.address);
+      console.log("deadline", BigInt(deadline));
+
+      const receipt = await UseSwapRouter.swapRouterWrite.swapExactTokensForTokens({
+        routerAddress: routerAddressPath[0],
+        amountIn: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amountOutMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        path: tradeRouteAddressPath,
+        to: account.address,
+        referrer: "0x0000000000000000000000000000000000000000",
+        deadline: BigInt(deadline),
+      });
+      return receipt;
+    }
+  }
+
+  // async function swap() {
+  //   if (!account.address) return console.log("wallet account is not connected");
+  //   if (!token0 || !token1 || !routerAddressPath) return;
+  //   const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
+  //   const token1AmountInputMin = Number(token1AmountInput)*(1-slippage)/100;
+  //   let multiCallParams = [];
+  //   let pathes = [];
+  //   for (let i = 0; i < tradeRouteAddressPath.length-1; i++) {
+  //     pathes.push([tradeRouteAddressPath[i], tradeRouteAddressPath[i+1]]);
+  //   }
+  //   for (let i = 0; i < pathes.length; i++) {
+  //     if (i == 0) {
+  //       if (token0.isNative) {
+  //         continue;
+  //       } else {
+  //         console.log("routerAddressPath", routerAddressPath[0]);
+  //         console.log("token0AmountInput", parseUnits(token0AmountInput!.toString(), token0.decimals));
+  //         console.log("token1AmountInputMin", parseUnits(token1AmountInputMin!.toString(), token1.decimals));
+  //         console.log("tradeRouteAddressPath", tradeRouteAddressPath);
+  //         console.log("account.address", account.address);
+  //         console.log("deadline", BigInt(deadline));
+
+  //         const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
+  //         multiCallParams.push({
+  //           target: routerAddressPath[i],
+  //           callData: swapRouterContract.interface.encodeFunctionData(
+  //             'swapExactTokensForTokens',
+  //             [
+  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
+  //               parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+  //               tradeRouteAddressPath,
+  //               account.address,
+  //               "0x0000000000000000000000000000000000000000",
+  //               BigInt(deadline),
+  //             ]
+  //           ),
+  //           value: BigInt(0),
+  //           allowFailure: false,
+  //         })
+  //       }
+        
+  //     } else if (i == pathes.length-1) {
+  //       if (token1.isNative) {
+  //         continue;
+  //       } else {
+  //         const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
+  //         multiCallParams.push({
+  //           target: routerAddressPath[i],
+  //           callData: swapRouterContract.interface.encodeFunctionData(
+  //             'swapExactTokensForTokens',
+  //             [
+  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
+  //               parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+  //               tradeRouteAddressPath,
+  //               account.address,
+  //               "0x0000000000000000000000000000000000000000",
+  //               BigInt(deadline),
+  //             ]
+  //           ),
+  //           value: BigInt(0),
+  //           allowFailure: false,
+  //         })
+  //       }
+  //     } else {
+  //       const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
+  //       multiCallParams.push({
+  //         target: routerAddressPath[i],
+  //         callData: swapRouterContract.interface.encodeFunctionData(
+  //           'swapExactTokensForTokens',
+  //           [
+  //             parseUnits(token0AmountInput!.toString(), token0.decimals),
+  //             parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+  //             tradeRouteAddressPath,
+  //             account.address,
+  //             "0x0000000000000000000000000000000000000000",
+  //             BigInt(deadline),
+  //           ]
+  //         ),
+  //         value: BigInt(0),
+  //         allowFailure: false,
+  //       })
+  //     }
+  //   }
+  //   const receipt = await UseMulticall.aggregate3Value(multiCallParams,"0");
+  //   return receipt;
+  // }
+
   async function setSwapDataWhenInput(tradeType: TradeType, value: string) {
     setRouteNotExist(false);
     if (isTransformView) {
@@ -369,6 +529,7 @@ export function useSwap(swapOpts: SwapOptions) {
     }
     if (swapOpts.view === SwapView.swap) {
       if (!publicClient) return;
+      // const Pairs =
       if (tradeType === TradeType.EXACT_INPUT) {
         // console.log("token0", tokenConvert(token0!));
         const result = Trade.bestTradeExactIn(
@@ -382,10 +543,12 @@ export function useSwap(swapOpts: SwapOptions) {
           setRouteNotExist(true);
           return setToken1AmountInput("");
         }
-        setToken1AmountInput(result[0].outputAmount.toFixed(8));
-        setTradeRoute(result[0]);
+        setToken1AmountInput(result[0].trade.outputAmount.toFixed(8));
+        setTradeRoute(result[0].trade);
+        setBestTradeRouter(result[0]);
         for (let i = 0; i < result.length; i++) {
-          console.log(`result[${i}]`, result[i].outputAmount.toFixed(8));
+          console.log(`result[${i}]`, result[i].trade.outputAmount.toFixed(8));
+          console.log(`swapFeeRates`, result[i].swapFeeRates);
         }
       } else {
         const result = Trade.bestTradeExactOut(
@@ -453,6 +616,7 @@ export function useSwap(swapOpts: SwapOptions) {
       pair,
       tradeRoute,
       tradeRoutePath,
+      tradeRouteAddressPath,
       minimalReceive,
       submitButtonStatus,
       priceImpact,
@@ -486,6 +650,6 @@ export function useSwap(swapOpts: SwapOptions) {
     approveToken0,
     approveToken1,
     addLiquidity,
-
+    swap,
   };
 }

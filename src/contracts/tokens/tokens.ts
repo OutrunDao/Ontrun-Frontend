@@ -16,6 +16,16 @@ export const tBNB: { [chainId: number]: Token } = {
   )
 }
 
+export const ORETH: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    addressMap[ChainId.BSC_TESTNET].TBNB,
+    18,
+    "wBNB",
+    "Test BNB",
+  )
+}
+
 const UseToken = useToken();
 
 export const Token0: { [chainId: number]: Token } = {

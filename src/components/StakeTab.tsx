@@ -23,6 +23,8 @@ import { set } from "radash";
 import { N, ethers } from "ethers";
 import { POT } from "@/contracts/tokens/POT";
 import TokenTab from "./TokenTab";
+import { useMulticall } from "@/hooks/useMulticall";
+import { addressMap } from "@/contracts/addressMap/addressMap";
 
 export default function StakeTab() {
 
@@ -55,6 +57,7 @@ export default function StakeTab() {
   const UseYT = useYT();
   const UseStakeRouter = useStakeRouter();
   const UsePOT = usePOT();
+  const UseMulticall = useMulticall();
 
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
 
@@ -219,6 +222,32 @@ export default function StakeTab() {
           UPTAddress: "0x0000000000000000000000000000000000000000",
           value: NT.symbol == "ETH"?parseEther(NTAmount):undefined,
         })
+
+        // let multiCallParams = [];
+        // const stakeRouterContract = await UseStakeRouter.getStakeRouterwrite();
+        // multiCallParams.push({
+        //   target: addressMap[chainId].stakeRouter,
+        //   callData: stakeRouterContract.interface.encodeFunctionData('mintPPYFromToken', [
+        //       (SY as Token).address,
+        //       POT.address,
+        //       NT.symbol == "ETH"?"0x0000000000000000000000000000000000000000":(NT as Token).address,
+        //       BigInt(parseEther(NTAmount)),
+        //       [
+        //         BigInt(sliderValue),
+        //         BigInt(minPTGenerated),
+        //         account.address,
+        //         account.address,
+        //         account.address,
+        //       ],
+        //       [
+        //         (PT as Token).address,
+        //         "0x0000000000000000000000000000000000000000"
+        //       ],
+        //     ]),
+        //   value: parseEther(NTAmount),
+        //   allowFailure: false
+        // })
+        // const receipt = await UseMulticall.aggregate3Value(multiCallParams,NTAmount);
   
         toast.custom(() => (
           <ToastCustom

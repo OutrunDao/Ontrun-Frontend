@@ -42,7 +42,7 @@ export const addressMap = {
   },
   [ChainId.BSC_TESTNET]: {
     [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
-    [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
+    [ContractName.multicall]: "0xcA11bde05977b3631167028862bE2a173976CA11",
     [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
     [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
     [ContractName.SWAP_FACTORY]: "0x9ef195740a75a76B0F1fE6909964E35123858521",
@@ -74,9 +74,14 @@ export const routerAddressMap = {
   ],
 }
 
-export function getRouterAddresses(chainId: number): `0x${string}`[] {
-  // @ts-ignore
-  return routerAddressMap[chainId] || [];
+export function getRouterAddress(chainId: number, swapFeeRate: string): `0x${string}`[] | undefined {
+  switch (swapFeeRate) {
+    // @ts-ignore
+    case "30": return [routerAddressMap[chainId][0]];
+    // @ts-ignore
+    case "100": return [routerAddressMap[chainId][1]];
+    default: return undefined;
+  }
 }
 
 export const initCodeHashMap = {

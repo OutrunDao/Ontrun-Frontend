@@ -52,9 +52,11 @@ export function inputOutputComparator<TInput extends Currency, TOutput extends C
 
 // extension of the input output comparator that also considers other dimensions of the trade in ranking them
 export function tradeComparator<TInput extends Currency, TOutput extends Currency, TTradeType extends TradeType>(
-  a: Trade<TInput, TOutput, TTradeType>,
-  b: Trade<TInput, TOutput, TTradeType>,
+  A: {trade:Trade<TInput, TOutput, TTradeType>,swapFeeRate:string},
+  B: {trade:Trade<TInput, TOutput, TTradeType>,swapFeeRate:string},
 ) {
+  const a = A.trade;
+  const b = B.trade;
   const ioComp = inputOutputComparator(a, b);
   if (ioComp !== 0) {
     return ioComp;
@@ -234,8 +236,10 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     // used in recursion.
     currentPairs: Pair[] = [],
     nextAmountIn: CurrencyAmount<Currency> = currencyAmountIn,
-    bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = [],
-  ): Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] {
+    // bestTrades: Trade<TInput, TOutput, TradeType.EXACT_INPUT>[] = [],
+    bestTrades: any[] = [],
+    swapFeeRates: string[] = [],
+  ): {trade:Trade<TInput, TOutput, TradeType.EXACT_INPUT>,swapFeeRates:string[]}[] {
     invariant(pairs.length > 0, "PAIRS");
     invariant(maxHops > 0, "MAX_HOPS");
     invariant(currencyAmountIn === nextAmountIn || currentPairs.length > 0, "INVALID_RECURSION");
@@ -260,19 +264,20 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       }
       // we have arrived at the output token, so this is the final trade of one of the paths
       if (amountOut.currency.equals(tokenOut)) {
+        // console.log("swapFeeRates1", swapFeeRates);
         sortedInsert(
           bestTrades,
-          new Trade(
+          {trade:new Trade(
             new Route([...currentPairs, pair], currencyAmountIn.currency, currencyOut),
             currencyAmountIn,
             TradeType.EXACT_INPUT,
-          ),
+          ),swapFeeRates:[...swapFeeRates,pair.swapFeeRate]},
           maxNumResults,
           tradeComparator,
         );
       } else if (maxHops > 1 && pairs.length > 1) {
         const pairsExcludingThisPair = pairs.slice(0, i).concat(pairs.slice(i + 1, pairs.length));
-
+        // console.log("swapFeeRates0", swapFeeRates);
         // otherwise, consider all the other paths that lead from this token as long as we have not exceeded maxHops
         Trade.bestTradeExactIn(
           pairsExcludingThisPair,
@@ -285,9 +290,10 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
           [...currentPairs, pair],
           amountOut,
           bestTrades,
+          [...swapFeeRates, pair.swapFeeRate],
         );
       }
-      console.log("bestTrades", bestTrades);
+      // console.log("bestTrades", bestTrades);
     }
 
     return bestTrades;
@@ -329,7 +335,8 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
     // used in recursion.
     currentPairs: Pair[] = [],
     nextAmountOut: CurrencyAmount<Currency> = currencyAmountOut,
-    bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = [],
+    // bestTrades: Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] = [],
+    bestTrades: any[] = [],
   ): Trade<TInput, TOutput, TradeType.EXACT_OUTPUT>[] {
     invariant(pairs.length > 0, "PAIRS");
     invariant(maxHops > 0, "MAX_HOPS");
@@ -357,11 +364,11 @@ export class Trade<TInput extends Currency, TOutput extends Currency, TTradeType
       if (amountIn.currency.equals(tokenIn)) {
         sortedInsert(
           bestTrades,
-          new Trade(
+          {trade:new Trade(
             new Route([pair, ...currentPairs], currencyIn, currencyAmountOut.currency),
             currencyAmountOut,
             TradeType.EXACT_OUTPUT,
-          ),
+          ),swapFeeRate:pair.swapFeeRate},
           maxNumResults,
           tradeComparator,
         );

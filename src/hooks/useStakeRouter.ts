@@ -11,6 +11,13 @@ export  function useStakeRouter() {
     const chainId = useChainId();
     const account = useAccount();
 
+    async function getStakeRouterwrite() {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
+    }
+
     async function mintYieldTokensFromToken({
         SYAddress,
         POTAddress,
@@ -107,6 +114,7 @@ export  function useStakeRouter() {
     }
 
     return {
+        getStakeRouterwrite,
         mintYieldTokensFromToken,
         redeemPPToToken,
     }
