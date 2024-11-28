@@ -11,15 +11,38 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import PaginationCustom from "../PaginationCustom";
+import { SwapView, useSwap } from "@/hooks/useSwap";
+import { useState, useEffect } from "react";
+import { usePair } from "@/hooks/usePair";
+import { Address } from "viem";
+
+
 
 export default function LiquidityTab() {
+  const {allPairsData} = useSwap({view:SwapView.LiquidityTab});
   const searchHandler = (value: string) => {};
-  const rows = [
-    { id: "1", pool: "usdb/oreth" },
-    { id: "2", pool: "usdb/oreth" },
-    { id: "3", pool: "usdb/oreth" },
-    { id: "4", pool: "usdb/oreth" },
-  ];
+  const [rows , setRows] = useState<any[] | undefined>([]);
+
+  useEffect(() => {
+    function _() {
+      if (!allPairsData) return;
+      let _row:any[] = []
+      for (let i = 0; i < allPairsData.length; i++) {
+        _row.push({
+          id: i.toString(), 
+          pool: `${allPairsData[i].token0.symbol}/${allPairsData[i].token1.symbol}`,
+          volume: allPairsData[i].address,
+        
+        })
+      }
+      return _row;
+    }
+    setRows(_());
+    
+  },[allPairsData])
+
+
+  // console.log(rows)
   return (
     <div className="flex flex-col gap-y-12 items-center justify-center">
       <div className="bg-no-repeat bg-cover bg-[url('/images/liquidity-tab.png')] w-[82.47rem] h-[56.30rem]">
@@ -47,14 +70,47 @@ export default function LiquidityTab() {
           <TableHeader columns={liquidityTableColumns}>
             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
           </TableHeader>
+          {rows && rows.length > 0 ? (
           <TableBody items={rows} emptyContent={"No data"}>
             {(item) => (
-              <TableRow key={item.id}>{(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}</TableRow>
+              <TableRow key={item.id}>
+                {/* <TableCell>{item.id}</TableCell>
+                <TableCell>{item.pool}</TableCell> */}
+
+                {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                </TableRow>
             )}
-          </TableBody>
+          </TableBody>):(
+            <TableBody >
+              <TableRow key="1">
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+              </TableRow>
+            </TableBody>
+          )}
         </Table>
       </div>
       <PaginationCustom total={10} currentPage={1} pageSize={10} setCurrentPage={() => {}} />
+      {/* <span>{allPairs}</span> */}
     </div>
   );
 }
+
+{/* <Table>
+<TableHeader >
+</TableHeader>
+<TableBody>
+  {rows?.map((item, index) => (
+    <TableRow 
+    key={item.id}           
+      className="bg-transparent text-white border-b border-divider border-[#4A325D] border-opacity-[0.3]">
+      <TableCell>{item.id}</TableCell>
+      <TableCell>{item.pool}</TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+</Table> */}

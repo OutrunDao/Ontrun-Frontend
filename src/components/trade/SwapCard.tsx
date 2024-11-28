@@ -90,15 +90,15 @@ export default function SwapCard() {
         />
       ));
     // } catch (error) {
-      // toast.custom(() => (
-      //   <ToastCustom
-      //     content={"Transaction failed"}
-      //   />
-      // ));
+    //   console.log(error);
+    //   toast.custom(() => (
+    //     <ToastCustom
+    //       content={"Transaction failed"}
+    //     />
+    //   ));
     // } finally {
     //   setLoading(false);
     // }
-    // setIsApproveToken0Loading(false);
   }
 
   return (

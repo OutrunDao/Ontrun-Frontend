@@ -9,7 +9,7 @@ export const tBNB: { [chainId: number]: Token } = {
 
   [ChainId.BSC_TESTNET]: new Token(
     ChainId.BSC_TESTNET,
-    addressMap[ChainId.BSC_TESTNET].TBNB,
+    addressMap[ChainId.BSC_TESTNET].WBNB,
     18,
     "tBNB",
     "Test BNB",
@@ -19,10 +19,10 @@ export const tBNB: { [chainId: number]: Token } = {
 export const ORETH: { [chainId: number]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(
     ChainId.BSC_TESTNET,
-    addressMap[ChainId.BSC_TESTNET].TBNB,
+    addressMap[ChainId.BSC_TESTNET].WBNB,
     18,
     "wBNB",
-    "Test BNB",
+    "Wrapped BNB",
   )
 }
 
@@ -55,5 +55,15 @@ export const Token2: { [chainId: number]: Token } = {
     18,
     "Token2",
     "Token2",
+  )
+}
+
+export const USDT: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    tokenAddressMap[ChainId.BSC_TESTNET].USDT,
+    18,
+    "USDT",
+    "USDT",
   )
 }

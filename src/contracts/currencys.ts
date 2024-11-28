@@ -34,7 +34,7 @@ export enum ContractName {
 }
 
 export const SwapCurrencyList = {
-    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2],
+    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2,Ether ,slisBNB],
 }
 
 export const BaseCurrencyList = {

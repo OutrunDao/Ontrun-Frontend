@@ -59,6 +59,8 @@ export function useERC20() {
     }
 
     return {
+        getERC20read,
+        getERC20write,
         ERC20View: {
             allowance,
         },

@@ -22,6 +22,7 @@ export function useSwapRouter() {
         routerAddress,
         tokenAAddress,
         tokenBAddress,
+        feeRate,
         amountADesired,
         amountBDesired,
         amountAMin,
@@ -32,6 +33,7 @@ export function useSwapRouter() {
         routerAddress: Address;
         tokenAAddress: string;
         tokenBAddress: string;
+        feeRate: BigInt;
         amountADesired: BigInt;
         amountBDesired: BigInt;
         amountAMin: BigInt;
@@ -43,6 +45,7 @@ export function useSwapRouter() {
         const tx = await swapRouterContract.addLiquidity(
             tokenAAddress,
             tokenBAddress,
+            feeRate,
             amountADesired,
             amountBDesired,
             amountAMin,
@@ -58,6 +61,7 @@ export function useSwapRouter() {
         routerAddress,
         value,
         tokenAddress,
+        feeRate,
         amountTokenDesired,
         amountTokenMin,
         amountETHMin,
@@ -67,6 +71,7 @@ export function useSwapRouter() {
         routerAddress: Address;
         value: BigInt;
         tokenAddress: string;
+        feeRate: BigInt;
         amountTokenDesired: BigInt;
         amountTokenMin: BigInt;
         amountETHMin: BigInt;
@@ -76,6 +81,7 @@ export function useSwapRouter() {
         const swapRouterContract = await getSwapRouterwrite(routerAddress);
         const tx = await swapRouterContract.addLiquidityETH(
             tokenAddress,
+            feeRate,
             amountTokenDesired,
             amountTokenMin,
             amountETHMin,
@@ -92,6 +98,7 @@ export function useSwapRouter() {
         amountIn,
         amountOutMin,
         path,
+        swapFeeRates,
         to,
         referrer,
         deadline,
@@ -100,6 +107,7 @@ export function useSwapRouter() {
         amountIn: BigInt;
         amountOutMin: BigInt;
         path: string[];
+        swapFeeRates: BigInt[];
         to: Address;
         referrer: Address;
         deadline: BigInt;
@@ -110,6 +118,7 @@ export function useSwapRouter() {
             amountIn,
             amountOutMin,
             path,
+            swapFeeRates,
             to,
             referrer,
             deadline,
@@ -123,6 +132,7 @@ export function useSwapRouter() {
         amountIn,
         amountOutMin,
         path,
+        swapFeeRates,
         to,
         referrer,
         deadline,
@@ -131,14 +141,17 @@ export function useSwapRouter() {
         amountIn: BigInt;
         amountOutMin: BigInt;
         path: string[];
+        swapFeeRates: BigInt[];
         to: Address;
         referrer: Address;
         deadline: BigInt;
     }) {
+        console.log([routerAddress, amountIn, amountOutMin, path, to, referrer, deadline]);
         const swapRouterContract = await getSwapRouterwrite(routerAddress);
         const tx = await swapRouterContract.swapExactETHForTokens(
             amountOutMin,
             path,
+            swapFeeRates,
             to,
             referrer,
             deadline,
@@ -153,6 +166,7 @@ export function useSwapRouter() {
         amountIn,
         amountOutMin,
         path,
+        swapFeeRates,
         to,
         referrer,
         deadline,
@@ -161,6 +175,7 @@ export function useSwapRouter() {
         amountIn: BigInt;
         amountOutMin: BigInt;
         path: string[];
+        swapFeeRates: BigInt[];
         to: Address;
         referrer: Address;
         deadline: BigInt;
@@ -170,6 +185,7 @@ export function useSwapRouter() {
             amountIn,
             amountOutMin,
             path,
+            swapFeeRates,
             to,
             referrer,
             deadline
@@ -183,9 +199,9 @@ export function useSwapRouter() {
         swapRouterWrite: {
             addLiquidity,
             addLiquidityETH,
-            swapExactTokensForTokens,
             swapExactETHForTokens,
             swapExactTokensForETH,
+            swapExactTokensForTokens,
         }
     }
 

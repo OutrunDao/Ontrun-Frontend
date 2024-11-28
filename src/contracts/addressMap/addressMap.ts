@@ -18,7 +18,7 @@ export enum ContractName {
   REY = "REY",
   OSETH = "OSETH",
 
-  TBNB = "TBNB",
+  WBNB = "WBNB",
   multicall = "multicall",
   slisBNB = "slisBNB",
   stakeRouter = "stakeRouter",
@@ -41,51 +41,32 @@ export const addressMap = {
     [ContractName.ORUSD_STAKE]: "0x082fcCB4Ef497B7cC856e71DcAD81763B15916Bc",
   },
   [ChainId.BSC_TESTNET]: {
-    [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+    [ContractName.WBNB]: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
     [ContractName.multicall]: "0xcA11bde05977b3631167028862bE2a173976CA11",
     [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
     [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
-    [ContractName.SWAP_FACTORY]: "0x9ef195740a75a76B0F1fE6909964E35123858521",
+    [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
+    [ContractName.SWAP_ROUTER]: "0xEf63848F3105e3a4EF568d8358F80EE5615eE4BF",
   }
 } as Record<number, ContractAddressMap>;
 
 export const factoryAddressMap = {
   [ChainId.BLAST_SEPOLIA]: [
-    "0x7388d4A76D6Ec12946652c2953cd17B70E457f03",
   ],
   [ChainId.BSC_TESTNET]: [
-    "0x263B2C7ee992959922f7C12FBdE33c1b2519f86D",//0.3% Fee
-    "0x7327A22496F7396B4228656A9c13B9Fb93AE50De",//1% Fee
+    "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",//0.3% Fee
+    "0xfeFcCd94289d39f71DFA09564eC9d14D31b3BeDe",//1% Fee
   ],
 };
 
-export function getFactoryAddresses(chainId: number): `0x${string}`[] {
+export function getSwapFactoryAddresses(chainId: number): `0x${string}`[] {
   // @ts-ignore
   return factoryAddressMap[chainId] || [];
 }
 
-export const routerAddressMap = {
-  [ChainId.BLAST_SEPOLIA]: [
-    "0xff5Ca5f867a03cE04f6ac146d16aF23224518604",
-  ],
-  [ChainId.BSC_TESTNET]: [
-    "0x1c043c58DE8e9bC23cBE72D1bC96c88770B66544",//0.3% Fee
-    "0xa9f423843a1066e91bb31fF09295945EAe1Fa699",//1% Fee
-  ],
-}
-
-export function getRouterAddress(chainId: number, swapFeeRate: string): `0x${string}`[] | undefined {
-  switch (swapFeeRate) {
-    // @ts-ignore
-    case "30": return [routerAddressMap[chainId][0]];
-    // @ts-ignore
-    case "100": return [routerAddressMap[chainId][1]];
-    default: return undefined;
-  }
-}
-
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
-  [ChainId.BSC_TESTNET]: "0x7473c3d610002203fa041b5c9660816c72c66dfc7cd4e1ff353ceb57289c40f4",
+  [ChainId.BSC_TESTNET]: "0xf52fc9f1359be155b90c9431d42b6d85340b12743086a3ba41d0297b047c675a",
+  
 } as Record<number, `0x${string}`>;
 

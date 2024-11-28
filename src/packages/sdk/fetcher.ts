@@ -87,7 +87,7 @@ export abstract class Fetcher {
     // console.log(tokenA, tokenB)
     invariant(tokenA.chainId === tokenB.chainId, "CHAIN_ID");
     const address = Pair.getAddress(tokenA, tokenB, factoryAddress, swapFeeRate?.toString()) as Address;
-    // console.log(address);
+    console.log("pair",address);
     // const swapFeeRate = factoryAddress ? await useSwapFactory().swapFactoryView.swapFeeRate(factoryAddress) : 0;
     const pairContract = getContract({
       abi: PairABI,

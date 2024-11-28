@@ -1,5 +1,5 @@
 import { ChainNames } from "@/contracts/chains";
-import { StakeCurrencyListMap, currencySelectList, currencySelectListETH, currencySelectListTBNB, currencySelectListUSDB } from "@/contracts/currencys";
+import { StakeCurrencyListMap, currencySelectList, currencySelectListETH, currencySelectListTBNB } from "@/contracts/currencys";
 // import { getChainId } from "viem/actions";
 import { useChainId, usePublicClient} from "wagmi"
 import { useEffect, useMemo, useState } from "react";

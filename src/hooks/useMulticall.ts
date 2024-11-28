@@ -29,9 +29,9 @@ export function useMulticall() {
         return receipt;
     }
 
-    async function aggregate3Value(multicallParams: {target:string,callData:string,value:BigInt,allowFailure:boolean}[],value:string){
+    async function aggregate3Value(multicallParams: {target:string,callData:string,value:BigInt,allowFailure:boolean}[],value:BigInt){
         const multicallContract = await getMulticallwrite();
-        const tx = await multicallContract.aggregate3Value(multicallParams,{value: parseEther(value)});
+        const tx = await multicallContract.aggregate3Value(multicallParams,{value: value});
         const receipt = await tx.wait();
         return receipt;
     }

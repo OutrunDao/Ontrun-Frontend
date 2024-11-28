@@ -87,8 +87,8 @@ export default function AddLiquidityCard() {
   }
 
   async function handleAddLiquidity() {
-    // try {
-    //   setIsAddLiquidityLoading(true);
+    try {
+      setIsAddLiquidityLoading(true);
       const receipt = await addLiquidity();
       toast.custom(() => (
         <ToastCustom
@@ -100,15 +100,15 @@ export default function AddLiquidityCard() {
           }
         />
       ));
-    // } catch (error) {
-    //   toast.custom(() => (
-    //     <ToastCustom
-    //       content={"Transaction failed"}
-    //     />
-    //   ));
-    // } finally {
-    //   setIsAddLiquidityLoading(false);
-    // }
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsAddLiquidityLoading(false);
+    }
   }
 
   return (
@@ -163,7 +163,7 @@ export default function AddLiquidityCard() {
                 </div>
               </div>
               <Select
-                onChange={(event) => setswapFeeRate(Number(event.target.value))}
+                onChange={(event) => setswapFeeRate(BigInt(Number(event.target.value)*100))}
                 classNames={{
                   trigger:
                     "bg-transparent data-[hover=true]:bg-transparent rounded-[1.88rem] border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5]",

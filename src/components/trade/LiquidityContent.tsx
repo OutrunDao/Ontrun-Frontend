@@ -41,7 +41,9 @@ export default function LiquidityContent() {
           <Tab key="allPool" title="All Pool">
             <LiquidityTab />
           </Tab>
-          <Tab key="myPositions" title="My Positions"></Tab>
+          <Tab key="myPositions" title="My Positions">
+            
+          </Tab>
         </Tabs>
       </div>
     </div>
