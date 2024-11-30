@@ -16,12 +16,8 @@ import { useState, useEffect, useMemo } from "react";
 import { usePair } from "@/contracts/useContract/usePair";
 import { Address } from "viem";
 
-interface LiquidityTabProps {
-  symbol: string;
-}
-
-export default function LiquidityTab({symbol}: LiquidityTabProps) {
-  const {allPairsData,ownerLiquiditysData} = useSwap({view:SwapView.LiquidityTab});
+export default function AllLiquidityTab() {
+  const {allPairsData} = useSwap({view:SwapView.LiquidityTab});
   const searchHandler = (value: string) => {};
   const [rows , setRows] = useState<any[] | undefined>([]);
 
@@ -39,28 +35,11 @@ export default function LiquidityTab({symbol}: LiquidityTabProps) {
       return _row;
   },[allPairsData])
 
-  const ownerRows = useMemo(() => {
-    if (!ownerLiquiditysData) return;
-      let _row:any[] = []
-      for (let i = 0; i < ownerLiquiditysData.length; i++) {
-        _row.push({
-          id: i.toString(), 
-          pool: `${ownerLiquiditysData[i].token0.symbol}/${ownerLiquiditysData[i].token1.symbol}`,
-          volume: ownerLiquiditysData[i].address,
-        
-        })
-      }
-      return _row;
-  },[ownerLiquiditysData])
-
   useEffect(() => {
-    if(symbol === "All"){
-      setRows(allRows)
-    } else if(symbol === "Owner"){
-      setRows(ownerRows)
-    }
-  },[symbol,allRows]) 
+    setRows(allRows);
+  },[allPairsData])
 
+  // console.log(rows)
   return (
     <div className="flex flex-col gap-y-12 items-center justify-center">
       <div className="bg-no-repeat bg-cover bg-[url('/images/liquidity-tab.png')] w-[82.47rem] h-[56.30rem]">

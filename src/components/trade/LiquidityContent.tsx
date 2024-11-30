@@ -1,6 +1,8 @@
 "use client";
 import { Button, Link, Tab, Tabs } from "@nextui-org/react";
 import LiquidityTab from "./LiquidityTab";
+import AllLiquidityTab from "./AllLiquidityTab";
+import OwnerLiquidityTab from "./OwnerLiquidityTab";
 
 export default function LiquidityContent() {
   return (
@@ -39,10 +41,12 @@ export default function LiquidityContent() {
             panel: "mt-8 pb-24",
           }}>
           <Tab key="allPool" title="All Pool">
-            <LiquidityTab />
+            <AllLiquidityTab />
+            {/* <LiquidityTab symbol = "All"/> */}
           </Tab>
           <Tab key="myPositions" title="My Positions">
-            
+            <OwnerLiquidityTab />
+            {/* <LiquidityTab symbol = "Owner"/> */}
           </Tab>
         </Tabs>
       </div>

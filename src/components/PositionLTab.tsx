@@ -4,7 +4,7 @@ import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { POT } from "@/contracts/tokens/POT";
-import { usePOT } from "@/hooks/usePOT";
+import { usePOT } from "@/contracts/useContract/usePOT";
 import { ethers } from "ethers";
 import Decimal from "decimal.js-light";
 import RedeemTab from "./RedeemTab";
@@ -12,7 +12,7 @@ import { all, chain, set } from "radash";
 import { X } from 'lucide-react'
 import RedeemCard from "./RedeemCard";
 import Position from "@/app/staking/position/page";
-import { useYT } from "@/hooks/useYT";
+import { useYT } from "@/contracts/useContract/useYT";
 import { Accordion, AccordionItem, Divider} from "@nextui-org/react";
 
 

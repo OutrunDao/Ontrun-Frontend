@@ -11,10 +11,10 @@ import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { POT } from "@/contracts/tokens/POT";
 import Decimal from "decimal.js-light";
 import { set } from "radash";
-import { usePOT } from "@/hooks/usePOT";
+import { usePOT } from "@/contracts/useContract/usePOT";
 import { ethers, parseEther } from "ethers";
 import TokenTab from "./TokenTab";
-import { useStakeRouter } from "@/hooks/useStakeRouter";
+import { useStakeRouter } from "@/contracts/useContract/useStakeRouter";
 
 export default function RedeemTab({
   // tokenName,

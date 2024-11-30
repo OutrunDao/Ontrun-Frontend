@@ -16,28 +16,10 @@ import { useState, useEffect, useMemo } from "react";
 import { usePair } from "@/contracts/useContract/usePair";
 import { Address } from "viem";
 
-interface LiquidityTabProps {
-  symbol: string;
-}
-
-export default function LiquidityTab({symbol}: LiquidityTabProps) {
-  const {allPairsData,ownerLiquiditysData} = useSwap({view:SwapView.LiquidityTab});
+export default function OwnerLiquidityTab() {
+  const {ownerLiquiditysData} = useSwap({view:SwapView.LiquidityTab});
   const searchHandler = (value: string) => {};
   const [rows , setRows] = useState<any[] | undefined>([]);
-
-  const allRows = useMemo(() => {
-    if (!allPairsData) return;
-      let _row:any[] = []
-      for (let i = 0; i < allPairsData.length; i++) {
-        _row.push({
-          id: i.toString(), 
-          pool: `${allPairsData[i].token0.symbol}/${allPairsData[i].token1.symbol}`,
-          volume: allPairsData[i].address,
-        
-        })
-      }
-      return _row;
-  },[allPairsData])
 
   const ownerRows = useMemo(() => {
     if (!ownerLiquiditysData) return;
@@ -54,12 +36,8 @@ export default function LiquidityTab({symbol}: LiquidityTabProps) {
   },[ownerLiquiditysData])
 
   useEffect(() => {
-    if(symbol === "All"){
-      setRows(allRows)
-    } else if(symbol === "Owner"){
-      setRows(ownerRows)
-    }
-  },[symbol,allRows]) 
+    setRows(ownerRows);
+  },[ownerLiquiditysData])
 
   return (
     <div className="flex flex-col gap-y-12 items-center justify-center">

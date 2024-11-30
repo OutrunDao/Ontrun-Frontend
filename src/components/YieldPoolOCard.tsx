@@ -5,12 +5,12 @@ import { Currency } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
 import Decimal from "decimal.js-light";
-import { useYT } from "@/hooks/useYT";
+import { useYT } from "@/contracts/useContract/useYT";
 import { Button, Divider, Input, Link } from "@nextui-org/react";
 import { ethers, parseEther } from "ethers";
 import { set } from "radash";
 import { POT } from "@/contracts/tokens/POT";
-import { usePOT } from "@/hooks/usePOT";
+import { usePOT } from "@/contracts/useContract/usePOT";
 
 export default function YieldPoolOCard() {
 

@@ -3,12 +3,12 @@ import { StakeCurrencyListMap, currencySelectList, currencySelectListETH, curren
 // import { getChainId } from "viem/actions";
 import { useChainId, usePublicClient} from "wagmi"
 import { useEffect, useMemo, useState } from "react";
-import { useSY } from "./useSY";
+import { useSY } from "../contracts/useContract/useSY";
 import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
 import { Currency } from "@/packages/core";
 import { set } from "radash";
-import { useYT } from "./useYT";
-import { usePOT } from "./usePOT";
+import { useYT } from "../contracts/useContract/useYT";
+import { usePOT } from "../contracts/useContract/usePOT";
 
 /* eslint-disable no-unused-vars */
 

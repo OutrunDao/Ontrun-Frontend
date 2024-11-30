@@ -5,7 +5,7 @@ import { Address, getContract, PublicClient } from "viem";
 import { erc20ABI } from "./abis/ERC20";
 import { PairABI } from "./abis/Pair";
 import { Pair } from "./entities/pair";
-import { useSwapFactory } from "@/hooks/useSwapFactory";
+import { useSwapFactory } from "@/contracts/useContract/useSwapFactory";
 
 let TOKEN_DECIMALS_CACHE: { [chainId: number]: { [address: string]: number } } = {
   [ChainId.BLAST_SEPOLIA]: {},

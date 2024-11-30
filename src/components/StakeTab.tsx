@@ -12,18 +12,18 @@ import Decimal from "decimal.js-light";
 import { UBNB } from "@/contracts/tokens/UPT";
 import { YT, YTslisBNB } from "@/contracts/tokens/YT";
 import { SYslisBNB } from "@/contracts/tokens/SY";
-import { useSY } from "@/hooks/useSY";
+import { useSY } from "@/contracts/useContract/useSY";
 import { ChainETHSymbol } from "@/contracts/chains";
-import { useYT } from "@/hooks/useYT";
+import { useYT } from "@/contracts/useContract/useYT";
 import StakeSetting from "./trade/StakeSetting";
-import { useStakeRouter } from "@/hooks/useStakeRouter";
+import { useStakeRouter } from "@/contracts/useContract/useStakeRouter";
 import { parseEther } from "viem";
-import { usePOT } from "@/hooks/usePOT";
+import { usePOT } from "@/contracts/useContract/usePOT";
 import { set } from "radash";
 import { N, ethers } from "ethers";
 import { POT } from "@/contracts/tokens/POT";
 import TokenTab from "./TokenTab";
-import { useMulticall } from "@/hooks/useMulticall";
+import { useMulticall } from "@/contracts/useContract/useMulticall";
 import { addressMap } from "@/contracts/addressMap/addressMap";
 
 export default function StakeTab() {

@@ -3,7 +3,7 @@ import { computePairAddress } from "@/packages/sdk";
 import { addressMap } from "../addressMap/addressMap";
 import { ChainId } from "../chains";
 import { tokenAddressMap } from "../addressMap/TokenAddressMap";
-import { useToken } from "@/hooks/useToken";
+import { useToken } from "@/contracts/useContract/useToken";
 
 export const tBNB: { [chainId: number]: Token } = {
 

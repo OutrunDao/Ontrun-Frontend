@@ -76,8 +76,8 @@ export default function SwapCard() {
   };
 
   async function handleSwap() {
-    // try {
-      // setLoading(true);
+    try {
+      setLoading(true);
       const receipt = await swap();
       toast.custom(() => (
         <ToastCustom
@@ -89,16 +89,16 @@ export default function SwapCard() {
           }
         />
       ));
-    // } catch (error) {
-    //   console.log(error);
-    //   toast.custom(() => (
-    //     <ToastCustom
-    //       content={"Transaction failed"}
-    //     />
-    //   ));
-    // } finally {
-    //   setLoading(false);
-    // }
+    } catch (error) {
+      console.log(error);
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

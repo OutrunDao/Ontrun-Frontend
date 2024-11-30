@@ -11,13 +11,15 @@ import { Address, PublicClient, encodeFunctionData, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import useContract from "./useContract";
 import { CurrencySelectListType, getBaseCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
-import { useSwapFactory } from "./useSwapFactory";
-import { useERC20 } from "./useERC20";
-import { useSwapRouter } from "./useSwapRouter";
-import { useMulticall } from "./useMulticall";
+import { useSwapFactory } from "../contracts/useContract/useSwapFactory";
+import { useERC20 } from "../contracts/useContract/useERC20";
+import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
+import { useMulticall } from "../contracts/useContract/useMulticall";
 import { call } from "viem/actions";
-import { usePair } from "./usePair";
-import { useToken } from "./useToken";
+import { usePair } from "../contracts/useContract/usePair";
+import { useToken } from "../contracts/useContract/useToken";
+import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
+import { ApolloError } from "@apollo/client";
 
 export enum BtnAction {
   disable,
@@ -44,8 +46,6 @@ export type SwapOptions = {
 };
 
 function tokenConvert(token: Currency): Token {
-  // if (token.equals(USDB[token.chainId])) return ORUSD[token.chainId];
-  // console.log("token", token);
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
@@ -54,11 +54,7 @@ async function makePairs(tokenA: Currency|Ether, tokenB: Currency|Ether, publicC
   let pairs: Pair[] = [];
   if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
 
-  // console.log("tokenA",tokenA)
-  // console.log("tokenA",tokenConvert(tokenA))
-
   for (let i = 0;i < getSwapFactoryAddresses(chainId).length;i++) {
-    // console.log("getSwapFactoryAddresses(chainId)[i]", i, getSwapFactoryAddresses(chainId)[i]);
     const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getSwapFactoryAddresses(chainId)[i]);
     let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
     console.log("p", p);
@@ -106,8 +102,8 @@ export function useSwap(swapOpts: SwapOptions) {
   const [bestTradeRouter, setBestTradeRouter] = useState<{trade:Trade<Currency, Currency, TradeType>,swapFeeRates:string[]}>();
   const [isToken0Approved, setIsToken0Approved] = useState<boolean>(false);
   const [isToken1Approved, setIsToken1Approved] = useState<boolean>(false);
-  const [allPairs, setAllPairs] = useState<any[][] | undefined>();
   const [allPairsData, setAllPairsData] = useState<any[] | undefined>();
+  const [ownerLiquiditysData, setOwnerLiquiditysData] = useState<any[] | undefined>();
 
   const UseERC20 = useERC20();
   const UseSwapRouter = useSwapRouter();
@@ -133,24 +129,24 @@ export function useSwap(swapOpts: SwapOptions) {
   useEffect(() => {
     if (!chainId || swapOpts.view != SwapView.LiquidityTab) return;
     async function _() {
-      const addresses = getSwapFactoryAddresses(chainId);
-      const result = await Promise.all(
-        addresses.map(async (address) => {
-          return await UseSwapFactory.swapFactoryView.getAllPairs(address);
-        })
-      );
-      setAllPairs(result);
-    };
-    _();
+      return await handleAllPairs();
+    }
+    try {
+      
+    } catch (error) {
+      
+    }
+    _().then(setAllPairsData)
   },[chainId])
 
   useEffect(() => {
-    if (!allPairs || !chainId || swapOpts.view != SwapView.LiquidityTab) return;
+    if (!chainId || swapOpts.view != SwapView.LiquidityTab) return;
     async function _() {
-      return await handleAllPairs();
+      if (!account.address) return;
+      return await handleOwenerLiquiditys(account.address);
     }
-    _().then(setAllPairsData)
-  },[chainId,allPairs])
+    _().then(setOwnerLiquiditysData)
+  },[chainId,account.address])
 
   useEffect(() => {
     if (!chainId) return;
@@ -315,17 +311,44 @@ export function useSwap(swapOpts: SwapOptions) {
   ]);
 
   async function handleAllPairs() {
-    if (!allPairs) return;
     let result: any[] = [];
-    for (let i = 0; i < allPairs.length; i++) {
-      for (let j = 0; j < allPairs[i].length; j++) {
-        const tokens = await UsePair.getPairTokens(allPairs[i][j].pair);
-        const _token0 = await UseToken.getToken({tokenAddress:tokens[0],chainId:chainId});
-        const _token1 = await UseToken.getToken({tokenAddress:tokens[1],chainId:chainId});
-        result.push({token0:_token0,token1:_token1,swapFeeRate:allPairs[i][j].swapFeeRate,address:allPairs[i][j].pair});
-      }
+    try {
+      const Gresult = await useSwapFactoryGraphQL().getPairs(chainId);
+      if (!Gresult) return;
+    for (let i = 0; i < Gresult.length; i++) {
+      const token0 = new Token(chainId, Gresult[i].token0.id, Number(Gresult[i].token0.decimals), Gresult[i].token0.symbol, Gresult[i].token0.name);
+      const token1 = new Token(chainId, Gresult[i].token1.id, Number(Gresult[i].token1.decimals), Gresult[i].token1.symbol, Gresult[i].token1.name);
+      result.push({
+        token0: token0,
+        token1: token1,
+        address: Gresult[i].id,
+      });
     }
     return result;
+    } catch (error) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
+  async function handleOwenerLiquiditys(owner: Address) {
+    let result: any[] = [];
+    try {
+      const Gresult = await useSwapFactoryGraphQL().getOwnerLiquiditys(chainId, owner);
+    if (!Gresult) return;
+    for (let i = 0; i < Gresult.length; i++) {
+      const token0 = new Token(chainId, Gresult[i].pair.token0.id, Number(Gresult[i].pair.token0.decimals), Gresult[i].pair.token0.symbol, Gresult[i].pair.token0.name);
+      const token1 = new Token(chainId, Gresult[i].pair.token1.id, Number(Gresult[i].pair.token1.decimals), Gresult[i].pair.token1.symbol, Gresult[i].pair.token1.name);
+      result.push({
+        token0: token0,
+        token1: token1,
+        address: Gresult[i].id,
+      });
+    }
+    return result;
+    } catch (error) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
   }
 
   async function approveToken0() {
@@ -811,8 +834,8 @@ export function useSwap(swapOpts: SwapOptions) {
       isToken0Approved,
       isToken1Approved,
     },
-    allPairs,
     allPairsData,
+    ownerLiquiditysData,
     loading,
     setLoading,
     setToken0,

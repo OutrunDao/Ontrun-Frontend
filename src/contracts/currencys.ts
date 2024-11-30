@@ -1,5 +1,5 @@
 import { Ether } from "@/packages/core";
-import { Token0, Token1, Token2, tBNB } from "./tokens/tokens";
+import { Token0, Token1, Token2, USDT, tBNB } from "./tokens/tokens";
 import { UBNB } from "./tokens/UPT";
 import { SYslisBNB } from "./tokens/SY";
 import { ChainId } from "./chains";
@@ -34,7 +34,7 @@ export enum ContractName {
 }
 
 export const SwapCurrencyList = {
-    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2,Ether ,slisBNB],
+    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2, Ether, slisBNB, USDT],
 }
 
 export const BaseCurrencyList = {
