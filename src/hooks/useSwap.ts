@@ -171,12 +171,6 @@ export function useSwap(swapOpts: SwapOptions) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, account.address, token0?.name]);
 
-  // useEffect(() => {
-  //   async function _() {
-  //     token0AmountInputHandler(token0AmountInput);
-  //   }
-  // },[token0AmountInput]);
-
   useEffect(() => {
     setToken0AmountInput("");
     setToken1AmountInput("");
@@ -254,13 +248,6 @@ export function useSwap(swapOpts: SwapOptions) {
     });
   }, [tradeRoute, token0, token1]);
 
-  // const routerAddressPath = useMemo(() => {
-  //   if (!bestTradeRouter) return [];
-  //   return bestTradeRouter.swapFeeRates.map((swapFeeRate, index) => {
-  //     return getSwapRouterAddress(chainId, Number(Number(swapFeeRate)*100).toString())![0];
-  //   });
-  // }, [bestTradeRouter,token0, token1]);
-
   const isTransformView = useMemo(() => {
     if (!token0 || !token1) return false;
     // if (token0.isNative && token1.equals(ORETH[chainId])) return true;
@@ -314,6 +301,7 @@ export function useSwap(swapOpts: SwapOptions) {
     let result: any[] = [];
     try {
       const Gresult = await useSwapFactoryGraphQL().getPairs(chainId);
+      console.log("Gresult", Gresult);
       if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
       const token0 = new Token(chainId, Gresult[i].token0.id, Number(Gresult[i].token0.decimals), Gresult[i].token0.symbol, Gresult[i].token0.name);
@@ -321,6 +309,9 @@ export function useSwap(swapOpts: SwapOptions) {
       result.push({
         token0: token0,
         token1: token1,
+        reserve0: parseFloat(Gresult[i].reserve0).toFixed(6).replace(/\.?0+$/, ''),
+        reserve1: parseFloat(Gresult[i].reserve1).toFixed(6).replace(/\.?0+$/, ''),
+        reserveUSD: parseFloat(Gresult[i].reserveUSD).toFixed(6).replace(/\.?0+$/, ''),
         address: Gresult[i].id,
       });
     }
@@ -341,6 +332,9 @@ export function useSwap(swapOpts: SwapOptions) {
       result.push({
         token0: token0,
         token1: token1,
+        reserve0: Gresult[i].pair.reserve0,
+        reserve1: Gresult[i].pair.reserve1,
+        reserveUSD: Gresult[i].pair.reserveUSD,
         address: Gresult[i].id,
       });
     }
@@ -358,8 +352,8 @@ export function useSwap(swapOpts: SwapOptions) {
     const allowanceToken0 = await (token0 as Token).allowance(account.address, routerAddress, publicClient!);
     if (allowanceToken0.lessThan(token0AmountInput || 0)) {
       console.log("token0AmountInput", token0AmountInput);
-      console.log("allowanceToken0", allowanceToken0);
-      console.log(allowanceToken0.lessThan(token0AmountInput || 0))
+      console.log("allowanceToken0", parseUnits(allowanceToken0.toFixed(6), token0.decimals));
+      console.log("TEXT",parseUnits(token0AmountInput!.toString(), token0.decimals) - parseUnits(allowanceToken0.toFixed(6), token0.decimals))
       const receipt = await UseERC20.ERC20Write.approve({
         erc20Address: (token0 as Token).address,
         spender: routerAddress,

@@ -20,11 +20,12 @@ import { useStakeRouter } from "@/contracts/useContract/useStakeRouter";
 import { parseEther } from "viem";
 import { usePOT } from "@/contracts/useContract/usePOT";
 import { set } from "radash";
-import { N, ethers } from "ethers";
+import { N, ethers, parseUnits } from "ethers";
 import { POT } from "@/contracts/tokens/POT";
 import TokenTab from "./TokenTab";
 import { useMulticall } from "@/contracts/useContract/useMulticall";
 import { addressMap } from "@/contracts/addressMap/addressMap";
+import { useERC20 } from "@/contracts/useContract/useERC20";
 
 export default function StakeTab() {
 
@@ -53,13 +54,31 @@ export default function StakeTab() {
   const [NTSymbol, setNTSymbol] = useState<string | undefined>("");
   const [exchangeRate, setExchangeRate] = useState<Decimal>();
   const [slippage, setSlippage] = useState(0.1);
+  const [isApproved, setIsApproved] = useState(false);
   const UseSY = useSY();
   const UseYT = useYT();
   const UseStakeRouter = useStakeRouter();
   const UsePOT = usePOT();
-  const UseMulticall = useMulticall();
+  const UseERC20 = useERC20();
 
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
+
+  const routerAddress = useMemo(() => {
+    return addressMap[chainId].stakeRouter;
+  },[chainId])
+
+  useEffect(() => {
+    async function _() {
+      if (!chainId || !NT || !account.address) return false;
+      if (NT.symbol == "ETH") {
+        return true;
+      } else {
+        const allowance = await (PT as Token).allowance(account.address, routerAddress, publicClient!);
+        return allowance.greaterThanOrEqualTo(NTAmount || 0);
+      }
+    }
+    _().then(setIsApproved);
+  },[NT, NTAmount, chainId, account.address])
 
   useEffect(() => {
     if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
@@ -142,15 +161,6 @@ export default function StakeTab() {
     _().then(setSYAmount);
   }, [NTAmount, exchangeRate, NT]);
 
-  // useEffect(() => {
-
-  //   async function _() {
-  //     const { PTReviewAmount } = await handlePTYTAmount() as { PTReviewAmount: string; YTReviewAmount: string; };
-  //     return PTReviewAmount;
-  //   }
-  //   _().then(setPTAmount);
-  // }, [SYAmount, exchangeRate, NT]);
-
   useEffect(() => {
     async function _YT() {
       const result = await handlePTYTAmount(SYAmount, sliderValue) as { PTReviewAmount: string; YTReviewAmount: string; };
@@ -163,28 +173,6 @@ export default function StakeTab() {
     }
     _PT().then(setPTAmount);
   },[SYAmount, sliderValue, NT, NTAmount])
-
-  // useEffect(() => {
-  //   async function _() {
-  //     if (NTAmount) {
-  //       return String(await handlePTAmount(NTAmount));
-  //     } else {
-  //       return "";
-  //     }
-  //   }
-  //   _().then(setPTAmount);
-  // }, [NTAmount, exchangeRate, NT]);
-
-  // useEffect(() => {
-  //   async function _() {
-  //     if (NTAmount) {
-  //       return String(await handleYTAmount(NTAmount));
-  //     } else {
-  //       return "";
-  //     }
-  //   }
-  //   _().then(setYTAmount);
-  // },[NTAmount, sliderValue, NT])
 
   useEffect(() => {
     async function _() {
@@ -222,32 +210,6 @@ export default function StakeTab() {
           UPTAddress: "0x0000000000000000000000000000000000000000",
           value: NT.symbol == "ETH"?parseEther(NTAmount):undefined,
         })
-
-        // let multiCallParams = [];
-        // const stakeRouterContract = await UseStakeRouter.getStakeRouterwrite();
-        // multiCallParams.push({
-        //   target: addressMap[chainId].stakeRouter,
-        //   callData: stakeRouterContract.interface.encodeFunctionData('mintPPYFromToken', [
-        //       (SY as Token).address,
-        //       POT.address,
-        //       NT.symbol == "ETH"?"0x0000000000000000000000000000000000000000":(NT as Token).address,
-        //       BigInt(parseEther(NTAmount)),
-        //       [
-        //         BigInt(sliderValue),
-        //         BigInt(minPTGenerated),
-        //         account.address,
-        //         account.address,
-        //         account.address,
-        //       ],
-        //       [
-        //         (PT as Token).address,
-        //         "0x0000000000000000000000000000000000000000"
-        //       ],
-        //     ]),
-        //   value: parseEther(NTAmount),
-        //   allowFailure: false
-        // })
-        // const receipt = await UseMulticall.aggregate3Value(multiCallParams,NTAmount);
   
         toast.custom(() => (
           <ToastCustom
@@ -271,6 +233,46 @@ export default function StakeTab() {
         setNTAmount("");
       }
       
+    }
+  }
+
+  async function approveNT() {
+    if (!NT || !NTAmount || !routerAddress) return;
+
+    if (!account.address)
+      return toast.custom(<ToastCustom content="Please Connect Wallet" />);
+
+    setIsLoading(true);
+    try {
+      if (!account.address) return console.log("wallet account is not connected");
+      const allowanceToken = await (PT as Token).allowance(account.address, routerAddress, publicClient!);
+      if (allowanceToken.lessThan(NTAmount || 0)) {
+        const receipt = await UseERC20.ERC20Write.approve({
+          erc20Address: (PT as Token).address,
+          spender: routerAddress,
+          amount: parseUnits(NTAmount!.toString(), NT.decimals) - parseUnits(allowanceToken!.toString(), NT.decimals),
+        });
+        if (receipt.status === 1) {
+          setIsApproved(true);
+        }
+        toast.custom(() => (
+          <ToastCustom
+            content={
+              receipt.status === 1
+                ? `You have successfully approved ${NTAmount} ${NT?.symbol}`
+                : "Transaction failed"
+            }
+          />
+        ));
+      }
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={`Transaction failed`}
+        />
+      ));
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -381,21 +383,24 @@ export default function StakeTab() {
           </div>
         )}
       />
+      {isApproved ? (
+        <Button
+          onClick={Stake}
+          isLoading={isLoading}
+          isDisabled={!Number(NTAmount) || !Number(PTAmount) }
+          className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+          {title}
+        </Button>
+      ) : (
+        <Button
+          onClick={approveNT}
+          isLoading={isLoading}
+          isDisabled={!Number(NTAmount) || !Number(PTAmount) }
+          className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+          Approve
+        </Button>
+      )}
 
-      {/* <div className="flex flex-col gap-y-[0.35rem] w-[28rem]  text-[0.82rem] leading-[1.12rem] font-avenir font-medium my-[0.71rem]">
-        <div className="flex justify-between w-full text-white text-opacity-50">
-          <span>Exchange Rate</span>
-          {NT&&PT ?  <span>1 {NTSymbol} = {1 / Number(exchangeRate?.toFixed(18))} {PT.symbol}</span> : null}
-          
-        </div>
-      </div> */}
-      <Button
-        onClick={Stake}
-        isLoading={isLoading}
-        isDisabled={!Number(NTAmount) || !Number(PTAmount) }
-        className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-        {title}
-      </Button>
     </div>
   );
 }

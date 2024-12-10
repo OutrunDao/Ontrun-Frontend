@@ -28,7 +28,8 @@ export default function AllLiquidityTab() {
         _row.push({
           id: i.toString(), 
           pool: `${allPairsData[i].token0.symbol}/${allPairsData[i].token1.symbol}`,
-          volume: allPairsData[i].address,
+          volume: `${allPairsData[i].reserve0} / ${allPairsData[i].reserve1} `,
+          tcl: `${allPairsData[i].reserveUSD}`,
         
         })
       }

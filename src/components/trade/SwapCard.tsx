@@ -287,26 +287,25 @@ export default function SwapCard() {
                 </Accordion>
               </div>
             )}
-
-            <Button
-              onPress={handleApproveToken0}
-              isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken0Approved}
-              isLoading={isApproveToken0Loading}
-              className="bg-button-gradient text-white mt-8 w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-              {swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken0Approved ? "Approved" : "Approve Token0"}
-            </Button>
-
-            {swapData.submitButtonStatus === BtnAction.insufficient ? (
-              <Button className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                insufficient token
-              </Button>
-            ) : (
+            {swapData.isToken0Approved ? swapData.submitButtonStatus === BtnAction.insufficient ? (
+                <Button className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  insufficient token
+                </Button>
+              ) : (
+                <Button
+                  onPress={handleSwap}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable || !swapData.isToken0Approved}
+                  isLoading={loading}
+                  className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  Swap
+                </Button>
+              ) : (
               <Button
-                onPress={handleSwap}
-                isDisabled={swapData.submitButtonStatus === BtnAction.disable || !swapData.isToken0Approved}
-                isLoading={loading}
-                className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                Swap
+                onPress={handleApproveToken0}
+                isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken0Approved}
+                isLoading={isApproveToken0Loading}
+                className="bg-button-gradient text-white mt-8 w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                Approve
               </Button>
             )}
           </div>
@@ -315,3 +314,4 @@ export default function SwapCard() {
     </div>
   );
 }
+//{swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken0Approved ? "Approved" : "Approve Token0"}

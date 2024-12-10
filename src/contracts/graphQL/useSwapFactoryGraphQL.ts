@@ -25,6 +25,9 @@ export function useSwapFactoryGraphQL() {
                         symbol
                         decimals
                     }
+                    reserve0
+                    reserve1
+                    reserveUSD
                     totalSupply
                 }
             }
@@ -60,6 +63,9 @@ export function useSwapFactoryGraphQL() {
                             symbol
                             decimals
                         }
+                        reserve0
+                        reserve1
+                        reserveUSD
                         totalSupply
                     }
                 }
