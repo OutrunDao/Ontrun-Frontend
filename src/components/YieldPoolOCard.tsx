@@ -1,5 +1,4 @@
 import { use, useEffect, useMemo, useState } from "react";
-import YieldPoolOTab from "./YieldPoolOTab";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { Currency } from "@/packages/core";
 import { useSearchParams } from "next/navigation";

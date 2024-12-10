@@ -1,12 +1,7 @@
 "use client"
 
 import { Tab, Tabs } from "@nextui-org/react"
-import { ArrowLeft, Eye } from 'lucide-react'
-import MintTab from "./MintTab"
 import StakeTab from "./StakeTab"
-import { CurrencySelectListType } from "@/contracts/currencys"
-import YieldPoolCard from "./YieldPoolCard"
-import RedeemTab from "./RedeemTab"
 import YieldPoolOCard from "./YieldPoolOCard"
 export default function LiquidStakingCard() {
   return (

@@ -14,12 +14,8 @@ import { CurrencySelectListType, getBaseCurrencyList, getSwapCurrencyList } from
 import { useSwapFactory } from "../contracts/useContract/useSwapFactory";
 import { useERC20 } from "../contracts/useContract/useERC20";
 import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
-import { useMulticall } from "../contracts/useContract/useMulticall";
-import { call } from "viem/actions";
-import { usePair } from "../contracts/useContract/usePair";
-import { useToken } from "../contracts/useContract/useToken";
 import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
-import { ApolloError } from "@apollo/client";
+
 
 export enum BtnAction {
   disable,
@@ -49,37 +45,7 @@ function tokenConvert(token: Currency): Token {
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
-async function makePairs(tokenA: Currency|Ether, tokenB: Currency|Ether, publicClient: PublicClient): Promise<any[]> {
-  const chainId = publicClient.chain!.id;
-  let pairs: Pair[] = [];
-  if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
 
-  for (let i = 0;i < getSwapFactoryAddresses(chainId).length;i++) {
-    const swapFeeRate = await useSwapFactory().swapFactoryView.swapFeeRate(getSwapFactoryAddresses(chainId)[i]);
-    let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
-    console.log("p", p);
-    if (p) pairs.push(p);
-    for (let j = 0; j < getBaseCurrencyList(chainId).length; j++) {
-      if (!tokenA.equals(getBaseCurrencyList(chainId)[j][chainId])) {
-        p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenA), publicClient, swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
-        if (p) pairs.push(p);
-      };
-      if (!tokenB.equals(getBaseCurrencyList(chainId)[j][chainId])) {
-        p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenB), publicClient, swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
-        if (p) pairs.push(p);
-      };
-    }
-  }
-
-  console.log("pairs", pairs);
-  const uniquePairs = pairs.filter((pair, index, self) =>
-    index === self.findIndex((p) => (
-      p.token0.equals(pair.token0) && p.token1.equals(pair.token1) && p.swapFeeRate===pair.swapFeeRate
-    ))
-  );
-  console.log("uniquePairs", uniquePairs);
-  return uniquePairs;
-}
 
 export function useSwap(swapOpts: SwapOptions) {
   const chainId = useChainId();
@@ -107,10 +73,8 @@ export function useSwap(swapOpts: SwapOptions) {
 
   const UseERC20 = useERC20();
   const UseSwapRouter = useSwapRouter();
-  const UseMulticall = useMulticall();
   const UseSwapFactory = useSwapFactory();
-  const UsePair = usePair();
-  const UseToken = useToken();
+  const UseSwapFactoryGraphQL = useSwapFactoryGraphQL();
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -297,10 +261,40 @@ export function useSwap(swapOpts: SwapOptions) {
     priceImpact,
   ]);
 
+  async function makePairs(tokenA: Currency|Ether, tokenB: Currency|Ether, publicClient: PublicClient): Promise<any[]> {
+    const chainId = publicClient.chain!.id;
+    let pairs: Pair[] = [];
+    if (!tokenA || !tokenB) console.error("tokenA or tokenB is not defined");
+  
+    for (let i = 0;i < getSwapFactoryAddresses(chainId).length;i++) {
+      const swapFeeRate = await UseSwapFactory.swapFactoryView.swapFeeRate(getSwapFactoryAddresses(chainId)[i]);
+      let p = await Fetcher.fetchPairData(tokenConvert(tokenA), tokenConvert(tokenB), publicClient,  swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
+      console.log("p", p);
+      if (p) pairs.push(p);
+      for (let j = 0; j < getBaseCurrencyList(chainId).length; j++) {
+        if (!tokenA.equals(getBaseCurrencyList(chainId)[j][chainId])) {
+          p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenA), publicClient, swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
+          if (p) pairs.push(p);
+        };
+        if (!tokenB.equals(getBaseCurrencyList(chainId)[j][chainId])) {
+          p = await Fetcher.fetchPairData(tokenConvert(getBaseCurrencyList(chainId)[j][chainId]), tokenConvert(tokenB), publicClient, swapFeeRate, getSwapFactoryAddresses(chainId)[i]);
+          if (p) pairs.push(p);
+        };
+      }
+    }
+  
+    const uniquePairs = pairs.filter((pair, index, self) =>
+      index === self.findIndex((p) => (
+        p.token0.equals(pair.token0) && p.token1.equals(pair.token1) && p.swapFeeRate===pair.swapFeeRate
+      ))
+    );
+    return uniquePairs;
+  }
+
   async function handleAllPairs() {
     let result: any[] = [];
     try {
-      const Gresult = await useSwapFactoryGraphQL().getPairs(chainId);
+      const Gresult = await UseSwapFactoryGraphQL.getPairs(chainId);
       console.log("Gresult", Gresult);
       if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
@@ -324,7 +318,7 @@ export function useSwap(swapOpts: SwapOptions) {
   async function handleOwenerLiquiditys(owner: Address) {
     let result: any[] = [];
     try {
-      const Gresult = await useSwapFactoryGraphQL().getOwnerLiquiditys(chainId, owner);
+      const Gresult = await UseSwapFactoryGraphQL.getOwnerLiquiditys(chainId, owner);
     if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
       const token0 = new Token(chainId, Gresult[i].pair.token0.id, Number(Gresult[i].pair.token0.decimals), Gresult[i].pair.token0.symbol, Gresult[i].pair.token0.name);

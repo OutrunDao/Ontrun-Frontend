@@ -1,4 +1,3 @@
-
 import ReferralContent from "@/components/trade/RefferContent";
 import type { Metadata } from "next";
 

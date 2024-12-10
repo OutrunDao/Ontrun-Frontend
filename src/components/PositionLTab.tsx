@@ -122,8 +122,8 @@ export default function PositionLTab() {
                             <span className="absolute left-[50%]">APY</span>
                             <span className="absolute left-[72.5%]">Unlockdays</span>
                         </div>
-                    {items.map((item, index) => (
-                        <div>
+                    {items.map((item: any, index: number) => (
+                        <div key={index}>
                             <Divider className="w-[calc(100%-1rem)] border-solid border-[0.1rem] border-[#9A6BE1] border-opacity-30 mx-2"/>
                             <div key={index} className="w-full h-[3rem] text-white relative">
                                 <div className="h-"></div>

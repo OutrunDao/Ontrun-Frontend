@@ -3,7 +3,35 @@ import { computePairAddress } from "@/packages/sdk";
 import { addressMap } from "../addressMap/addressMap";
 import { ChainId } from "../chains";
 import { tokenAddressMap } from "../addressMap/TokenAddressMap";
-import { useToken } from "@/contracts/useContract/useToken";
+
+export const WETH9: { [chainId: number]: Token } = {
+  // blast testnet
+  [ChainId.BLAST_SEPOLIA]: new Token(
+    ChainId.BLAST_SEPOLIA,
+    "0x4200000000000000000000000000000000000023",
+    18,
+    "WETH",
+    "Wrapped Ether",
+  ),
+  // blast mainnet
+  [ChainId.BLAST]: new Token(ChainId.BLAST, "0x4300000000000000000000000000000000000004", 18, "WETH", "Wrapped Ether"),
+};
+
+/**
+ * Blast usdt like coin: usdb
+ */
+export const USDB: { [chainId: number]: Token } = {
+  // blast testnet
+  [ChainId.BLAST_SEPOLIA]: new Token(
+    ChainId.BLAST_SEPOLIA,
+    "0x4200000000000000000000000000000000000022",
+    18,
+    "USDB",
+    "USDB",
+  ),
+  // blast mainnet
+  [ChainId.BLAST]: new Token(ChainId.BLAST, "0x4200000000000000000000000000000000000022", 18, "USDB", "USDB"),
+};
 
 export const tBNB: { [chainId: number]: Token } = {
 
@@ -25,8 +53,6 @@ export const ORETH: { [chainId: number]: Token } = {
     "Wrapped BNB",
   )
 }
-
-const UseToken = useToken();
 
 export const Token0: { [chainId: number]: Token } = {
   [ChainId.BSC_TESTNET]: new Token(

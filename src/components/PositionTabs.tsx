@@ -4,7 +4,6 @@ import { Tab, Tabs } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import PositionTab from "./PositionNTab";
-import PositionETHCard from "./PositionETHCard";
 
 export default function PositionTabs() {
   const account = useAccount();
