@@ -99,12 +99,6 @@ export default function PositionLTab() {
         setSelectedPosition(null);
         setOnOpne(false);
     }
-
-
-    const PositionsDates = [
-        {name: "ETH", APY: "0.00%", value: "0.00", deadline: "0"},
-        {name: "USDB", APY: "0.00%", value: "0.00", deadline: "0"},
-    ]
     
     return (
 
@@ -168,75 +162,7 @@ export default function PositionLTab() {
                     )}
                     </AccordionItem>
                 ))}
-
-                {/* <AccordionItem 
-                    key="1" 
-                    aria-label="Accordion 1" 
-                    title={
-                        <div>
-                            <span className="text-white ml-4">Accordion 1</span>
-                        </div>
-                    }
-                    className="shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card"
-                     >
-                        <div className="flex justify-between relative text-purple-300 mb-8">
-                            <span className="absolute left-[4%]">Name</span>
-                            <span className="absolute left-[26%]">PrincipalRedeemable</span>
-                            <span className="absolute left-[50%]">APY</span>
-                            <span className="absolute left-[72.5%]">Unlockdays</span>
-                        </div>
-                    {positionDatas && positionDatas.map((item, index) => (
-                        <div>
-                            <Divider className="w-[calc(100%-1rem)] border-solid border-[0.1rem] border-[#9A6BE1] border-opacity-30 mx-2"/>
-                            <div key={index} className="w-full h-[3rem] text-white relative">
-                                <div className="h-"></div>
-                                <div className="flex justify-between h-full items-center text-lg text-center mx-8">
-                                    <span className="absolute left-[4%] top-1/2 transform -translate-y-1/2 text-white">{item.name}</span>
-                                    <span className="absolute left-[25%] top-1/2 transform -translate-y-1/2 text-white">{item.principalRedeemable.toFixed(6)}</span>
-                                    <span className="absolute left-[50%] top-1/2 transform -translate-y-1/2 text-white">{item.APY}%</span>
-                                    <span className="absolute left-[75%] top-1/2 transform -translate-y-1/2 text-white">{item.deadline}{" "}days</span>
-                                    <Button 
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-button-gradient text-white" 
-                                        onClick={() => handleOpen(item)}
-                                    >
-                                        Redeem
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                        
-
-                    ))}
-                    {selectedPosition && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="relative">
-                                <RedeemCard positionData={selectedPosition}/>
-                                <Button
-                                    onClick={handleClosePopup}
-                                    className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-300"
-                                    variant="ghost"
-                                    size="icon"
-                                    aria-label="Close"
-                                >
-                                    <X className="h-6 w-6" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </AccordionItem> */}
-
             </Accordion>
-
-            
         </div>
-        
-        // <div className="w-full h-[5rem] text-white relative border-solid border-[#504360] border-[0.15rem] rounded-[1.25rem] bg-white bg-opacity-5">
-        //     <div className="flex justify-between h-full items-center text-center mb-2">
-        //             <span>Name</span>
-        //             <span>APY</span>
-        //             <span>value</span>
-        //             <span>deadline</span>
-        //     </div>
-        // </div>
     )
 }

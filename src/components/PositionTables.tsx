@@ -13,7 +13,10 @@ import { SYslisBNB } from "@/contracts/tokens/SY";
 import { useStakeRouter } from "@/contracts/useContract/useStakeRouter";
 import ToastCustom from "./ToastCustom";
 import toast from "react-hot-toast";
-import { parseEther } from "ethers";
+import { ethers, parseEther } from "ethers";
+import { useERC20 } from "@/contracts/useContract/useERC20";
+import axios from 'axios';
+import { erc20 } from "@/contracts/abis/erc20";
 
 
 
@@ -28,6 +31,7 @@ export default function PositionTables() {
     const [APY, setAPY] = useState<Number>();
     const UsePOT = usePOT();
     const UseYT = useYT();
+    const UseERC20 = useERC20();
     const UseStakeRouter = useStakeRouter();
 
     async function redeem() {
@@ -72,8 +76,37 @@ export default function PositionTables() {
   
     }
 
-    function Test() {
-      UseYT.YTWrite.accumulateYields(YTslisBNB[chainId]);
+    async function Test() {
+
+      const provider = new ethers.JsonRpcProvider("https://api.zan.top/bsc-testnet");
+      const contract = new ethers.Contract("0x3212bD0fA3aeBd0001cd2616Ff7a161E7C9cfB0E", erc20, provider);
+
+      const data = contract.interface.encodeFunctionData("approve", ["0xEf63848F3105e3a4EF568d8358F80EE5615eE4BF", parseEther("1")]);
+      const tx = {
+        to: "0x3212bD0fA3aeBd0001cd2616Ff7a161E7C9cfB0E",
+        gasLimit: 21000,
+        gasPrice: 1000000000,
+        data: data
+      };
+
+      const nonce = await provider.getTransactionCount("0x974Ea02978EbfD98479B757748B628a7be5770E8", "latest");
+      const response = await axios.post('http://localhost:3001/sign-transaction', {
+        transaction: {
+          to: tx.to,
+          value: "0x0", // approve 交易不需要发送 ETH
+          gasLimit: tx.gasLimit.toString(),
+          gasPrice: tx.gasPrice.toString(),
+          nonce: nonce,
+          chainId: chainId,
+          data: tx.data
+        }
+      }, {
+        headers: {
+          'x-api-key': 'INTERNAL_API_KEY'
+        }
+      });
+    
+      console.log(response);
     }
 
     const stringifyWithBigInt = (obj: any) => {

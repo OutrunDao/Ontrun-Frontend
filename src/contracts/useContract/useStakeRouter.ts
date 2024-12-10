@@ -95,12 +95,13 @@ export  function useStakeRouter() {
             const signer = await provider.getSigner();
 
             const stakeRouterContract = new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
+
             const tx = await stakeRouterContract.redeemPPToToken(
                 SYAddress,
                 PTAddress,
                 UPTAddress,
                 POTAddress,
-                slisBNB[chainId].address,
+                addressMap[chainId].slisBNB,
                 receiverAddress,
                 [
                     positionId,

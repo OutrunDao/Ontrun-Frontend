@@ -19,11 +19,20 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { ChevronDown, Settings } from "lucide-react"
+import { setCookie } from "nookies";
 
 export function Menu() {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
+	useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get('inviteCode');
+    if (inviteCode) {
+      setCookie(null,'inviteCode', inviteCode, { expires: 7 }); // Cookie expires in 7 days
+    }
+  });
 
   useEffect(() => {
     const handleScroll = () => {

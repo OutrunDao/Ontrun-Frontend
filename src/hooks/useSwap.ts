@@ -357,10 +357,13 @@ export function useSwap(swapOpts: SwapOptions) {
     if (token0.isNative) return;
     const allowanceToken0 = await (token0 as Token).allowance(account.address, routerAddress, publicClient!);
     if (allowanceToken0.lessThan(token0AmountInput || 0)) {
+      console.log("token0AmountInput", token0AmountInput);
+      console.log("allowanceToken0", allowanceToken0);
+      console.log(allowanceToken0.lessThan(token0AmountInput || 0))
       const receipt = await UseERC20.ERC20Write.approve({
         erc20Address: (token0 as Token).address,
         spender: routerAddress,
-        amount: parseUnits(token0AmountInput!.toString(), token0.decimals),
+        amount: parseUnits(token0AmountInput!.toString(), token0.decimals) - parseUnits(allowanceToken0.toFixed(6), token0.decimals),
       });
       return receipt;
     }
@@ -375,7 +378,7 @@ export function useSwap(swapOpts: SwapOptions) {
       const receipt = await UseERC20.ERC20Write.approve({
         erc20Address: (token1 as Token).address,
         spender: routerAddress,
-        amount: parseUnits(token1AmountInput!.toString(), token1.decimals),
+        amount: parseUnits(token1AmountInput!.toString(), token1.decimals) - parseUnits(allowanceToken1.toFixed(6), token1.decimals),
       });
       return receipt;
     }
@@ -478,239 +481,13 @@ export function useSwap(swapOpts: SwapOptions) {
         path: tradeRouteAddressPath,
         swapFeeRates: swapFeeRates,
         to: account.address,
-        referrer: "0x0000000000000000000000000000000000000000",
+        // referrer: "0x0000000000000000000000000000000000000000",
+        referrer: "0x35eDD5f2c2205C4e88F3a69279D1EF06497cF44a",
         deadline: BigInt(deadline),
       });
       return receipt;
     }
   }
-
-  // async function swap() {
-  //   if (!account.address) return console.log("wallet account is not connected");
-  //   if (!token0 || !token1 ) return;
-  //   const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
-  //   const token1AmountInputMin = Number(token1AmountInput)*(1-slippage)/100;
-  //   let multiCallParams = [];
-  //   let pathes = [];
-  //   let value = BigInt(0);
-  //   for (let i = 0; i < tradeRouteAddressPath.length-1; i++) {
-  //     pathes.push([tradeRouteAddressPath[i], tradeRouteAddressPath[i+1]]);
-  //   }
-  //   for (let i = 0; i < pathes.length; i++) {
-  //     if (i == 0) {
-  //       if (token0.isNative) {
-  //         const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
-  //         multiCallParams.push({
-  //           target: routerAddressPath[i],
-  //           callData: swapRouterContract.interface.encodeFunctionData(
-  //             'swapExactETHForTokens',
-  //             [
-  //               parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //               tradeRouteAddressPath,
-  //               account.address,
-  //               "0x0000000000000000000000000000000000000000",
-  //               BigInt(deadline),
-  //             ]
-  //           ),
-  //           value: parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //           allowFailure: false,
-  //         })
-  //         value = parseUnits(token0AmountInput!.toString(), token0.decimals);
-  //       } else {
-  //         // console.log("routerAddressPath", routerAddressPath[0]);
-  //         // console.log("token0AmountInput", parseUnits(token0AmountInput!.toString(), token0.decimals));
-  //         // console.log("token1AmountInputMin", parseUnits(token1AmountInputMin!.toString(), token1.decimals));
-  //         // console.log("tradeRouteAddressPath", tradeRouteAddressPath);
-  //         // console.log("account.address", account.address);
-  //         // console.log("deadline", BigInt(deadline));
-  //         const ERC20Contract = await UseERC20.getERC20write(token0.address);
-  //         multiCallParams.push({
-  //           target: token0.address,
-  //           callData: ERC20Contract.interface.encodeFunctionData(
-  //             'transferFrom',
-  //             [
-  //               account.address,
-  //               addressMap[chainId].multicall,
-  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //             ]
-  //           ),
-  //           value: BigInt(0),
-  //           allowFailure: false,
-  //         }
-  //         ,{
-  //           target: token0.address,
-  //           callData: ERC20Contract.interface.encodeFunctionData(
-  //             'approve',
-  //             [
-  //               routerAddressPath[i],
-  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //             ]
-  //           ),
-  //           value: BigInt(0),
-  //           allowFailure: false,
-  //         })
-
-  //         const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
-  //         multiCallParams.push({
-  //           target: routerAddressPath[i],
-  //           callData: swapRouterContract.interface.encodeFunctionData(
-  //             'swapExactTokensForTokens',
-  //             [
-  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //               parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //               tradeRouteAddressPath,
-  //               account.address,
-  //               "0x0000000000000000000000000000000000000000",
-  //               BigInt(deadline),
-  //             ]
-  //           ),
-  //           value: BigInt(0),
-  //           allowFailure: false,
-  //         })
-  //       }
-        
-  //     } else if (i == pathes.length-1) {
-  //       if (token1.isNative) {
-  //         continue;
-  //       } else {
-  //         const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
-  //         multiCallParams.push({
-  //           target: routerAddressPath[i],
-  //           callData: swapRouterContract.interface.encodeFunctionData(
-  //             'swapExactTokensForTokens',
-  //             [
-  //               parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //               parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //               tradeRouteAddressPath,
-  //               account.address,
-  //               "0x0000000000000000000000000000000000000000",
-  //               BigInt(deadline),
-  //             ]
-  //           ),
-  //           value: BigInt(0),
-  //           allowFailure: false,
-  //         })
-  //       }
-  //     } else {
-  //       const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddressPath[i]);
-  //       multiCallParams.push({
-  //         target: routerAddressPath[i],
-  //         callData: swapRouterContract.interface.encodeFunctionData(
-  //           'swapExactTokensForTokens',
-  //           [
-  //             parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //             parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //             tradeRouteAddressPath,
-  //             account.address,
-  //             "0x0000000000000000000000000000000000000000",
-  //             BigInt(deadline),
-  //           ]
-  //         ),
-  //         value: BigInt(0),
-  //         allowFailure: false,
-  //       })
-  //     }
-  //   }
-  //   const receipt = await UseMulticall.aggregate3Value(multiCallParams,value);
-  //   return receipt;
-  // }
-
-  // async function swap() {
-  //   if (!account.address) return console.log("wallet account is not connected");
-  //   if (!bestTradeRouter || !token0 || !token1) return;
-  //   const swapRouterContract = await UseSwapRouter.getSwapRouterwrite(routerAddress);
-  //   const path = bestTradeRouter.trade.route.path;
-  //   const swapFeeRates = bestTradeRouter.swapFeeRates;
-  //   const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
-  //   const token1AmountInputMin = Number(token1AmountInput)*(1-slippage)/100;
-  //   let multiCallParams = [];
-  //   let value = BigInt(0);
-  //   if (token0.isNative) {
-  //     multiCallParams.push({
-  //       target: routerAddress,
-  //       callData: swapRouterContract.interface.encodeFunctionData(
-  //         'swapExactETHForTokens',
-  //         [
-  //           parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //           path,
-  //           swapFeeRates,
-  //           account.address,
-  //           "0x0000000000000000000000000000000000000000",
-  //           BigInt(deadline),
-  //         ]
-  //       ),
-  //       value: parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //       allowFailure: false,
-  //     })
-  //     value = parseUnits(token0AmountInput!.toString(), token0.decimals);
-  //   } else if (token1.isNative) {
-  //     multiCallParams.push({
-  //       target: routerAddress,
-  //       callData: swapRouterContract.interface.encodeFunctionData(
-  //         'swapExactTokensForETH',
-  //         [
-  //           parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //           BigInt(0),
-  //           path,
-  //           swapFeeRates,
-  //           account.address,
-  //           "0x0000000000000000000000000000000000000000",
-  //           BigInt(deadline),
-  //         ]
-  //       ),
-  //       value: BigInt(0),
-  //       allowFailure: false,
-  //     })
-  //   } else {
-  //     const ERC20Contract = await UseERC20.getERC20write(token0.address);
-  //     multiCallParams.push({
-  //       target: token0.address,
-  //       callData: ERC20Contract.interface.encodeFunctionData(
-  //         'transferFrom',
-  //         [
-  //           account.address,
-  //           addressMap[chainId].multicall,
-  //           parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //         ]
-  //       ),
-  //       value: BigInt(0),
-  //       allowFailure: false,
-  //     }
-  //     ,{
-  //       target: token0.address,
-  //       callData: ERC20Contract.interface.encodeFunctionData(
-  //         'approve',
-  //         [
-  //           routerAddress,
-  //           parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //         ]
-  //       ),
-  //       value: BigInt(0),
-  //       allowFailure: false,
-  //     })
-
-  //     multiCallParams.push({
-  //       target: routerAddress,
-  //       callData: swapRouterContract.interface.encodeFunctionData(
-  //         'swapExactTokensForTokens',
-  //         [
-  //           parseUnits(token0AmountInput!.toString(), token0.decimals),
-  //           parseUnits(token1AmountInputMin!.toString(), token1.decimals),
-  //           path,
-  //           swapFeeRates,
-  //           account.address,
-  //           "0x0000000000000000000000000000000000000000",
-  //           BigInt(deadline),
-  //         ]
-  //       ),
-  //       value: BigInt(0),
-  //       allowFailure: false,
-  //     })
-  //   }
-
-  //   const receipt = await UseMulticall.aggregate3Value(multiCallParams,value);
-  //   return receipt;
-  // }
 
   async function setSwapDataWhenInput(tradeType: TradeType, value: string) {
     setRouteNotExist(false);

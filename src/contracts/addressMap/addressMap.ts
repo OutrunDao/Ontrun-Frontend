@@ -22,6 +22,7 @@ export enum ContractName {
   multicall = "multicall",
   slisBNB = "slisBNB",
   stakeRouter = "stakeRouter",
+  refferManager = "refferManager",
 }
 export type ContractAddressMap = Record<string, `0x${string}`>;
 
@@ -44,9 +45,10 @@ export const addressMap = {
     [ContractName.WBNB]: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
     [ContractName.multicall]: "0xcA11bde05977b3631167028862bE2a173976CA11",
     [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
-    [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
+    [ContractName.stakeRouter]: "0x88c022aA8Ccae9C1cdc2BeC7Aac32dc0ec61986c",
     [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
     [ContractName.SWAP_ROUTER]: "0xEf63848F3105e3a4EF568d8358F80EE5615eE4BF",
+    [ContractName.refferManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
   }
 } as Record<number, ContractAddressMap>;
 

@@ -21,6 +21,7 @@ export default function SwapCard() {
 
   const [ tokenA,setTokenA ] = useState();
   const [ tokenB,setTokenB ] = useState();
+  const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
 
   const {
     swapData,
@@ -34,11 +35,38 @@ export default function SwapCard() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
+    approveToken0,
     swap,
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
   });
+
+  async function handleApproveToken0() {
+    try {
+      setIsApproveToken0Loading(true);
+      const receipt = await approveToken0();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Approve Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsApproveToken0Loading(false);
+    }
+    // setIsApproveToken0Loading(false);
+  }
 
   useEffect(() => {
 
@@ -260,6 +288,14 @@ export default function SwapCard() {
               </div>
             )}
 
+            <Button
+              onPress={handleApproveToken0}
+              isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken0Approved}
+              isLoading={isApproveToken0Loading}
+              className="bg-button-gradient text-white mt-8 w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+              {swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken0Approved ? "Approved" : "Approve Token0"}
+            </Button>
+
             {swapData.submitButtonStatus === BtnAction.insufficient ? (
               <Button className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
                 insufficient token
@@ -267,7 +303,7 @@ export default function SwapCard() {
             ) : (
               <Button
                 onPress={handleSwap}
-                isDisabled={swapData.submitButtonStatus === BtnAction.disable}
+                isDisabled={swapData.submitButtonStatus === BtnAction.disable || !swapData.isToken0Approved}
                 isLoading={loading}
                 className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
                 Swap
