@@ -17,4 +17,18 @@ export function useEndPoint() {
     const signer = await provider.getSigner();
     return new ethers.Contract(memeverseAddressMap[ChainId.BSC_TESTNET].endPoint, endPointAbi, signer);
   }
+
+  async function quote({
+    omnichainIds,
+    options,
+    message,
+  }: {
+    omnichainIds: Number[];
+    options: any;
+    message: any;
+  }) {
+    const memeverseRegistrationCenterContract = await getMemeverseRegistrationCenterRead();
+    const receipt = await memeverseRegistrationCenterContract.quote(omnichainIds, options, message);
+    return receipt;
+  }
 }
