@@ -32,7 +32,7 @@ import {
         offset={10}
         classNames={{
           content:
-            "w-[19.12rem] h-[16.29rem] px-[1.18rem] py-[0.88rem] gap-y-4 justify-start items-start bg-transparent bg-blur text-white border-[0.06rem] rounded-[1.25rem] border-[#C29BFF] border-opacity-[0.37] backdrop-blur-sm",
+            "w-[19.12rem] px-[1.18rem] py-[0.88rem] gap-y-4 justify-start items-start bg-transparent bg-blur text-white border-[0.06rem] rounded-[1.25rem] border-[#C29BFF] border-opacity-[0.37] backdrop-blur-sm",
         }}>
         <PopoverTrigger>
           <Button
@@ -83,6 +83,7 @@ import {
             <div className="w-[6rem] flex justify-between items-center">
               <Input
                 onValueChange={(value) => setSlipPage(Number(value))}
+                value={slippage.toString()}
                 placeholder="1.0"
                 classNames={{
                   base: "w-[4.71rem] h-[1rem] mt-[-0.5rem]",

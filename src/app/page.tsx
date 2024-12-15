@@ -1,6 +1,5 @@
 import { Discover } from "@/components/Discover";
 import { HomeDescription } from "@/components/HomeDescription";
-import { Investor } from "@/components/Investor";
 
 export default function Index() {
   return (

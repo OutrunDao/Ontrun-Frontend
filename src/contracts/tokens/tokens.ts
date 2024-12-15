@@ -2,6 +2,7 @@ import { Token } from "@/packages/core/entities/token";
 import { computePairAddress } from "@/packages/sdk";
 import { addressMap } from "../addressMap/addressMap";
 import { ChainId } from "../chains";
+import { tokenAddressMap } from "../addressMap/TokenAddressMap";
 
 export const WETH9: { [chainId: number]: Token } = {
   // blast testnet
@@ -32,98 +33,63 @@ export const USDB: { [chainId: number]: Token } = {
   [ChainId.BLAST]: new Token(ChainId.BLAST, "0x4200000000000000000000000000000000000022", 18, "USDB", "USDB"),
 };
 
-export const RUY: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(ChainId.BLAST_SEPOLIA, addressMap[ChainId.BLAST_SEPOLIA].RUY, 18, "RUY", "RUY"),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, addressMap[ChainId.BLAST_SEPOLIA].RUY, 18, "RUY", "RUY"),
-};
-
-export const ORUSD: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(
-    ChainId.BLAST_SEPOLIA,
-    addressMap[ChainId.BLAST_SEPOLIA].ORUSD,
-    18,
-    "orUSD",
-    "Outrun USD",
-  ),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, addressMap[ChainId.BLAST_SEPOLIA].ORUSD, 18, "orUSD", "Outrun USD"),
-};
-
-export const REY: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(ChainId.BLAST_SEPOLIA, addressMap[ChainId.BLAST_SEPOLIA].REY, 18, "REY", "REY"),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, addressMap[ChainId.BLAST_SEPOLIA].REY, 18, "REY", "REY"),
-};
-
-export const ORETH: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(
-    ChainId.BLAST_SEPOLIA,
-    addressMap[ChainId.BLAST_SEPOLIA].ORETH,
-    18,
-    "orETH",
-    "Outrun ETH",
-  ),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, "0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5", 18, "orETH", "Outrun ETH"),
-};
-
-export const OSUSD: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(
-    ChainId.BLAST_SEPOLIA,
-    addressMap[ChainId.BLAST_SEPOLIA].OSUSD,
-    18,
-    "osUSD",
-    "Outrun staked USD",
-  ),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, addressMap[ChainId.BLAST_SEPOLIA].OSUSD, 18, "osUSD", "Outrun staked USD"),
-};
-
-export const OSETH: { [chainId: number]: Token } = {
-  // blast testnet
-  [ChainId.BLAST_SEPOLIA]: new Token(
-    ChainId.BLAST_SEPOLIA,
-    addressMap[ChainId.BLAST_SEPOLIA].OSETH,
-    18,
-    "osETH",
-    "Outrun staked ETH",
-  ),
-  // blast mainnet
-  [ChainId.BLAST]: new Token(ChainId.BLAST, addressMap[ChainId.BLAST_SEPOLIA].OSETH, 18, "osETH", "Outrun staked ETH"),
-};
-
-computePairAddress({
-  factoryAddress: addressMap[ChainId.BLAST_SEPOLIA].SWAP_FACTORY,
-  tokenA: ORETH[ChainId.BLAST_SEPOLIA],
-  tokenB: ORUSD[ChainId.BLAST_SEPOLIA],
-});
-
 export const tBNB: { [chainId: number]: Token } = {
 
   [ChainId.BSC_TESTNET]: new Token(
     ChainId.BSC_TESTNET,
-    addressMap[ChainId.BSC_TESTNET].TBNB,
+    addressMap[ChainId.BSC_TESTNET].WBNB,
     18,
     "tBNB",
     "Test BNB",
   )
 }
 
-export const getTokensByChainId = (chainId: number): Token[] => {
-  const tokenObjects = [WETH9, USDB, RUY, ORUSD, REY, ORETH, OSUSD, OSETH, tBNB];
-  const tokens: Token[] = [];
+export const ORETH: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    addressMap[ChainId.BSC_TESTNET].WBNB,
+    18,
+    "wBNB",
+    "Wrapped BNB",
+  )
+}
 
-  tokenObjects.forEach(tokenObject => {
-    if (tokenObject[chainId]) {
-      tokens.push(tokenObject[chainId]);
-    }
-  });
-
-  return tokens;
+export const Token0: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    tokenAddressMap[ChainId.BSC_TESTNET].Token0,
+    18,
+    "Token0",
+    "Token0",
+  )
 };
+
+export const Token1: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    tokenAddressMap[ChainId.BSC_TESTNET].Token1,
+    18,
+    "Token1",
+    "Token1",
+  )
+};
+
+export const Token2: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    tokenAddressMap[ChainId.BSC_TESTNET].Token2,
+    18,
+    "Token2",
+    "Token2",
+  )
+}
+
+export const USDT: { [chainId: number]: Token } = {
+  [ChainId.BSC_TESTNET]: new Token(
+    ChainId.BSC_TESTNET,
+    tokenAddressMap[ChainId.BSC_TESTNET].USDT,
+    18,
+    "USDT",
+    "USDT",
+  )
+}

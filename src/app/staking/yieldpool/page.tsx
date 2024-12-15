@@ -1,5 +1,4 @@
 import PositionTables from "@/components/PositionTables";
-import YieldPoolCard from "@/components/YieldPoolCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

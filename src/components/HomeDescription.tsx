@@ -2,6 +2,7 @@ import { Button } from "@nextui-org/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function HomeDescription() {
+	
 	return (
 		<div className="relative flex flex-col items-center justify-center text-center max-w-5xl mx-auto px-4 py-20 overflow-hidden">
 			<div className="relative z-10">

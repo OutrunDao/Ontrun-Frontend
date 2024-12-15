@@ -21,10 +21,9 @@ export default function TokenSure({
     })
 
     return (
-        <div className="flex items-center h-[2rem]">
-          <img alt="icon" src="/images/select-token.svg" className="w-[1.59rem] h-[1.55rem] mr-4" />
-          {/* <span className="text-[1.25rem] leading-7">{Token ? Token.symbol : "NULL"}</span> */}
-          <span className="text-[1.25rem] leading-7">{Token?.symbol}</span>
+        <div className="flex items-center">
+            <img alt="icon" src="/images/select-token.svg" className="w-[1.59rem] ml- mr-4" />
+            <span className="text-[1rem] leading-7">{Token?.symbol}</span>
         </div>
     )
 

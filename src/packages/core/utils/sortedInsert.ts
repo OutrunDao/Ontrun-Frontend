@@ -6,7 +6,6 @@ export function sortedInsert<T>(items: T[], add: T, maxSize: number, comparator:
   invariant(maxSize > 0, 'MAX_SIZE_ZERO')
   // this is an invariant because the interface cannot return multiple removed items if items.length exceeds maxSize
   invariant(items.length <= maxSize, 'ITEMS_SIZE')
-
   // short circuit first item add
   if (items.length === 0) {
     items.push(add)

@@ -1,13 +1,15 @@
 "use client";
 import { BlockExplorers } from "@/contracts/chains";
-import { currencySelectList } from "@/contracts/currencys";
+import { SwapCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import useContract from "@/hooks/useContract";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
 import { Accordion, AccordionItem, Button, Divider, Image, Input, Tab, Tabs } from "@nextui-org/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
+import toast from "react-hot-toast";
+import ToastCustom from "../ToastCustom";
 
 export default function SwapCard() {
   const chainId = useChainId();
@@ -15,6 +17,11 @@ export default function SwapCard() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { write: writeContract } = useContract();
+  const [countdown, setCountdown] = useState(60);
+
+  const [ tokenA,setTokenA ] = useState();
+  const [ tokenB,setTokenB ] = useState();
+  const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
 
   const {
     swapData,
@@ -22,20 +29,67 @@ export default function SwapCard() {
     setToken0,
     setToken1,
     setLoading,
-    approveTokens,
     setSlippage,
     setTransactionDeadline,
     setUnlimitedAmount,
-    setToken0AmountInput,
-    setToken1AmountInput,
-    updateTokenBalance,
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler,
+    approveToken0,
+    swap,
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
   });
+
+  async function handleApproveToken0() {
+    try {
+      setIsApproveToken0Loading(true);
+      const receipt = await approveToken0();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Approve Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setIsApproveToken0Loading(false);
+    }
+    // setIsApproveToken0Loading(false);
+  }
+
+  useEffect(() => {
+
+    setCountdown(60);
+    if (!Number(swapData.token0AmountInput)) return;
+    function _() {
+      token0AmountInputHandler(swapData.token0AmountInput);
+    }
+
+    const intervalId = setInterval(() => {
+      _();
+      setCountdown(60);
+    }, 60000);
+
+    const countdownIntervalId = setInterval(() => {
+      setCountdown(prevCountdown => prevCountdown > 0 ? prevCountdown - 1 : 10);
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(countdownIntervalId);
+    };
+  }, [swapData.token0AmountInput]);
 
   const blockExplore = useMemo(() => {
     return BlockExplorers[chainId];
@@ -48,6 +102,32 @@ export default function SwapCard() {
     token0AmountInputHandler("");
     token1AmountInputHandler("");
   };
+
+  async function handleSwap() {
+    try {
+      setLoading(true);
+      const receipt = await swap();
+      toast.custom(() => (
+        <ToastCustom
+          content={receipt.status === 1 ?
+            <>
+              {`Swap Success`}
+            </>
+            : "Transaction failed"
+          }
+        />
+      ));
+    } catch (error) {
+      console.log(error);
+      toast.custom(() => (
+        <ToastCustom
+          content={"Transaction failed"}
+        />
+      ));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="w-[34.18rem] min-h-[26.59rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card relative">
@@ -83,7 +163,7 @@ export default function SwapCard() {
                   placeholder="0.00"
                   value={swapData.token0AmountInput}
                   onValueChange={(value) => {
-                    setToken0AmountInput(value);
+                    token0AmountInputHandler(value);
                   }}
                   classNames={{
                     base: "h-[2.5rem] text-white",
@@ -95,7 +175,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={currencySelectList}
+                      tokenList={swapData.CurrencyList}
                       token={swapData.token0}
                       tokenDisable={swapData.token1}
                       onSelect={setToken0}
@@ -123,7 +203,6 @@ export default function SwapCard() {
                 <Input
                   placeholder="0.00"
                   value={swapData.token1AmountInput}
-                  onValueChange={(value) => setToken1AmountInput(value)}
                   classNames={{
                     base: "h-[2.5rem] text-white",
                     input:
@@ -134,7 +213,7 @@ export default function SwapCard() {
                   }}
                   startContent={
                     <TokenSelect
-                      tokenList={currencySelectList}
+                      tokenList={swapData.CurrencyList}
                       tokenDisable={swapData.token0}
                       token={swapData.token1}
                       onSelect={setToken1}
@@ -172,12 +251,16 @@ export default function SwapCard() {
                           Price Impact: <Image alt="notice" src="/images/error.svg" className="w-[1rem] h-[1rem]" />
                         </span>
                         <span className="font-extrabold">
-                          {swapData.priceImpact ? `${swapData.priceImpact}%` : "---"}
+                          {Number(swapData.token0AmountInput)!=0?`${swapData.priceImpact}%`:"---"}
                         </span>
                       </div>
                       <div className="flex justify-between">
+                        <span className="text-opacity-50 text-white">Refresh Time:</span>
+                        <span className="font-extrabold">{countdown}s</span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Min.received:</span>
-                        <span className="font-extrabold">{`${swapData.minimalReceive} ${swapData.token1.symbol}`}</span>
+                        <span className="font-extrabold">{Number(swapData.token0AmountInput)!=0?`${swapData.minimalReceive} ${swapData.token1.symbol}`:"---"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Max.Slippage:</span>
@@ -185,25 +268,44 @@ export default function SwapCard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Route:</span>
-                        <span className="font-extrabold">view Route</span>
+                        <div className="flex font-extrabold">
+                          {swapData.tradeRoutePath.map((token, index) => (
+                            <a 
+                              key={index}
+                              href={`https://testnet.bscscan.com/address/${swapData.tradeRouteAddressPath[index]}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-white"
+                            >
+                              {index == swapData.tradeRoutePath.length - 1 ? token : token + " -> "}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </AccordionItem>
                 </Accordion>
               </div>
             )}
-
-            {swapData.submitButtonStatus === BtnAction.insufficient ? (
-              <Button className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                insufficient token
-              </Button>
-            ) : (
+            {swapData.isToken0Approved ? swapData.submitButtonStatus === BtnAction.insufficient ? (
+                <Button className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  insufficient token
+                </Button>
+              ) : (
+                <Button
+                  onPress={handleSwap}
+                  isDisabled={swapData.submitButtonStatus === BtnAction.disable || !swapData.isToken0Approved}
+                  isLoading={loading}
+                  className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                  Swap
+                </Button>
+              ) : (
               <Button
-                onPress={() => {}}
-                isDisabled={swapData.submitButtonStatus === BtnAction.disable}
-                isLoading={loading}
-                className="bg-button-gradient mt-8 text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
-                Swap
+                onPress={handleApproveToken0}
+                isDisabled={swapData.submitButtonStatus === BtnAction.disable || swapData.isToken0Approved}
+                isLoading={isApproveToken0Loading}
+                className="bg-button-gradient text-white mt-8 w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
+                Approve
               </Button>
             )}
           </div>
@@ -212,3 +314,4 @@ export default function SwapCard() {
     </div>
   );
 }
+//{swapData.submitButtonStatus === BtnAction.disable? "Input Please" :swapData.isToken0Approved ? "Approved" : "Approve Token0"}

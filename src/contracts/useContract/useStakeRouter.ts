@@ -3,12 +3,20 @@ import { addressMap } from "@/contracts/addressMap/addressMap";
 import { ethers, parseEther } from "ethers";
 import { usePublicClient, useChainId, useAccount } from "wagmi";
 import { stakeRouterAbi } from "@/contracts/abis/stakeRouter";
+import { slisBNB } from "@/contracts/tokens/tokenStake";
 
 export  function useStakeRouter() {
 
     const publicClient = usePublicClient();
     const chainId = useChainId();
     const account = useAccount();
+
+    async function getStakeRouterwrite() {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
+    }
 
     async function mintYieldTokensFromToken({
         SYAddress,
@@ -65,7 +73,8 @@ export  function useStakeRouter() {
         PTAddress,
         UPTAddress,
         POTAddress,
-        tokenOutAddress,
+        // tokenOutAddress,
+        receiverAddress,
         positionId,
         positionShare,
         minRedeemedSyAmount,
@@ -74,7 +83,7 @@ export  function useStakeRouter() {
         PTAddress:string,
         UPTAddress:string,
         POTAddress:string,
-        tokenOutAddress:string,
+        // tokenOutAddress:string,
         receiverAddress:string,
         positionId:BigInt,
         positionShare:BigInt,
@@ -86,24 +95,28 @@ export  function useStakeRouter() {
             const signer = await provider.getSigner();
 
             const stakeRouterContract = new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
+
             const tx = await stakeRouterContract.redeemPPToToken(
                 SYAddress,
                 PTAddress,
                 UPTAddress,
                 POTAddress,
-                tokenOutAddress,
-                account.address,
+                addressMap[chainId].slisBNB,
+                receiverAddress,
                 [
                     positionId,
                     positionShare,
                     minRedeemedSyAmount,
                 ]
             );
-            
+            const receipt = await tx.wait();
+            return receipt;
         }
     }
 
     return {
+        getStakeRouterwrite,
         mintYieldTokensFromToken,
+        redeemPPToToken,
     }
 }

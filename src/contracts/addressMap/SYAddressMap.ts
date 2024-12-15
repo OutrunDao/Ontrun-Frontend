@@ -8,6 +8,6 @@ export enum ContractName {
 
 export const SYAddressMap = {
     [ChainId.BSC_TESTNET]: {
-      [ContractName.slisBNB]: '0xa03330c7F7C0a23FA109ad0291ff0f7Dd671C3A8',
+      [ContractName.slisBNB]: '0xA51A28C628ee5aA25A1AE3eC911DA54028A39332',
     }
   } as Record<number, ContractAddressMap>;

@@ -18,12 +18,12 @@ export const outstake: DiscoverCard = {
       description: "Manage staked position and yield token",
       link: "/staking/position",
     },
-    {
-      icon: "/images/yield-pool.svg",
-      title: "Yield Pool",
-      description: "Burn yield token to claim native yield",
-      link: "/staking/yieldpool",
-    },
+    // {
+    //   icon: "/images/yield-pool.svg",
+    //   title: "Yield Pool",
+    //   description: "Burn yield token to claim native yield",
+    //   link: "/staking/yieldpool",
+    // },
   ],
 };
 
@@ -92,7 +92,7 @@ export const NavbarMenu: NavbarItem[] = [
     children: [
       { name: "Markets", path: "/markets" },
       { name: "Position", path: "/staking/position" },
-      { name: "Yield Pool", path: "/staking/yieldpool" },
+      // { name: "Yield Pool", path: "/staking/yieldpool" },
     ],
   },
   {
@@ -104,14 +104,6 @@ export const NavbarMenu: NavbarItem[] = [
       { name: "Referral", path: "/trade/referral" },
     ],
   },
-  // {
-  //   name: "Staking",
-  //   hasChildren: true,
-  //   children: [
-  //     { name: "Liquid Staking", path: "/staking/liquidstaking" },
-  //     { name: "Yield Pool", path: "/staking/yieldpool" },
-  //   ],
-  // },
   {
     name: "FFLaunch",
     hasChildren: false,

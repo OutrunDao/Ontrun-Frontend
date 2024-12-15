@@ -24,6 +24,7 @@ export default function EnhancedMarketPage() {
     marketsData,
     refresh,
     refreshLiquiditys, 
+    refreshImpliedStakingDays,
   } = useMarkets();
 
   const [selectedMarket, setSelectedMarket] = useState(null);
@@ -45,6 +46,7 @@ export default function EnhancedMarketPage() {
 
   const handleRefresh = () => {
     refreshLiquiditys();
+    refreshImpliedStakingDays();
     refresh();
   }
 

@@ -32,3 +32,17 @@ export const ChainETHName = {
   [ChainId.BLAST_SEPOLIA]: "Ether",
   [ChainId.BSC_TESTNET]: "Test BNB",
 } as Record<number, string>
+
+export enum supportChainId {
+  BLAST_SEPOLIA = 168587773,
+  BASE_SEPOLIA = 84532,
+  BSC_TESTNET = 97,
+}
+
+export const CenterChainId = supportChainId.BSC_TESTNET;
+
+export const supportChainNames = {
+  [supportChainId.BLAST_SEPOLIA]: 'Blast Sepolia',
+  [supportChainId.BASE_SEPOLIA]: 'Base Sepolia',
+  [supportChainId.BSC_TESTNET]: 'BSC Testnet',
+} as Record<number, string>;

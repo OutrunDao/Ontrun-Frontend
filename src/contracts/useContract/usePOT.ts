@@ -4,7 +4,7 @@ import { Currency, Token } from "@/packages/core";
 import Decimal from "decimal.js-light";
 import { ethers } from "ethers";
 import { useState } from "react";
-import { createWalletClient, parseEther } from "viem";
+import { Address, createWalletClient, parseEther } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient, useWriteContract } from "wagmi";
 import { ApolloProvider, InMemoryCache, ApolloClient, useQuery, gql} from '@apollo/client';
 
@@ -12,46 +12,17 @@ import { ApolloProvider, InMemoryCache, ApolloClient, useQuery, gql} from '@apol
 
 export function usePOT() {
 
-    const account = useAccount();
-    const publicClient = usePublicClient();
+    async function getPOTread(POTAddress: string) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        return new ethers.Contract(POTAddress, POTAbi, provider);
+    }
 
-    // const client = new ApolloClient({
-    //     uri: 'https://api.studio.thegraph.com/query/92841/ontrun-pot/version/latest',
-    //     cache: new InMemoryCache()
-    //   });
-      
-    // const GET_BALANCES = gql`
-    //     query GetBalances($account: String!) {
-    //         balances(where: { account: $account }) {
-    //         id
-    //         account
-    //         tokenId
-    //         value
-    //         }
-    //     }
-    // `;
-    // const { loading, error, data } = useQuery(GET_BALANCES, {
-    //     variables: { account:account.address },
-    //     });
-
-    async function stake({
-            POT,
-            SYAmount,
-            lockupDays,
-            
-        }:{
-            POT:POT,
-            SYAmount:string,
-            lockupDays:number,
-        }) {
-            
-            if (publicClient) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
-                const POTContract = new ethers.Contract(POT.address, POTAbi, signer);
-                const tx = await POTContract.stake(parseEther(SYAmount), BigInt(lockupDays), account.address, account.address, account.address);
-            }
+    async function getPOTwrite(POTAddress: string) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(POTAddress, POTAbi, signer);
     }
 
     async function previewStake({
@@ -63,10 +34,7 @@ export function usePOT() {
         amountInSY:BigInt,
         lockupDays:BigInt,
     }) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        // const signer = await provider.getSigner();
-        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
+        const POTContract = await getPOTread(POT.address);
         const result = await POTContract.previewStake(amountInSY, lockupDays);
         return result;
     }
@@ -80,11 +48,14 @@ export function usePOT() {
         positionId:BigInt,
         positionShare:BigInt,
     }) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        // const signer = await provider.getSigner();
-        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
+        const POTContract = await getPOTread(POT.address);
         const result = await POTContract.previewRedeem(positionId, positionShare);
+        return result;
+    }
+
+    async function impliedStakingDays({POT}:{POT:POT}) {
+        const POTContract = await getPOTread(POT.address);
+        const result = await POTContract.impliedStakingDays();
         return result;
     }
 
@@ -133,34 +104,53 @@ export function usePOT() {
         })
         const tokenIds = Gresult.data.balances.map((balance: { tokenId: any; }) => balance.tokenId);
 
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const POTContract = new ethers.Contract(POT.address, POTAbi, provider);
-
-        // const positionsArray = [];
-        // for (let i=0 ;i<tokenIds.length;i++) {
-        //     try {
-        //         const position = await POTContract.positions(tokenIds[i]);
-        //         positionsArray.push(position);
-        //     } catch (error) {
-        //         console.error(`Error fetching position for tokenId ${tokenIds[i]}:`, error);
-        //     }
-        // }
+        const POTContract = await getPOTread(POT.address);
         const positionsPromises = tokenIds.map((tokenId: any | ethers.Overrides) => POTContract.positions(tokenId));
         const positionsArray = await Promise.all(positionsPromises);
 
         return positionsArray;
     }
 
+    async function setApprovalForAll({
+        POTAddress,
+        spender,
+        approved,
+    }: {
+        POTAddress: string;
+        spender: Address;
+        approved: boolean;
+    }) {
+        const POTContract = await getPOTwrite(POTAddress);
+        const tx = await POTContract.setApprovalForAll(spender,approved);
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
+    async function isApprovedForAll({
+        POTAddress,
+        account,
+        operator,
+    } : {
+        POTAddress: string;
+        account: Address;
+        operator: string;
+    }) {
+        const POTContract = await getPOTread(POTAddress);
+        const result = POTContract.isApprovedForAll(account,operator);
+        return result;
+    }
+
     return {
         POTWrite: {
-            stake,
+            setApprovalForAll,
         },
         POTRead: {
             previewStake,
             previewRedeem,
             getAllPOT,
             positions,
+            impliedStakingDays,
+            isApprovedForAll,
         }
     }
 

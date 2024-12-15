@@ -1,5 +1,5 @@
 import { Ether } from "@/packages/core";
-import { ORETH, ORUSD, OSETH, OSUSD, REY, RUY, USDB, tBNB } from "./tokens/tokens";
+import { Token0, Token1, Token2, USDT, tBNB } from "./tokens/tokens";
 import { UBNB } from "./tokens/UPT";
 import { SYslisBNB } from "./tokens/SY";
 import { ChainId } from "./chains";
@@ -8,19 +8,11 @@ import { YTslisBNB } from "./tokens/YT";
 import { POTslisBNB } from "./tokens/POT";
 
 
-export const currencySelectList = [Ether, USDB, ORETH, ORUSD, OSUSD, OSETH, REY, RUY];
-
-export const currencyMintPageSelectList = [Ether, USDB, ORETH, ORUSD];
-
-export const currencyStakePageSelectList = [ORETH, ORUSD];
-
-export const currencyStakePageSelectList2 = [OSETH, OSUSD];
+export const currencySelectList = [Ether, tBNB, slisBNB];
 
 export const currencySelectListTBNB = [Ether, SYslisBNB];
 
 export const currencySelectListETH = [Ether];
-
-export const currencySelectListUSDB = [USDB];
 
 export type CurrencySelectListType = typeof currencySelectList;
 
@@ -41,8 +33,26 @@ export enum ContractName {
     slisBNB = "slisBNB",
 }
 
+export const SwapCurrencyList = {
+    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2, Ether, slisBNB, USDT],
+}
+
+export const BaseCurrencyList = {
+    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2],
+}
+
 export const StakeCurrencyListMap = {
     [ChainId.BSC_TESTNET]: {
       [ContractName.slisBNB]: slisBNBCurrencyList,
     }
 } as Record<number, StakeCurrencyListMapType>;
+
+export function getSwapCurrencyList(chainId: number): [] {
+    // @ts-ignore
+    return SwapCurrencyList[chainId];
+}
+
+export function getBaseCurrencyList(chainId: number): [] {
+    // @ts-ignore
+    return BaseCurrencyList[chainId];
+}

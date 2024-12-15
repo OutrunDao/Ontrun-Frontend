@@ -18,10 +18,12 @@ export enum ContractName {
   REY = "REY",
   OSETH = "OSETH",
 
-  TBNB = "TBNB",
+  WBNB = "WBNB",
   multicall = "multicall",
   slisBNB = "slisBNB",
   stakeRouter = "stakeRouter",
+  refferManager = "refferManager",
+  memeverseRegistrationCenter = "memeverseRegistrationCenter",
 }
 export type ContractAddressMap = Record<string, `0x${string}`>;
 
@@ -41,14 +43,34 @@ export const addressMap = {
     [ContractName.ORUSD_STAKE]: "0x082fcCB4Ef497B7cC856e71DcAD81763B15916Bc",
   },
   [ChainId.BSC_TESTNET]: {
-    [ContractName.TBNB]: "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
-    [ContractName.multicall]: "0x665668428fb636A6fCe06Aa1E643117077f57974",
-    [ContractName.slisBNB]: "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B",
-    [ContractName.stakeRouter]: "0xeC3dE0884a4C4b041Dda0Ae60C95Cf25967D6Efe",
+    [ContractName.WBNB]: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+    [ContractName.multicall]: "0xcA11bde05977b3631167028862bE2a173976CA11",
+    [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
+    [ContractName.stakeRouter]: "0x88c022aA8Ccae9C1cdc2BeC7Aac32dc0ec61986c",
+    [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
+    [ContractName.SWAP_ROUTER]: "0xEf63848F3105e3a4EF568d8358F80EE5615eE4BF",
+    [ContractName.refferManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
+
   }
 } as Record<number, ContractAddressMap>;
 
+export const factoryAddressMap = {
+  [ChainId.BLAST_SEPOLIA]: [
+  ],
+  [ChainId.BSC_TESTNET]: [
+    "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",//0.3% Fee
+    "0xfeFcCd94289d39f71DFA09564eC9d14D31b3BeDe",//1% Fee
+  ],
+};
+
+export function getSwapFactoryAddresses(chainId: number): `0x${string}`[] {
+  // @ts-ignore
+  return factoryAddressMap[chainId] || [];
+}
+
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
+  [ChainId.BSC_TESTNET]: "0xf52fc9f1359be155b90c9431d42b6d85340b12743086a3ba41d0297b047c675a",
+  
 } as Record<number, `0x${string}`>;
 
