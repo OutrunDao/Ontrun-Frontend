@@ -43,10 +43,10 @@ export default function YieldPoolOCard() {
 
     useMemo(async () => {
         if (!YT) return;
-        const _YieldsNow = await UseYT.YTView.previewWithdrawYield({YT:YT, amountInBurnedYT:parseEther("0.01")});
-        const a = ethers.formatEther(_YieldsNow*BigInt(100));
-        setYieldsNow(a);
-        
+        const totalRedeemableYields = await UseYT.YTView.totalRedeemableYields(YT);
+        if (totalRedeemableYields) {
+            setYieldsNow(totalRedeemableYields.toString());
+        }
     },[YT])
 
     useMemo(() => {
@@ -168,19 +168,19 @@ export default function YieldPoolOCard() {
             <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] rounded-[0.25rem] flex gap-x-5 items-center">
                 <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
                     <span className="text-[1rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{impliedStakingDays}</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{impliedStakingDays} Days</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
                     <span className="text-[1rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{YieldsNow}</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(YieldsNow).toFixed(6)} {RT?.symbol}</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{rateNow}</span>
+                    <span className="text-[1rem] leading-[1.56rem] opacity-30">RateNow</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(rateNow).toFixed(2)}%</span>
                 </div>
                 <div className="flex flex-col gap-5 ml-[1.13rem]">
                     <span className="text-[1rem] leading-[1.56rem] opacity-30">APR</span>
-                    <span className="text-[1.25rem] leading-[1.69rem] font-extrabold">{APY}%</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{APY}%</span>
                 </div>
             </div>
             <span className="text-[1.13rem] leading-[1.56rem] font-medium mt-[2.5rem]">
@@ -199,7 +199,7 @@ export default function YieldPoolOCard() {
                 }}
                 startContent={
                 <div className="flex h-full items-center space-x-4">
-                    <p className="text-[1.13rem] leading-[1.56rem]">Amount</p>
+                    <p className="text-[1rem] leading-[1rem]">{"YTAmount"}</p>
                     <Divider orientation="vertical" className="bg-white bg-opacity-30 h-[60%]" />
                 </div>
                 }
@@ -222,7 +222,7 @@ export default function YieldPoolOCard() {
                 }}
                 startContent={
                 <div className="flex h-full items-center space-x-4">
-                    <p className="text-[1.13rem] leading-[1.56rem]">AmountOut</p>
+                    <p className="text-[1rem] leading-[1rem]">{"NTAmount"}</p>
                     <Divider orientation="vertical" className="bg-white bg-opacity-30 h-[60%]" />
                 </div>
                 }

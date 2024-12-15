@@ -270,7 +270,7 @@ export default function CreateMemeverseCard() {
                 <div className="flex justify-center items-center w-full">
                   <div className="w-1/2 p-2 flex justify-center">
                     <div className="w-full mx-4">
-                      <span>Discord (optoinal)</span>
+                      <span>OmniChainIds</span>
                       <Select
                         classNames={{
                           trigger:

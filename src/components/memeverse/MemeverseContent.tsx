@@ -1,5 +1,6 @@
 "use client";
 import { Button, Link, Tab, Tabs } from "@nextui-org/react";
+import MemeverseTab from "./MemeverseTab";
 
 export default function MemeverseContent() {
   return (
@@ -26,7 +27,7 @@ export default function MemeverseContent() {
           as={Link}
           className="absolute right-0 top-3 rounded-[5.63rem] bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium w-[10.75rem] h-[2.63rem] border-solid border-[0.06rem] border-white"
           >
-          Creat Memeverse
+          Create Memeverse
         </Button>
         <Tabs
           variant="underlined"
@@ -39,6 +40,7 @@ export default function MemeverseContent() {
           }}>
           <Tab key="Persistence verse" title="Persistence verse">
             {/* <LiquidityTab symbol = "All"/> */}
+            <MemeverseTab />
           </Tab>
           <Tab key="Genesis verse" title="Genesis verse">
             {/* <LiquidityTab symbol = "Owner"/> */}

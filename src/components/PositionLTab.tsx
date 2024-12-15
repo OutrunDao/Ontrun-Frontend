@@ -106,12 +106,13 @@ export default function PositionLTab() {
         <div>
             <Accordion variant="bordered" >
                 {(positionsDatas || []).map((items, index) => (
-                    <AccordionItem
+                    items[index] && (
+                        <AccordionItem
                         key={index}
                         aria-label={`Accordion ${index}`}
                         title={
                             <div>
-                                <span className="text-white ml-4">{items[0].name}</span>
+                                <span className="text-white ml-4">{items[index].name}</span>
                             </div>
                         }
                         className="shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card"
@@ -161,6 +162,8 @@ export default function PositionLTab() {
                         </div>
                     )}
                     </AccordionItem>
+                    )
+
                 ))}
             </Accordion>
         </div>

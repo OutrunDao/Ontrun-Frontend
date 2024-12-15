@@ -127,6 +127,15 @@ export const liquidityTableColumns = [
   { key: "apr", label: "APR" },
 ];
 
+export const MemeverseTableColumns = [
+  { key: "symbol", label: "Memeverse" },
+  { key: "deposit", label: "Deposited" },
+  { key: "liquidity", label: "Liquiduty" },
+  { key: "endtime", label: "End Time" },
+  { key: "lockupdays", label: "LockupDays" },
+  { key: "population", label: "Population" },
+];
+
 export const minLockupDays = 7;
 export const maxLockupDays = 365;
 export const oneDaySec = 24 * 3600;
