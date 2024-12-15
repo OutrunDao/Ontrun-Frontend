@@ -25,7 +25,7 @@ export default function MemeverseContent() {
           href="/memeverse/createMemeverse"
           as={Link}
           className="absolute right-0 top-3 rounded-[5.63rem] bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium w-[10.75rem] h-[2.63rem] border-solid border-[0.06rem] border-white"
-          startContent={<span className="text-[1.13rem] font-medium">+</span>}>
+          >
           Creat Memeverse
         </Button>
         <Tabs
@@ -37,6 +37,12 @@ export default function MemeverseContent() {
             tabContent: "text-white text-[1.5rem] leading-[2.13rem] group-data-[selected=true]:text-white",
             panel: "mt-8 pb-24",
           }}>
+          <Tab key="Persistence verse" title="Persistence verse">
+            {/* <LiquidityTab symbol = "All"/> */}
+          </Tab>
+          <Tab key="Genesis verse" title="Genesis verse">
+            {/* <LiquidityTab symbol = "Owner"/> */}
+          </Tab>
         </Tabs>
       </div>
     </div>

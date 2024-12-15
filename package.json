@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
+    "@layerzerolabs/lz-v2-utilities": "^3.0.27",
     "@nextui-org/react": "^2.4.6",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
