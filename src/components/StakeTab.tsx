@@ -314,7 +314,7 @@ export default function StakeTab() {
             ～$0
           </span>
         </div>
-        <div className="w-[28rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-4">
+        <div className="w-[28rem] border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-4">
           <div>
             <Input
               placeholder="0.00"
@@ -342,6 +342,7 @@ export default function StakeTab() {
 
       <TokenTab Balance={PTBalance} InputValue={Number(PTAmount)?PTAmount:""} token={PT}/>
       <TokenTab Balance={YTBalance} InputValue={Number(YTAmount)?YTAmount:""} token={YT}/>
+      <TokenTab InputValue={Number(PTAmount)?PTAmount:""} token={POT}/>
       <div className="flex m-8 w-full justify-around items-center">
         <Divider className="w-[8.76rem] border-solid border-[0.06rem] border-[#9A6BE1] border-opacity-30" />
         <span className="text-white font-avenir text-[0.82rem] leading-[1.12rem]">LOCK PERIOD</span>
@@ -355,7 +356,7 @@ export default function StakeTab() {
             setSliderValueView(numericValue);
           }}}
         classNames={{
-          base: "w-[28rem] rounded-xl text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent",
+          base: "w-[28rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent",
           input: "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-white font-black",
           inputWrapper: "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent",
         }}
@@ -378,8 +379,8 @@ export default function StakeTab() {
         renderThumb={(props) => (
           <div
             {...props}
-            className="w-[0.94rem] h-[0.94rem] group p-1 top-1/2 bg-thumb border-[0.13rem] rounded-full cursor-grab data-[dragging=true]:cursor-grabbing">
-            <span className="transition-transform bg-thumb rounded-full w-full h-full block group-data-[dragging=true]:scale-80" />
+            className="w-[0.94rem] h-[0.94rem] group p-1 top-1/2 bg-thumb border-[0.13rem] cursor-grab data-[dragging=true]:cursor-grabbing">
+            <span className="transition-transform bg-thumb w-full h-full block group-data-[dragging=true]:scale-80" />
           </div>
         )}
       />

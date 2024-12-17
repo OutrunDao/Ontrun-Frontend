@@ -23,16 +23,17 @@ export default function OwnerLiquidityTab() {
 
   const ownerRows = useMemo(() => {
     if (!ownerLiquiditysData) return;
-      let _row:any[] = []
-      for (let i = 0; i < ownerLiquiditysData.length; i++) {
-        _row.push({
-          id: i.toString(), 
-          pool: `${ownerLiquiditysData[i].token0.symbol}/${ownerLiquiditysData[i].token1.symbol}`,
-          volume: ownerLiquiditysData[i].address,
-        
-        })
-      }
-      return _row;
+    let _row:any[] = []
+    for (let i = 0; i < ownerLiquiditysData.length; i++) {
+      _row.push({
+        id: i.toString(), 
+        pool: `${ownerLiquiditysData[i].token0.symbol}/${ownerLiquiditysData[i].token1.symbol}`,
+        volume: `${ownerLiquiditysData[i].reserve0} / ${ownerLiquiditysData[i].reserve1} `,
+        tcl: `${ownerLiquiditysData[i].reserveUSD}`,
+      
+      })
+    }
+    return _row;
   },[ownerLiquiditysData])
 
   useEffect(() => {

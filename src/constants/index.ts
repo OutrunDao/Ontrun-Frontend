@@ -118,6 +118,14 @@ export const NavbarMenu: NavbarItem[] = [
   },
 ];
 
+export const positionTableColumns = [
+  { key: "name", label: "Name" },
+  { key: "principalRedeemable", label: "Principal Redeemable" },
+  { key: "rate", label: "Rate" },
+  { key: "unlockTime", label: "Unlock Time" },
+  { key: "action", label: "" },
+]
+
 export const liquidityTableColumns = [
   { key: "id", label: "#" },
   { key: "pool", label: "Pool" },
@@ -125,6 +133,15 @@ export const liquidityTableColumns = [
   { key: "tcl", label: "TCL" },
   { key: "fees", label: "Fees(24H)" },
   { key: "apr", label: "APR" },
+];
+
+export const MemeverseTableColumns = [
+  { key: "symbol", label: "Memeverse" },
+  { key: "deposit", label: "Deposited" },
+  { key: "liquidity", label: "Liquiduty" },
+  { key: "endtime", label: "End Time" },
+  { key: "lockupdays", label: "LockupDays" },
+  { key: "population", label: "Population" },
 ];
 
 export const minLockupDays = 7;

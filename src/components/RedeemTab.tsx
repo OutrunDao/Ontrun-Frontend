@@ -53,6 +53,11 @@ export default function RedeemTab({
     return addressMap[chainId].stakeRouter;
   },[chainId])
 
+  const disAble = useMemo(() => {
+    console.log(!PTPOTAmount || !account.address)
+    return !PTPOTAmount || !account.address || Number(PTPOTAmount) === 0;
+  },[PTPOTAmount])
+
   useEffect(() => {
     if (!chainId || !tokenName || !StakeCurrencyListMap[chainId]) return;
 
@@ -72,7 +77,12 @@ export default function RedeemTab({
       return PT.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
     }
     _PT().then(setPTBalance);
-    setPOTBalance(positionData.POTBalance);
+    async function _POT() {
+      if (!account.address || !POT || !publicClient) return new Decimal(0);
+      const result = await UsePOT.POTRead.balanceOf({POTAddress: POT.address, account: account.address, id: BigInt(PositionId)});
+      return new Decimal(ethers.formatEther(result || "0"));
+    }
+    _POT().then(setPOTBalance);
   }, [chainId, account.address, PT]);
 
   useEffect(() => {
@@ -255,7 +265,6 @@ export default function RedeemTab({
 
   return (
     <div className="flex flex-col items-center">
-      <span>Deadline:{positionData.deadline}{" "}days</span>
       <TokenTab Balance={PTBalance} InputValue={PTPOTAmount} onValueChange={handlePTPOTAmount} token={PT}/>
       <div className="text-white flex m-1 w-full justify-around items-center"></div>
       <TokenTab Balance={POTBalance} InputValue={PTPOTAmount} onValueChange={handlePTPOTAmount} token={POT} ifMax={true}/>
@@ -269,7 +278,7 @@ export default function RedeemTab({
       {isApprovedPOT ? isApprovedPT ? (
         <Button
           onClick={redeem}
-          isDisabled={!PTPOTAmount && !isApprovedPT}
+          isDisabled={disAble}
           isLoading={isLoading}
           className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
           {'Redeem'}
@@ -277,7 +286,7 @@ export default function RedeemTab({
       ) : (
         <Button
           onClick={approvePT}
-          isDisabled={!PTPOTAmount}
+          isDisabled={disAble}
           isLoading={isLoading}
           className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
           {'Approve PT'}
@@ -285,7 +294,7 @@ export default function RedeemTab({
       ) : (
         <Button
           onClick={approvePOT}
-          isDisabled={!POT}
+          isDisabled={disAble}
           isLoading={isLoading}
           className="bg-button-gradient text-white w-[11.41rem] h-[3.59rem] rounded-[3.97rem]">
           {'Approve POT'}

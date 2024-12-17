@@ -29,7 +29,7 @@ export default function LiquidityContent() {
           as={Link}
           className="absolute right-0 top-3 rounded-[5.63rem] bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium w-[10.75rem] h-[2.63rem] border-solid border-[0.06rem] border-white"
           startContent={<span className="text-[1.13rem] font-medium">+</span>}>
-          Creat Position
+          Create Position
         </Button>
         <Tabs
           variant="underlined"

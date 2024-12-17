@@ -5,7 +5,7 @@ import { Native, Pair, Trade } from "@/packages/sdk";
 import { Fetcher } from "@/packages/sdk/fetcher";
 import { useQuery } from "@tanstack/react-query";
 import Decimal from "decimal.js-light";
-import { all, debounce, map, set } from "radash";
+import { debounce } from "radash";
 import { useEffect, useMemo, useState } from "react";
 import { Address, PublicClient, encodeFunctionData, parseUnits } from "viem";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
@@ -15,6 +15,7 @@ import { useSwapFactory } from "../contracts/useContract/useSwapFactory";
 import { useERC20 } from "../contracts/useContract/useERC20";
 import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
 import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
+import { USDT } from "@/contracts/tokens/tokens";
 
 
 export enum BtnAction {
@@ -52,8 +53,8 @@ export function useSwap(swapOpts: SwapOptions) {
   const publicClient = usePublicClient();
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [token0, setToken0] = useState<Currency | Ether>();
-  const [token1, setToken1] = useState<Currency | Ether>();
+  const [token0, setToken0] = useState<Currency | Ether>(Ether.onChain(chainId));
+  const [token1, setToken1] = useState<Currency | Ether>(USDT[chainId]);
   const [token0AmountInput, setToken0AmountInput] = useState<string>("");
   const [token1AmountInput, setToken1AmountInput] = useState<string>("");
   const [routeNotExist, setRouteNotExist] = useState<boolean>(false);
@@ -89,6 +90,13 @@ export function useSwap(swapOpts: SwapOptions) {
   const V2_ROUTER_ADDRESSES = useMemo(() => {
     return addressMap[chainId].SWAP_ROUTER;
   }, [chainId]);
+
+  useEffect(() => {
+    if (!chainId) return;
+    if (!token1) {
+      setToken1(USDT[chainId]);
+    }
+  },[chainId])
 
   useEffect(() => {
     if (!chainId || swapOpts.view != SwapView.LiquidityTab) return;
@@ -599,6 +607,7 @@ export function useSwap(swapOpts: SwapOptions) {
       isToken0Approved,
       isToken1Approved,
     },
+    chainId,
     allPairsData,
     ownerLiquiditysData,
     loading,

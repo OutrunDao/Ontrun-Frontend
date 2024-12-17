@@ -4,10 +4,12 @@ import { Button, Image, Input, Select, SelectItem, Tab, Tabs} from "@nextui-org/
 import { useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
+import { useChainId } from "wagmi";
 
 
 export default function CreateMemeverseCard() {
 
+  const chainId = useChainId();
   const [fileName, setFileName] = useState('');
   const {
     loading,
@@ -270,7 +272,7 @@ export default function CreateMemeverseCard() {
                 <div className="flex justify-center items-center w-full">
                   <div className="w-1/2 p-2 flex justify-center">
                     <div className="w-full mx-4">
-                      <span>Discord (optoinal)</span>
+                      <span>OmniChainIds</span>
                       <Select
                         classNames={{
                           trigger:
@@ -283,6 +285,7 @@ export default function CreateMemeverseCard() {
                         fullWidth={true}
                         placeholder="Select Chains"
                         selectionMode="multiple"
+                        defaultSelectedKeys={[97]} // Fix: Wrap chainId in an array
                       >
                         {memeverseData.supportChains.map((chain) => (
                           <SelectItem key={chain.chainId}>{chain.chainName}</SelectItem>

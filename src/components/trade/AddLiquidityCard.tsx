@@ -3,12 +3,14 @@ import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
 import { Button, Image, Input, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
+import { ChainETHSymbol } from "@/contracts/chains";
 
 export default function AddLiquidityCard() {
   const {
+    chainId,
     swapData,
     setToken0,
     setToken1,
@@ -119,7 +121,7 @@ export default function AddLiquidityCard() {
         startContent={<Image alt="back" src="/images/back.svg" />}>
         Back
       </Button>
-      <div className="w-[34rem] min-h-[39.13rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card relative">
+      <div className="w-[34rem] min-h-[39.13rem] shadow-card bg-modal border-[0.06rem] border-card relative">
         <div className="absolute z-10 text-white top-[2.29rem] right-[2rem]">
           <SwapSetting
             slippage={swapData.slippage}
@@ -145,7 +147,7 @@ export default function AddLiquidityCard() {
             <div className="flex flex-col text-white gap-y-4 text-[1.25rem] leading-[1.75rem] font-avenir">
               <span>TOKEN PAIR</span>
               <div className="flex justify-between">
-                <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] rounded-[1.88rem] px-4 py-2">
+                <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] px-4 py-2">
                   <TokenSelect
                     tokenList={swapData.CurrencyList}
                     token={swapData.token0}
@@ -153,7 +155,7 @@ export default function AddLiquidityCard() {
                     onSelect={(token) => setToken0(token)}
                   />
                 </div>
-                <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] rounded-[1.88rem] px-4 py-2">
+                <div className="border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5] px-4 py-2">
                   <TokenSelect
                     tokenList={swapData.CurrencyList}
                     token={swapData.token1}
@@ -166,11 +168,13 @@ export default function AddLiquidityCard() {
                 onChange={(event) => setswapFeeRate(BigInt(Number(event.target.value)*100))}
                 classNames={{
                   trigger:
-                    "bg-transparent data-[hover=true]:bg-transparent rounded-[1.88rem] border-solid border-[0.06rem] border-[#4A325D] border-opacity-[0.5]",
+                    "bg-transparent data-[hover=true]:bg-transparent border-solid border-[0.06rem] border-[#4A325D] rounded-none border-opacity-[0.5]",
                   value: "group-data-[has-value=true]:text-white ml-2",
                   popoverContent: "bg-[#4A325D]",
                   listboxWrapper: "text-white",
+                  
                 }}
+                defaultSelectedKeys={["0.3"]}
                 >
                 <SelectItem key="0.3" value={0.3}>
                   0.30% fee tier
@@ -180,7 +184,7 @@ export default function AddLiquidityCard() {
                 </SelectItem>
               </Select>
               <span className="mt-8">SUPPLY AMOUNT</span>
-              <div className="rounded-[0.25rem] w-[30.2rem] h-[6.5rem] bg-[#1D1226] px-4 flex flex-col justify-center">
+              <div className="w-[30.2rem] h-[6.5rem] bg-[#1D1226] px-4 flex flex-col justify-center">
                 <Input
                   placeholder="0.00"
                   value={swapData.token0AmountInput}
@@ -196,10 +200,10 @@ export default function AddLiquidityCard() {
                     innerWrapper: "justify-between",
                   }}
                   startContent={
-                    <div className="flex text-white font-avenir bg-transparent rounded-[1.88rem] border-solid border-[0.06rem] border-opacity-30  px-4 py-2">
+                    <div className="flex text-white font-avenir bg-transparent border-solid border-[0.06rem] border-[#4A325D] border-opacity-30  px-4 py-2">
                       <Image alt="icon" src="/images/select-token.svg" className="w-[1.59rem] h-[1.55rem] mr-4" />
                       <span className="text-[1.25rem] leading-7">
-                        {swapData.token0 ? swapData.token0.symbol : "Select Token"}
+                        {swapData.token0?.isNative ? ChainETHSymbol[chainId] : swapData.token0?.symbol}
                       </span>
                     </div>
                   }
@@ -211,7 +215,7 @@ export default function AddLiquidityCard() {
                     </span>
                     <Button
                       onClick={() => setToken0AmountInput(swapData.token0Balance.toString())}
-                      className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
+                      className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
                       Max
                     </Button>
                   </div>
@@ -220,7 +224,7 @@ export default function AddLiquidityCard() {
                   </span>
                 </div>
               </div>
-              <div className="rounded-[0.25rem] w-[30.2rem] h-[6.5rem] bg-[#1D1226] px-4 flex flex-col justify-center">
+              <div className="w-[30.2rem] h-[6.5rem] bg-[#1D1226] px-4 flex flex-col justify-center">
                 <Input
                   placeholder="0.00"
                   value={swapData.token1AmountInput}
@@ -236,10 +240,10 @@ export default function AddLiquidityCard() {
                     innerWrapper: "justify-between",
                   }}
                   startContent={
-                    <div className="flex text-white font-avenir bg-transparent rounded-[1.88rem] border-solid border-[0.06rem] border-opacity-30  px-4 py-2">
+                    <div className="flex text-white font-avenir bg-transparent border-solid border-[0.06rem] border-[#4A325D] border-opacity-30  px-4 py-2">
                       <Image alt="icon" src="/images/select-token.svg" className="w-[1.59rem] h-[1.55rem] mr-4" />
                       <span className="text-[1.25rem] leading-7">
-                        {swapData.token1 ? swapData.token1.symbol : "Select Token"}
+                        {swapData.token1?.isNative ? ChainETHSymbol[chainId] : swapData.token1?.symbol}
                       </span>
                     </div>
                   }
@@ -251,7 +255,7 @@ export default function AddLiquidityCard() {
                     </span>
                     <Button
                       onClick={() => setToken1AmountInput(swapData.token1Balance.toString())}
-                      className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent rounded-[1.76rem] border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
+                      className="text-white text-[0.82rem] font-avenir leading-[1.12rem] font-normal text-opacity-50 bg-transparent border-solid border-[0.06rem] border-opacity-30  px-0 min-w-[2.67rem] h-[1.34rem]">
                       Max
                     </Button>
                   </div>

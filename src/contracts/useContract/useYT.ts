@@ -124,7 +124,7 @@ export function useYT() {
         const aveSYTotalStaking = syTotalStaking / (i+1);
         const APS = Yield / (time*aveSYTotalStaking);
         const APY = APS * 31536000;
-        return ethers.formatEther("0");
+        return APY.toFixed(3);
 
 
         
