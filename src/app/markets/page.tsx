@@ -93,7 +93,7 @@ export default function EnhancedMarketPage() {
                 </TableCell>
                 <TableCell>
                   <div className="transition-all duration-300 ease-in-out hover:scale-105">
-                    {item.averageLockTime}
+                    {item.averageLockTime} Days
                   </div>
                 </TableCell>
                 <TableCell>

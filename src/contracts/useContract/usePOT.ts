@@ -150,7 +150,7 @@ export function usePOT() {
         id: BigInt;
     }){
         const POTContract = await getPOTread(POTAddress);
-        const result = POTContract.balanceof(account,id);
+        const result = POTContract.balanceOf(account,id);
         return result;
     }
 

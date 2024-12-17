@@ -24,7 +24,7 @@ function unixTimestampToYMDHMS(timestamp: number) {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    return { year, month, day, hours, minutes, seconds };
+    return `${year}:${month}:${day}:${hours}:${minutes}:${seconds}`;
 }
 
 export default function PositionLTab() {
@@ -97,24 +97,25 @@ export default function PositionLTab() {
     },[POTs]);
 
     function getTableData(item:any,key:Key) {
-        const deadline = `${item.deadline.year}:${item.deadline.month}:${item.deadline.day}:${item.deadline.hours}:${item.deadline.minutes}:${item.deadline.seconds}`;
         switch (key) {
             case "name":
                 return item.name;
             case "principalRedeemable":
-                return (<span>`${item.principalRedeemable.toFixed(6)} ${RTSymbol}`</span>);
+                return (<div><span>{item.principalRedeemable.toFixed(6)} {item.RTSymbol}</span></div>);
             case "rate":
-                return (<span>{item.APY}%</span>);
+                return (<div><span>{item.APY}%</span></div>);
             case "unlockTime": 
-                return (<span>{deadline}</span>);
+                return (<div><span>{item.deadline}</span></div>);
             case "action":
                 return (
-                    <Button 
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-button-gradient text-white"
-                        onClick={() => handleOpen(item)}
-                    >
-                        Redeem
-                    </Button>
+                    <div>
+                        <Button 
+                            className="text-white text-[0.82rem] font-avenir leading-[1.12rem] rounded-full font-normal text-opacity-50 bg-transparent border-solid border-[0.06rem] border-opacity-30  px-2 h-[1.34rem] hover:bg-gray-200 hover:text-black"
+                            onClick={() => handleOpen(item)}
+                        >
+                            Redeem
+                        </Button>
+                    </div>
                 )
         }
     }
@@ -162,7 +163,6 @@ export default function PositionLTab() {
                                 {(item: any) => (
                                     <TableRow
                                     key={item.name}
-                                    onClick={() => handleOpen(item)}
                                     >
                                         {(columnKey) => <TableCell>{getTableData(item, columnKey)}</TableCell>}
                                     </TableRow>
@@ -170,8 +170,8 @@ export default function PositionLTab() {
                                 </TableBody>
                             </Table>
                             {selectedPosition && (
-                                <div>
-                                    <div>
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div className="relative">
                                         <RedeemCard positionData={selectedPosition}/>
                                         <Button
                                             onClick={handleClosePopup}

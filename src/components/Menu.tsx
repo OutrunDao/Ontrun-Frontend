@@ -30,7 +30,9 @@ export function Menu() {
     const params = new URLSearchParams(window.location.search);
     const inviteCode = params.get('inviteCode');
     if (inviteCode) {
-      setCookie(null,'inviteCode', inviteCode, { expires: 7 }); // Cookie expires in 7 days
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7);
+      setCookie(null,'inviteCode', inviteCode, { expires });
     }
   });
 
