@@ -118,6 +118,14 @@ export const NavbarMenu: NavbarItem[] = [
   },
 ];
 
+export const positionTableColumns = [
+  { key: "name", label: "Name" },
+  { key: "principalRedeemable", label: "Principal Redeemable" },
+  { key: "rate", label: "Rate" },
+  { key: "unlockTime", label: "Unlock Time" },
+  { key: "action", label: "" },
+]
+
 export const liquidityTableColumns = [
   { key: "id", label: "#" },
   { key: "pool", label: "Pool" },

@@ -140,11 +140,26 @@ export function usePOT() {
         return result;
     }
 
+    async function balanceOf({
+        POTAddress,
+        account,
+        id,
+    } : {
+        POTAddress: string;
+        account: Address;
+        id: BigInt;
+    }){
+        const POTContract = await getPOTread(POTAddress);
+        const result = POTContract.balanceof(account,id);
+        return result;
+    }
+
     return {
         POTWrite: {
             setApprovalForAll,
         },
         POTRead: {
+            balanceOf,
             previewStake,
             previewRedeem,
             getAllPOT,

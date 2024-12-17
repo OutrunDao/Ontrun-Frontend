@@ -27,7 +27,6 @@ export default function TokenSelect({
   tokenList,
   tokenDisable,
   hiddenSearchInput,
-  tokenSymbol,
 }: {
   onSelect: (token: Currency) => void;
   token?: Currency;
@@ -117,7 +116,7 @@ export default function TokenSelect({
         <div className="flex items-center h-[2rem]">
           <img alt="icon" src="/images/select-token.svg" className="w-[1.59rem] h-[1.55rem] mr-4" />
           {/* <span className="text-[1.25rem] leading-7">{tokenSymbol}</span> */}
-          {token ? <span className="text-[1rem] leading-7">{token.symbol=="ETH" ? tokenSymbol : token.symbol}</span> : <span className="text-[1rem] leading-7">Select Token</span>}
+          {token ? <span className="text-[1rem] leading-7">{token.symbol=="ETH" ? ChainETHSymbol[chainId] : token.symbol}</span> : <span className="text-[1rem] leading-7">Select Token</span>}
           <img alt="arrow down" src="/images/arrow_down.svg" className="ml-[1rem]" />
         </div>
       </Button>

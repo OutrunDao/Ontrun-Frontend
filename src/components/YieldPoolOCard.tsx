@@ -148,7 +148,7 @@ export default function YieldPoolOCard() {
     }
 
     return (
-        <div className="flex flex-col items-center w-[38.44rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card">
+        <div className="flex flex-col items-center w-[38.44rem] shadow-card bg-modal border-[0.06rem] border-card">
             <span className="w-full text-transparent bg-clip-text bg-title font-kronaOne text-[2rem] leading-[2.3rem] text-center mt-6 mb-6">{YT?.symbol}</span>
             {/* <YieldPoolOTab
                 type={YT?.symbol || ""}
@@ -165,7 +165,7 @@ export default function YieldPoolOCard() {
                 RTSymbol={RT?.symbol || ""}
             /> */}
             <div className="flex flex-col items-center text-white font-avenir">
-            <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] rounded-[0.25rem] flex gap-x-5 items-center">
+            <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] flex gap-x-5 items-center">
                 <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
                     <span className="text-[1rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{impliedStakingDays} Days</span>
@@ -191,7 +191,7 @@ export default function YieldPoolOCard() {
                 onValueChange={handleSetWithdrawAmount}
                 placeholder="withdraw amount"
                 classNames={{
-                base: "h-[3.19rem] mt-[0.69rem] rounded-[0.75rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
+                base: "h-[3.19rem] mt-[0.69rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
                 mainWrapper: "justify-center",
                 input:
                     "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-wihte font-black text-[1.13rem] leading-[1.56rem]",
@@ -205,7 +205,7 @@ export default function YieldPoolOCard() {
                 }
             />
             <div className="flex gap-x-2 mt-[0.81rem] ml-auto mr-10">
-                <span>Balance: {YTBalance.toFixed(6)}</span>
+                <span>{YT?.symbol} Balance: {YTBalance.toFixed(6)}</span>
                 <Link underline="always" className="text-[#B625FF]" onPress={() => setWithdrawAmount(YTBalance.toFixed(18) || "")}>
                 MAX
                 </Link>
@@ -214,7 +214,7 @@ export default function YieldPoolOCard() {
                 value={Number(amountOut) ? amountOut : ""}
                 placeholder="withdraw amount"
                 classNames={{
-                base: "h-[3.19rem] mt-[0.69rem] rounded-[0.75rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
+                base: "h-[3.19rem] mt-[0.69rem] text-white font-medium font-avenir border-[0.03rem] border-[#504360] hover:bg-transparent w-[33.5rem]",
                 mainWrapper: "justify-center",
                 input:
                     "data-[hover=true]:bg-transparent text-right group-data-[has-value=true]:text-wihte font-black text-[1.13rem] leading-[1.56rem]",
@@ -222,7 +222,7 @@ export default function YieldPoolOCard() {
                 }}
                 startContent={
                 <div className="flex h-full items-center space-x-4">
-                    <p className="text-[1rem] leading-[1rem]">{"NTAmount"}</p>
+                    <p className="text-[1rem] leading-[1rem]">{RT?.symbol}</p>
                     <Divider orientation="vertical" className="bg-white bg-opacity-30 h-[60%]" />
                 </div>
                 }

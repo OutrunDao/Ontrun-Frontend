@@ -4,10 +4,12 @@ import { Button, Image, Input, Select, SelectItem, Tab, Tabs} from "@nextui-org/
 import { useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
+import { useChainId } from "wagmi";
 
 
 export default function CreateMemeverseCard() {
 
+  const chainId = useChainId();
   const [fileName, setFileName] = useState('');
   const {
     loading,
@@ -283,6 +285,7 @@ export default function CreateMemeverseCard() {
                         fullWidth={true}
                         placeholder="Select Chains"
                         selectionMode="multiple"
+                        defaultSelectedKeys={[97]} // Fix: Wrap chainId in an array
                       >
                         {memeverseData.supportChains.map((chain) => (
                           <SelectItem key={chain.chainId}>{chain.chainName}</SelectItem>

@@ -78,7 +78,8 @@ export default function AllLiquidityTab() {
                 {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
                 </TableRow>
             )}
-          </TableBody>):(
+          </TableBody>
+          ):(
             <TableBody >
               <TableRow key="1">
                 <TableCell>-</TableCell>

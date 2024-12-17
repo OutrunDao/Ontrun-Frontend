@@ -130,7 +130,7 @@ export default function SwapCard() {
   }
 
   return (
-    <div className="w-[34.18rem] min-h-[26.59rem] shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card relative">
+    <div className="w-[34.18rem] min-h-[26.59rem] shadow-card bg-modal border-[0.06rem] border-card relative">
       <div className="absolute z-10 text-white top-[2.29rem] right-[2.71rem]">
         <SwapSetting
           slippage={swapData.slippage}
@@ -154,7 +154,7 @@ export default function SwapCard() {
         }}>
         <Tab key="swap" title="Swap">
           <div className="flex flex-col items-center">
-            <div className="w-full h-[14rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8 relative">
+            <div className="w-full h-[14rem] border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] flex flex-col justify-around py-2 px-8 relative">
               <Button isIconOnly className="bg-transparent absolute left-[50%] top-[41%]" onClick={onReverse}>
                 <Image alt="transfer" src="/images/transfer-bg.svg" />
               </Button>

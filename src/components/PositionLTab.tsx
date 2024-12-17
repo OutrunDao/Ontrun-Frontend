@@ -2,20 +2,30 @@ import { Button } from "@/components/ui/button"
 import { useAccount, useChainId } from "wagmi";
 import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
 import { StakeCurrencyListMap } from "@/contracts/currencys";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, Key, useEffect, useMemo, useState } from "react";
 import { POT } from "@/contracts/tokens/POT";
 import { usePOT } from "@/contracts/useContract/usePOT";
 import { ethers } from "ethers";
 import Decimal from "decimal.js-light";
 import RedeemTab from "./RedeemTab";
-import { all, chain, set } from "radash";
+import { all, chain, iterate, set } from "radash";
 import { X } from 'lucide-react'
 import RedeemCard from "./RedeemCard";
 import Position from "@/app/staking/position/page";
 import { useYT } from "@/contracts/useContract/useYT";
-import { Accordion, AccordionItem, Divider} from "@nextui-org/react";
+import { Accordion, AccordionItem, Divider, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue} from "@nextui-org/react";
+import { positionTableColumns } from "@/constants";
 
-
+function unixTimestampToYMDHMS(timestamp: number) {
+    const date = new Date(timestamp * 1000); // 将秒转换为毫秒
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // 月份从0开始，需要加1
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    return { year, month, day, hours, minutes, seconds };
+}
 
 export default function PositionLTab() {
 
@@ -23,7 +33,7 @@ export default function PositionLTab() {
     const account = useAccount();
 
     const tokensOnChain = useMemo(() => getTokensByChainId(chainId), [chainId]);
-    const [positionDatas,setPositionDatas] = useState<any[]>();
+    const [tablesDatas,setTablesDatas] = useState<any[]>();
     const [positionsDatas,setPositionsDatas] = useState<any[]>();
     const [POTs,setPOTs] = useState<POT[]>();
     const [selectedPosition,setSelectedPosition] = useState<any>(null);
@@ -62,18 +72,16 @@ export default function PositionLTab() {
                 for (let j = 0; j < result.length; j++) {
                     const POTBalance = new Decimal(ethers.formatEther(allPOT[j].value || "0"));
                     const PositionId = allPOT[j].tokenId.toString();
-                    const principalRedeemable = new Decimal(ethers.formatEther(result[j][2] || "0"));
-                    
 
-                    const currentTimeInSeconds = BigInt(Math.floor(Date.now() / 1000));
-                    const remainingTimeInDays = Number((result[j][3] - currentTimeInSeconds) / BigInt(60 * 60 * 24));
+                    const res = await UsePOT.POTRead.previewRedeem({POT:POTs[i],positionId:PositionId,positionShare:result[j][2]});
 
-
+                    const principalRedeemable = new Decimal(ethers.formatEther(res || "0"));
+                    const deadline = unixTimestampToYMDHMS(Number(result[j][3]));
                     const _positionData = {
                         name: POTs[i].symbol,
                         principalRedeemable:principalRedeemable,
                         APY: APY,
-                        deadline:remainingTimeInDays,
+                        deadline:deadline,
                         RTSymbol:POTs[i].RTSymbol,
                         POTBalance:POTBalance,
                         PositionId:PositionId,
@@ -87,6 +95,29 @@ export default function PositionLTab() {
         _().then(setPositionsDatas);
         // _().then(setPositionDatas);
     },[POTs]);
+
+    function getTableData(item:any,key:Key) {
+        const deadline = `${item.deadline.year}:${item.deadline.month}:${item.deadline.day}:${item.deadline.hours}:${item.deadline.minutes}:${item.deadline.seconds}`;
+        switch (key) {
+            case "name":
+                return item.name;
+            case "principalRedeemable":
+                return (<span>`${item.principalRedeemable.toFixed(6)} ${RTSymbol}`</span>);
+            case "rate":
+                return (<span>{item.APY}%</span>);
+            case "unlockTime": 
+                return (<span>{deadline}</span>);
+            case "action":
+                return (
+                    <Button 
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-button-gradient text-white"
+                        onClick={() => handleOpen(item)}
+                    >
+                        Redeem
+                    </Button>
+                )
+        }
+    }
 
     function handleOpen(item:any) {
         setSelectedPosition(item);
@@ -108,64 +139,56 @@ export default function PositionLTab() {
                 {(positionsDatas || []).map((items, index) => (
                     items[index] && (
                         <AccordionItem
-                        key={index}
-                        aria-label={`Accordion ${index}`}
-                        title={
-                            <div>
-                                <span className="text-white ml-4">{items[index].name}</span>
-                            </div>
-                        }
-                        className="shadow-card bg-modal border-[0.06rem] rounded-[1.25rem] border-card"
-                    >
-                        <div className="flex justify-between relative text-purple-300 mb-8">
-                            <span className="absolute left-[4%]">Name</span>
-                            <span className="absolute left-[26%]">PrincipalRedeemable</span>
-                            <span className="absolute left-[50%]">APY</span>
-                            <span className="absolute left-[72.5%]">Unlockdays</span>
-                        </div>
-                    {items.map((item: any, index: number) => (
-                        <div key={index}>
-                            <Divider className="w-[calc(100%-1rem)] border-solid border-[0.1rem] border-[#9A6BE1] border-opacity-30 mx-2"/>
-                            <div key={index} className="w-full h-[3rem] text-white relative">
-                                <div className="h-"></div>
-                                <div className="flex justify-between h-full items-center text-lg text-center mx-8">
-                                    <span className="absolute left-[4%] top-1/2 transform -translate-y-1/2 text-white">{item.name}</span>
-                                    <span className="absolute left-[25%] top-1/2 transform -translate-y-1/2 text-white">{item.principalRedeemable.toFixed(6)}</span>
-                                    <span className="absolute left-[50%] top-1/2 transform -translate-y-1/2 text-white">{item.APY}%</span>
-                                    <span className="absolute left-[75%] top-1/2 transform -translate-y-1/2 text-white">{item.deadline}{" "}days</span>
-                                    <Button 
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-button-gradient text-white" 
-                                        onClick={() => handleOpen(item)}
-                                    >
-                                        Redeem
-                                    </Button>
+                            key={index}
+                            aria-label={`Accordion ${index}`}
+                            title={
+                                <div>
+                                    <span className="text-white ml-4">{items[index].name}</span>
                                 </div>
-                            </div>
-                        </div>
-                        
-
-                    ))}
-                    {selectedPosition && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="relative">
-                                <RedeemCard positionData={selectedPosition}/>
-                                <Button
-                                    onClick={handleClosePopup}
-                                    className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-300"
-                                    variant="ghost"
-                                    size="icon"
-                                    aria-label="Close"
-                                >
-                                    <X className="h-6 w-6" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                    </AccordionItem>
-                    )
-
-                ))}
+                            }
+                            className="shadow-card bg-modal border-[0.06rem] border-card"
+                        >
+                            <Table
+                                removeWrapper
+                                classNames={{
+                                th: "bg-transparent text-center border-b border-divider border-[#4A325D] border-opacity-[0.3]",
+                                tr: "border-divider border-[#4A325D] border-opacity-[0.3] outline-2",
+                                td: "text-center text-white",
+                                }}>
+                                <TableHeader columns={positionTableColumns}>
+                                {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                                </TableHeader>
+                                <TableBody items={items} emptyContent={"No data"}>
+                                {(item: any) => (
+                                    <TableRow
+                                    key={item.name}
+                                    onClick={() => handleOpen(item)}
+                                    >
+                                        {(columnKey) => <TableCell>{getTableData(item, columnKey)}</TableCell>}
+                                    </TableRow>
+                                )}
+                                </TableBody>
+                            </Table>
+                            {selectedPosition && (
+                                <div>
+                                    <div>
+                                        <RedeemCard positionData={selectedPosition}/>
+                                        <Button
+                                            onClick={handleClosePopup}
+                                            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-300"
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label="Close"
+                                        >
+                                            <X className="h-6 w-6" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </AccordionItem>
+                    )))}
             </Accordion>
         </div>
     )
 }
+
