@@ -57,10 +57,10 @@ export default function EnhancedMarketPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-700">
-              <TableHead className="w-[250px] text-gray-300">Name <ArrowUpDown className="ml-2 h-4 w-4 inline" /></TableHead>
-              <TableHead className="text-gray-300">Liquidity <ArrowUpDown className="ml-2 h-4 w-4 inline" /></TableHead>
-              <TableHead className="text-gray-300">Average Lock Time <ArrowUpDown className="ml-2 h-4 w-4 inline" /></TableHead>
-              <TableHead className="text-gray-300">Currently Anchored APY</TableHead>
+              <TableHead className="w-[250px] text-gray-300">Name</TableHead>
+              <TableHead className="text-gray-300">Liquidity</TableHead>
+              <TableHead className="text-gray-300">Average Lock Time</TableHead>
+              <TableHead className="text-gray-300">YT Anchored Rate</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,7 +79,7 @@ export default function EnhancedMarketPage() {
                       <div className="flex items-center">
                         {item.symbol}
                         <div className="ml-2 text-yellow-500 transition-transform duration-300 ease-in-out hover:scale-125 hover:rotate-180">
-                          <Star className="h-4 w-4" />
+                          {/* <Star className="h-4 w-4" /> */}
                         </div>
                       </div>
                       <div className="text-sm text-gray-400">{item.name}</div>
@@ -100,7 +100,7 @@ export default function EnhancedMarketPage() {
                   <div className="bg-gradient-to-r from-blue-900/50 via-purple-900/50 to-pink-900/50 p-3 rounded-md inline-block min-w-[120px] shadow-lg transition-all duration-300 ease-in-out hover:scale-105">
                     <div className="text-lg font-bold flex items-center">
                       {item.currentlyAnchoredAPY}%
-                      <TrendingUp className="ml-1 h-4 w-4 text-green-500" />
+                      {/* <TrendingUp className="ml-1 h-4 w-4 text-green-500" /> */}
                     </div>
                   </div>
                 </TableCell>

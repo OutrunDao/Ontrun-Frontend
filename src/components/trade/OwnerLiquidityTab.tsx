@@ -1,5 +1,6 @@
 import { liquidityTableColumns } from "@/constants";
 import {
+  Button,
   getKeyValue,
   Image,
   Input,
@@ -12,7 +13,7 @@ import {
 } from "@nextui-org/react";
 import PaginationCustom from "../PaginationCustom";
 import { SwapView, useSwap } from "@/hooks/useSwap";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Key } from "react";
 import { usePair } from "@/contracts/useContract/usePair";
 import { Address } from "viem";
 
@@ -28,13 +29,45 @@ export default function OwnerLiquidityTab() {
       _row.push({
         id: i.toString(), 
         pool: `${ownerLiquiditysData[i].token0.symbol}/${ownerLiquiditysData[i].token1.symbol}`,
-        volume: `${ownerLiquiditysData[i].reserve0} / ${ownerLiquiditysData[i].reserve1} `,
-        tcl: `${ownerLiquiditysData[i].reserveUSD}`,
+        volume: `${ownerLiquiditysData[i].volumeUSD}$`,
+        tcl: `${ownerLiquiditysData[i].reserveUSD}$`,
+        fees: `${Number(ownerLiquiditysData[i].fee)/1000}%`,
+        address: ownerLiquiditysData[i].address
       
       })
     }
     return _row;
   },[ownerLiquiditysData])
+
+  function handleDetail(address: Address) {
+    window.location.href = '/trade/liquidity/liquidityDetail?pairAddress=' + address;
+  }
+
+  function getRows(item: any, key: Key) {
+    switch (key) {
+      case "id":
+        return item.id;
+      case "pool":
+        return item.pool;
+      case "volume":
+        return item.volume;
+      case "tcl": 
+        return item.tcl;
+      case "fees":
+        return item.fees;
+      case "action":
+        return (
+          <div>
+            <Button 
+              className="text-white text-[0.82rem] font-avenir leading-[1.12rem] rounded-full font-normal text-opacity-50 bg-transparent border-solid border-[0.06rem] border-opacity-30 h-[1.34rem] hover:bg-gray-200 hover:text-black"
+              onClick={() => handleDetail(item.address)}
+            >
+              Detail
+            </Button>
+          </div>
+        )
+  }
+}
 
   useEffect(() => {
     setRows(ownerRows);
@@ -74,12 +107,13 @@ export default function OwnerLiquidityTab() {
                 {/* <TableCell>{item.id}</TableCell>
                 <TableCell>{item.pool}</TableCell> */}
 
-                {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                {(columnKey) => <TableCell>{getRows(item, columnKey)}</TableCell>}
                 </TableRow>
             )}
           </TableBody>):(
             <TableBody >
               <TableRow key="1">
+                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>

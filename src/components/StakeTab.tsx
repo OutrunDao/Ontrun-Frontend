@@ -88,7 +88,7 @@ export default function StakeTab() {
     if (tokens) {
       setNT(tokens.NT.onChain(chainId));
       setSY(tokens.SY[chainId]);
-      setPT(tokens.UPT[chainId]);
+      setPT(tokens.PT[chainId]);
       setYT(tokens.YT[chainId]);
       setPOT(tokens.POT[chainId]);
       setCurrencyList([tokens.NT, tokens.RT]);

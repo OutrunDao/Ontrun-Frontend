@@ -65,7 +65,7 @@ export function useSwap(swapOpts: SwapOptions) {
   const [transactionDeadline, setTransactionDeadline] = useState<number>(10);
   const [unlimitedAmount, setUnlimitedAmount] = useState<boolean>(false);
   const [CurrencyList, setCurrencyList] = useState<CurrencySelectListType>();
-  const [swapFeeRate, setswapFeeRate] = useState<BigInt>();
+  const [swapFeeRate, setswapFeeRate] = useState<BigInt>(BigInt(30));
   const [bestTradeRouter, setBestTradeRouter] = useState<{trade:Trade<Currency, Currency, TradeType>,swapFeeRates:string[]}>();
   const [isToken0Approved, setIsToken0Approved] = useState<boolean>(false);
   const [isToken1Approved, setIsToken1Approved] = useState<boolean>(false);
@@ -303,18 +303,20 @@ export function useSwap(swapOpts: SwapOptions) {
     let result: any[] = [];
     try {
       const Gresult = await UseSwapFactoryGraphQL.getPairs(chainId);
-      console.log("Gresult", Gresult);
       if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
       const token0 = new Token(chainId, Gresult[i].token0.id, Number(Gresult[i].token0.decimals), Gresult[i].token0.symbol, Gresult[i].token0.name);
       const token1 = new Token(chainId, Gresult[i].token1.id, Number(Gresult[i].token1.decimals), Gresult[i].token1.symbol, Gresult[i].token1.name);
+      const swapFeeRate = await UseSwapFactory.swapFactoryView.swapFeeRate(Gresult[i].factoryAddress); 
       result.push({
         token0: token0,
         token1: token1,
         reserve0: parseFloat(Gresult[i].reserve0).toFixed(6).replace(/\.?0+$/, ''),
         reserve1: parseFloat(Gresult[i].reserve1).toFixed(6).replace(/\.?0+$/, ''),
         reserveUSD: parseFloat(Gresult[i].reserveUSD).toFixed(6).replace(/\.?0+$/, ''),
+        volumeUSD: parseFloat(Gresult[i].volumeUSD).toFixed(6).replace(/\.?0+$/, ''),
         address: Gresult[i].id,
+        fee: swapFeeRate,
       });
     }
     return result;
@@ -327,19 +329,24 @@ export function useSwap(swapOpts: SwapOptions) {
     let result: any[] = [];
     try {
       const Gresult = await UseSwapFactoryGraphQL.getOwnerLiquiditys(chainId, owner);
+      console.log("Gresult", Gresult);
     if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
       const token0 = new Token(chainId, Gresult[i].pair.token0.id, Number(Gresult[i].pair.token0.decimals), Gresult[i].pair.token0.symbol, Gresult[i].pair.token0.name);
       const token1 = new Token(chainId, Gresult[i].pair.token1.id, Number(Gresult[i].pair.token1.decimals), Gresult[i].pair.token1.symbol, Gresult[i].pair.token1.name);
+      const swapFeeRate = await UseSwapFactory.swapFactoryView.swapFeeRate(Gresult[i].pair.factoryAddress); 
       result.push({
         token0: token0,
         token1: token1,
-        reserve0: Gresult[i].pair.reserve0,
-        reserve1: Gresult[i].pair.reserve1,
-        reserveUSD: Gresult[i].pair.reserveUSD,
-        address: Gresult[i].id,
+        reserve0: parseFloat(Gresult[i].pair.reserve0).toFixed(6).replace(/\.?0+$/, ''),
+        reserve1: parseFloat(Gresult[i].pair.reserve1).toFixed(6).replace(/\.?0+$/, ''),
+        reserveUSD: parseFloat(Gresult[i].pair.reserveUSD).toFixed(6).replace(/\.?0+$/, ''),
+        volumeUSD: parseFloat(Gresult[i].pair.volumeUSD).toFixed(6).replace(/\.?0+$/, ''),
+        address: Gresult[i].pair.id,
+        fee: swapFeeRate,
       });
     }
+    console.log("result", result);
     return result;
     } catch (error) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -381,8 +388,8 @@ export function useSwap(swapOpts: SwapOptions) {
   }
 
   async function addLiquidity() {
-    if (!account.address) return console.log("wallet account is not connected");
-    if (!token0 || !token1 || !routerAddress || !swapFeeRate) return;
+    if (!account.address) return console.error("wallet account is not connected");
+    if (!token0 || !token1 || !routerAddress || !swapFeeRate) return console.error("token0 or token1 or routerAddress or swapFeeRate is not defined");
     const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
     const token0AmountInputMin = Number(token0AmountInput)*(100-slippage)/100;
     const token1AmountInputMin = Number(token1AmountInput)*(100-slippage)/100;

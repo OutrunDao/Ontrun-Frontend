@@ -63,7 +63,7 @@ export default function RedeemTab({
 
     const tokens = StakeCurrencyListMap[chainId][tokenName];
     if (tokens) {
-      setPT(tokens.UPT[chainId]);
+      setPT(tokens.PT[chainId]);
       setPOT(tokens.POT[chainId]);
       setRT(tokens.RT[chainId]);
     }

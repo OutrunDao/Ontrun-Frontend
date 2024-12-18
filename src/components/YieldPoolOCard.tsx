@@ -167,19 +167,19 @@ export default function YieldPoolOCard() {
             <div className="flex flex-col items-center text-white font-avenir">
             <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] flex gap-x-5 items-center">
                 <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
-                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{impliedStakingDays} Days</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[1rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(YieldsNow).toFixed(6)} {RT?.symbol}</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[1rem] leading-[1.56rem] opacity-30">RateNow</span>
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Rate Now</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(rateNow).toFixed(2)}%</span>
                 </div>
                 <div className="flex flex-col gap-5 ml-[1.13rem]">
-                    <span className="text-[1rem] leading-[1.56rem] opacity-30">APR</span>
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">YT Anchored Rate</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{APY}%</span>
                 </div>
             </div>
