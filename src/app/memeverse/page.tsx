@@ -7,9 +7,9 @@ export const metadata: Metadata = {
 
 export default function Liquidity() {
   return (
-    <div className="h-[125rem] relative bg-[#0B0C1D]">
+    <div className="h-[125rem] relative bg-[#0B0C1D] flex justify-center">
       <img alt="background" src="/images/common-bg.svg" className="absolute top-0 left-0 bg-no-repeat z-0" />
-      <div className="absolute z-10 top-[14rem] left-[16rem]">
+      <div className="relative z-10" style={{ marginTop: '100px' }}>
         <MemeverseContent />
       </div>
     </div>

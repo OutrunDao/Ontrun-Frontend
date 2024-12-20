@@ -1,14 +1,25 @@
 "use client";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
-import { Button, Image, Input, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@nextui-org/react";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
 import { ChainETHSymbol } from "@/contracts/chains";
+import { Ether, Currency } from "@/packages/core";
 
-export default function AddLiquidityCard() {
+export default function AddLiquidityCard({
+  isBack,
+  _token0,
+  _token1,
+  _swapFee,
+}:{
+  isBack?:boolean,
+  _token0?:Currency | Ether,
+  _token1?:Currency | Ether,
+  _swapFee?:number
+}) {
   const {
     chainId,
     swapData,
@@ -32,6 +43,13 @@ export default function AddLiquidityCard() {
     fetchPair: true,
     approve2Tokens: true,
   });
+
+  useEffect(() => {
+    if (!_token0 || !_token1 || !_swapFee) return;
+    setToken0(_token0);
+    setToken1(_token1);
+    setswapFeeRate(BigInt(_swapFee));
+  },[_token0,_token1,_swapFee])
 
   const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
   const [isApproveToken1Loading, setIsApproveToken1Loading] = useState(false);
@@ -60,7 +78,6 @@ export default function AddLiquidityCard() {
     } finally {
       setIsApproveToken0Loading(false);
     }
-    // setIsApproveToken0Loading(false);
   }
 
   async function handleApproveToken1() {
@@ -113,14 +130,26 @@ export default function AddLiquidityCard() {
     }
   }
 
+  function handleBackClick() {
+    window.history.back();
+  }
+
   return (
     <div className="w-[34rem] min-h-[26.59rem]">
-      <Button
-        disableRipple
-        className="bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium mb-12"
-        startContent={<Image alt="back" src="/images/back.svg" />}>
-        Back
-      </Button>
+      {!isBack ? (
+        <Button
+          disableRipple
+          className="bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium mb-12"
+          startContent={<Image alt="back" src="/images/back.svg" />}
+          href="/trade/liquidity"
+          as={Link}
+        >
+          Back
+        </Button>
+      ) : (
+        <div className="mb-20"></div>
+      )}
+
       <div className="w-[34rem] min-h-[39.13rem] shadow-card bg-modal border-[0.06rem] border-card relative">
         <div className="absolute z-10 text-white top-[2.29rem] right-[2rem]">
           <SwapSetting
@@ -174,10 +203,10 @@ export default function AddLiquidityCard() {
                   listboxWrapper: "text-white",
                   
                 }}
-                defaultSelectedKeys={["0.3"]}
+                defaultSelectedKeys={[String(Number(swapData.swapFeeRate)/100)]}
                 >
                 <SelectItem key="0.3" value={0.3}>
-                  0.30% fee tier
+                  0.3% fee tier
                 </SelectItem>
                 <SelectItem key="1" value={1}>
                   1% fee tier

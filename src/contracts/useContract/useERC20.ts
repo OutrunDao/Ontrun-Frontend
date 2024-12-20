@@ -32,13 +32,15 @@ export function useERC20() {
     }
 
     async function allowance({
+        tokenAddress,
         ownerAddress,
         spenderAddress,
     }:{
-        ownerAddress: Address;
-        spenderAddress: Address;
+        tokenAddress: string;
+        ownerAddress: string;
+        spenderAddress: string;
     }) {
-        const erc20Contract = await getERC20read(ownerAddress);
+        const erc20Contract = await getERC20read(tokenAddress);
         const allowance = await erc20Contract.allowance(ownerAddress, spenderAddress);
         return allowance;   
     }

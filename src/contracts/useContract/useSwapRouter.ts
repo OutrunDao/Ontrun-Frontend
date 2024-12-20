@@ -194,6 +194,77 @@ export function useSwapRouter() {
         return receipt;
     }
 
+    async function removeLiquidity({
+        routerAddress,
+        tokenA,
+        tokenB,
+        feeRate,
+        liquidity,
+        amountAMin,
+        amountBMin,
+        to,
+        deadline,
+    }:{
+        routerAddress: Address,
+        tokenA: string,
+        tokenB: string,
+        feeRate: BigInt,
+        liquidity: BigInt,
+        amountAMin: BigInt,
+        amountBMin: BigInt,
+        to: string,
+        deadline: BigInt,
+    }) {
+        console.log([routerAddress, tokenA, tokenB, feeRate, liquidity, amountAMin, amountBMin, to, deadline]);
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
+        const tx = await swapRouterContract.removeLiquidity(
+            tokenA,
+            tokenB,
+            feeRate,
+            liquidity,
+            amountAMin,
+            amountBMin,
+            to,
+            deadline
+        );
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
+    async function removeLiquidityETH({
+        routerAddress,
+        token,
+        feeRate,
+        liquidity,
+        amountTokenMin,
+        amountETHMin,
+        to,
+        deadline,
+    }:{
+        routerAddress: Address,
+        token: string,
+        feeRate: BigInt,
+        liquidity: BigInt,
+        amountTokenMin: BigInt,
+        amountETHMin: BigInt,
+        to: string,
+        deadline: BigInt,
+    }) {
+        const swapRouterContract = await getSwapRouterwrite(routerAddress);
+        const tx = await swapRouterContract.removeLiquidity(
+            token,
+            feeRate,
+            liquidity,
+            amountTokenMin,
+            amountETHMin,
+            to,
+            deadline
+        );
+        const receipt = await tx.wait();
+        return receipt;
+    }
+
+
     return {
         getSwapRouterwrite,
         swapRouterWrite: {
@@ -202,6 +273,8 @@ export function useSwapRouter() {
             swapExactETHForTokens,
             swapExactTokensForETH,
             swapExactTokensForTokens,
+            removeLiquidity,
+            removeLiquidityETH,
         }
     }
 

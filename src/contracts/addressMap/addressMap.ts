@@ -48,7 +48,7 @@ export const addressMap = {
     [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
     [ContractName.stakeRouter]: "0x88c022aA8Ccae9C1cdc2BeC7Aac32dc0ec61986c",
     [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
-    [ContractName.SWAP_ROUTER]: "0xEf63848F3105e3a4EF568d8358F80EE5615eE4BF",
+    [ContractName.SWAP_ROUTER]: "0x10C30c55566f21ed0ad6ee073fF3Dd81C6899C81",
     [ContractName.refferManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
 
   }
@@ -58,8 +58,8 @@ export const factoryAddressMap = {
   [ChainId.BLAST_SEPOLIA]: [
   ],
   [ChainId.BSC_TESTNET]: [
-    "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",//0.3% Fee
-    "0xfeFcCd94289d39f71DFA09564eC9d14D31b3BeDe",//1% Fee
+    "0x367aEc60D79c4E7Ff93086F7FEfA71F4A349aD6E",//0.3% Fee
+    "0x6c293Aa6F04408DA6797CE8Fd0B72086f70bBd28",//1% Fee
   ],
 };
 
@@ -70,7 +70,7 @@ export function getSwapFactoryAddresses(chainId: number): `0x${string}`[] {
 
 export const initCodeHashMap = {
   [ChainId.BLAST_SEPOLIA]: "0x9d7b24376800c0a5fb253d12673d2021f71732f524fe808d89000739fc93fce8",
-  [ChainId.BSC_TESTNET]: "0xf52fc9f1359be155b90c9431d42b6d85340b12743086a3ba41d0297b047c675a",
+  [ChainId.BSC_TESTNET]: "0x9c7eeb5e368d54ce67148dc0587b65e6dc5950f3520417b65bcc9ed6cd846ad6",
   
 } as Record<number, `0x${string}`>;
 

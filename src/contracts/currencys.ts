@@ -6,6 +6,7 @@ import { ChainId } from "./chains";
 import { slisBNB } from "./tokens/tokenStake";
 import { YTslisBNB } from "./tokens/YT";
 import { POTslisBNB } from "./tokens/POT";
+import { PTslisBNB } from "./tokens/PT";
 
 
 export const currencySelectList = [Ether, tBNB, slisBNB];
@@ -20,7 +21,7 @@ const slisBNBCurrencyList = {
     NT: Ether,
     RT: slisBNB,
     SY: SYslisBNB,
-    UPT: UBNB,
+    PT: PTslisBNB,
     YT: YTslisBNB,
     POT: POTslisBNB,
 };

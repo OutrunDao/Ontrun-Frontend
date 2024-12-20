@@ -1,5 +1,6 @@
 import { liquidityTableColumns } from "@/constants";
 import {
+  Button,
   getKeyValue,
   Image,
   Input,
@@ -12,7 +13,7 @@ import {
 } from "@nextui-org/react";
 import PaginationCustom from "../PaginationCustom";
 import { SwapView, useSwap } from "@/hooks/useSwap";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Key } from "react";
 import { usePair } from "@/contracts/useContract/usePair";
 import { Address } from "viem";
 
@@ -27,14 +28,40 @@ export default function AllLiquidityTab() {
       for (let i = 0; i < allPairsData.length; i++) {
         _row.push({
           id: i.toString(), 
-          pool: `${allPairsData[i].token0.symbol}/${allPairsData[i].token1.symbol}`,
-          volume: `${allPairsData[i].reserve0} / ${allPairsData[i].reserve1} `,
-          tcl: `${allPairsData[i].reserveUSD}`,
+          pool: `${allPairsData[i].token0Symbol}/${allPairsData[i].token1Symbol}`,
+          feeRate: `${allPairsData[i].fee.toFixed(6).replace(/\.?0+$/, '')}%`,
+          volume: `${allPairsData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+          tcl: `${allPairsData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+          fees: `${Number(allPairsData[i].fee * allPairsData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')} $`,
+          address: allPairsData[i].address
         
         })
       }
       return _row;
   },[allPairsData])
+
+  function handleDetail(address: Address) {
+    window.location.href = '/trade/liquidity/liquidityDetail?pairAddress=' + address;
+  }
+
+  function getRows(item: any, key: Key) {
+    switch (key) {
+      case "id":
+        return item.id;
+      case "pool":
+        return item.pool;
+      case "feeRate":
+        return item.feeRate;
+      case "volume":
+        return item.volume;
+      case "tcl": 
+        return item.tcl;
+      case "fees":
+        return item.fees;
+      case "action":
+        return 
+  }
+}
 
   useEffect(() => {
     setRows(allRows);
@@ -72,16 +99,16 @@ export default function AllLiquidityTab() {
           <TableBody items={rows} emptyContent={"No data"}>
             {(item) => (
               <TableRow key={item.id}>
-                {/* <TableCell>{item.id}</TableCell>
-                <TableCell>{item.pool}</TableCell> */}
 
-                {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                {(columnKey) => <TableCell>{getRows(item, columnKey)}</TableCell>}
                 </TableRow>
             )}
           </TableBody>
           ):(
             <TableBody >
               <TableRow key="1">
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>

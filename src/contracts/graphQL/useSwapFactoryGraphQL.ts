@@ -25,10 +25,13 @@ export function useSwapFactoryGraphQL() {
                         symbol
                         decimals
                     }
+                    id
                     reserve0
                     reserve1
                     reserveUSD
+                    volumeUSD
                     totalSupply
+                    factoryAddress
                 }
             }
         `;
@@ -63,10 +66,17 @@ export function useSwapFactoryGraphQL() {
                             symbol
                             decimals
                         }
+                        id
                         reserve0
                         reserve1
+                        token0Price
+                        token1Price
                         reserveUSD
+                        volumeToken0
+                        volumeToken1
+                        volumeUSD
                         totalSupply
+                        factoryAddress
                     }
                 }
                 }
