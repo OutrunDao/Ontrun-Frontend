@@ -72,6 +72,8 @@ export function useSwapFactoryGraphQL() {
                         token0Price
                         token1Price
                         reserveUSD
+                        volumeToken0
+                        volumeToken1
                         volumeUSD
                         totalSupply
                         factoryAddress

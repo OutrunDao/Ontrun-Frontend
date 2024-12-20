@@ -28,10 +28,11 @@ export default function OwnerLiquidityTab() {
     for (let i = 0; i < ownerLiquiditysData.length; i++) {
       _row.push({
         id: i.toString(), 
-        pool: `${ownerLiquiditysData[i].token0.symbol}/${ownerLiquiditysData[i].token1.symbol}`,
-        volume: `${ownerLiquiditysData[i].volumeUSD}$`,
-        tcl: `${ownerLiquiditysData[i].reserveUSD}$`,
-        fees: `${Number(ownerLiquiditysData[i].fee)/1000}%`,
+        pool: `${ownerLiquiditysData[i].token0Symbol}/${ownerLiquiditysData[i].token1Symbol}`,
+        feeRate: `${ownerLiquiditysData[i].fee.toFixed(6).replace(/\.?0+$/, '')}%`,
+        volume: `${ownerLiquiditysData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+        tcl: `${ownerLiquiditysData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+        fees: `${Number(ownerLiquiditysData[i].fee * ownerLiquiditysData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')} $`,
         address: ownerLiquiditysData[i].address
       
       })
@@ -49,6 +50,8 @@ export default function OwnerLiquidityTab() {
         return item.id;
       case "pool":
         return item.pool;
+      case "feeRate":
+        return item.feeRate;
       case "volume":
         return item.volume;
       case "tcl": 
@@ -113,6 +116,7 @@ export default function OwnerLiquidityTab() {
           </TableBody>):(
             <TableBody >
               <TableRow key="1">
+                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>

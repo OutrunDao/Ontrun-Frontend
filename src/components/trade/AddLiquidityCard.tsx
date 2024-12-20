@@ -13,10 +13,12 @@ export default function AddLiquidityCard({
   isBack,
   _token0,
   _token1,
+  _swapFee,
 }:{
   isBack?:boolean,
   _token0?:Currency | Ether,
   _token1?:Currency | Ether,
+  _swapFee?:number
 }) {
   const {
     chainId,
@@ -43,10 +45,11 @@ export default function AddLiquidityCard({
   });
 
   useEffect(() => {
-    if (!_token0 || !_token1) return;
+    if (!_token0 || !_token1 || !_swapFee) return;
     setToken0(_token0);
     setToken1(_token1);
-  },[_token0,_token1])
+    setswapFeeRate(BigInt(_swapFee));
+  },[_token0,_token1,_swapFee])
 
   const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
   const [isApproveToken1Loading, setIsApproveToken1Loading] = useState(false);
@@ -200,10 +203,10 @@ export default function AddLiquidityCard({
                   listboxWrapper: "text-white",
                   
                 }}
-                defaultSelectedKeys={["0.3"]}
+                defaultSelectedKeys={[String(Number(swapData.swapFeeRate)/100)]}
                 >
                 <SelectItem key="0.3" value={0.3}>
-                  0.30% fee tier
+                  0.3% fee tier
                 </SelectItem>
                 <SelectItem key="1" value={1}>
                   1% fee tier

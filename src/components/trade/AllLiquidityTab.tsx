@@ -28,10 +28,11 @@ export default function AllLiquidityTab() {
       for (let i = 0; i < allPairsData.length; i++) {
         _row.push({
           id: i.toString(), 
-          pool: `${allPairsData[i].token0.symbol}/${allPairsData[i].token1.symbol}`,
-          volume: `${allPairsData[i].volumeUSD}$`,
-          tcl: `${allPairsData[i].reserveUSD}$`,
-          fees: `${Number(allPairsData[i].fee)/1000}%`,
+          pool: `${allPairsData[i].token0Symbol}/${allPairsData[i].token1Symbol}`,
+          feeRate: `${allPairsData[i].fee.toFixed(6).replace(/\.?0+$/, '')}%`,
+          volume: `${allPairsData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+          tcl: `${allPairsData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
+          fees: `${Number(allPairsData[i].fee * allPairsData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')} $`,
           address: allPairsData[i].address
         
         })
@@ -49,6 +50,8 @@ export default function AllLiquidityTab() {
         return item.id;
       case "pool":
         return item.pool;
+      case "feeRate":
+        return item.feeRate;
       case "volume":
         return item.volume;
       case "tcl": 
@@ -104,6 +107,7 @@ export default function AllLiquidityTab() {
           ):(
             <TableBody >
               <TableRow key="1">
+                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>

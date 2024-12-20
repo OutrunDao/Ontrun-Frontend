@@ -1,5 +1,5 @@
 import { addressMap, getSwapFactoryAddresses} from "@/contracts/addressMap/addressMap";
-import { SUPPORTED_CHAINS } from "@/contracts/chains";
+import { ChainETHSymbol, SUPPORTED_CHAINS } from "@/contracts/chains";
 import { Currency, CurrencyAmount, Ether, Percent, Token, TradeType } from "@/packages/core";
 import { Native, Pair, Trade } from "@/packages/sdk";
 import { Fetcher } from "@/packages/sdk/fetcher";
@@ -15,7 +15,7 @@ import { useSwapFactory } from "../contracts/useContract/useSwapFactory";
 import { useERC20 } from "../contracts/useContract/useERC20";
 import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
 import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
-import { USDT } from "@/contracts/tokens/tokens";
+import { ORETH, USDT } from "@/contracts/tokens/tokens";
 
 
 export enum BtnAction {
@@ -305,18 +305,32 @@ export function useSwap(swapOpts: SwapOptions) {
       const Gresult = await UseSwapFactoryGraphQL.getPairs(chainId);
       if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
-      const token0 = new Token(chainId, Gresult[i].token0.id, Number(Gresult[i].token0.decimals), Gresult[i].token0.symbol, Gresult[i].token0.name);
-      const token1 = new Token(chainId, Gresult[i].token1.id, Number(Gresult[i].token1.decimals), Gresult[i].token1.symbol, Gresult[i].token1.name);
+      let token0 = new Token(chainId, Gresult[i].token0.id, Number(Gresult[i].token0.decimals), Gresult[i].token0.symbol, Gresult[i].token0.name);
+      let token1 = new Token(chainId, Gresult[i].token1.id, Number(Gresult[i].token1.decimals), Gresult[i].token1.symbol, Gresult[i].token1.name);
+      let token0Symbol = token0.symbol;
+      let token1Symbol = token1.symbol;
+      if (token0.equals(ORETH[chainId])) {
+        // @ts-ignore
+        token0 = Ether.onChain(chainId);
+        token0Symbol = ChainETHSymbol[chainId];
+      }
+      if (token1.equals(ORETH[chainId])) {
+        // @ts-ignore
+        token1 = Ether.onChain(chainId);
+        token1Symbol = ChainETHSymbol[chainId];
+      }
       const swapFeeRate = await UseSwapFactory.swapFactoryView.swapFeeRate(Gresult[i].factoryAddress); 
       result.push({
         token0: token0,
         token1: token1,
-        reserve0: parseFloat(Gresult[i].reserve0).toFixed(6).replace(/\.?0+$/, ''),
-        reserve1: parseFloat(Gresult[i].reserve1).toFixed(6).replace(/\.?0+$/, ''),
-        reserveUSD: parseFloat(Gresult[i].reserveUSD).toFixed(6).replace(/\.?0+$/, ''),
-        volumeUSD: parseFloat(Gresult[i].volumeUSD).toFixed(6).replace(/\.?0+$/, ''),
+        token0Symbol: token0Symbol,
+        token1Symbol: token1Symbol,
+        reserve0: parseFloat(Gresult[i].reserve0),
+        reserve1: parseFloat(Gresult[i].reserve1),
+        reserveUSD: parseFloat(Gresult[i].reserveUSD),
+        volumeUSD: parseFloat(Gresult[i].volumeUSD),
         address: Gresult[i].id,
-        fee: swapFeeRate,
+        fee: Number(swapFeeRate)/100,
       });
     }
     return result;
@@ -332,18 +346,36 @@ export function useSwap(swapOpts: SwapOptions) {
       console.log("Gresult", Gresult);
     if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
-      const token0 = new Token(chainId, Gresult[i].pair.token0.id, Number(Gresult[i].pair.token0.decimals), Gresult[i].pair.token0.symbol, Gresult[i].pair.token0.name);
-      const token1 = new Token(chainId, Gresult[i].pair.token1.id, Number(Gresult[i].pair.token1.decimals), Gresult[i].pair.token1.symbol, Gresult[i].pair.token1.name);
+      let token0 = new Token(chainId, Gresult[i].pair.token0.id, Number(Gresult[i].pair.token0.decimals), Gresult[i].pair.token0.symbol, Gresult[i].pair.token0.name);
+      let token1 = new Token(chainId, Gresult[i].pair.token1.id, Number(Gresult[i].pair.token1.decimals), Gresult[i].pair.token1.symbol, Gresult[i].pair.token1.name);
+      let token0Symbol = token0.symbol;
+      let token1Symbol = token1.symbol;
+      if (token0.equals(ORETH[chainId])) {
+        // @ts-ignore
+        token0 = Ether.onChain(chainId);
+        token0Symbol = ChainETHSymbol[chainId];
+      }
+      if (token1.equals(ORETH[chainId])) {
+        // @ts-ignore
+        token1 = Ether.onChain(chainId);
+        token1Symbol = ChainETHSymbol[chainId];
+      }
       const swapFeeRate = await UseSwapFactory.swapFactoryView.swapFeeRate(Gresult[i].pair.factoryAddress); 
       result.push({
         token0: token0,
         token1: token1,
-        reserve0: parseFloat(Gresult[i].pair.reserve0).toFixed(6).replace(/\.?0+$/, ''),
-        reserve1: parseFloat(Gresult[i].pair.reserve1).toFixed(6).replace(/\.?0+$/, ''),
-        reserveUSD: parseFloat(Gresult[i].pair.reserveUSD).toFixed(6).replace(/\.?0+$/, ''),
-        volumeUSD: parseFloat(Gresult[i].pair.volumeUSD).toFixed(6).replace(/\.?0+$/, ''),
+        token0Symbol: token0Symbol,
+        token1Symbol: token1Symbol,
+        reserve0: parseFloat(Gresult[i].pair.reserve0),
+        reserve1: parseFloat(Gresult[i].pair.reserve1),
+        reserveUSD: parseFloat(Gresult[i].pair.reserveUSD),
+        volumeUSD: parseFloat(Gresult[i].pair.volumeUSD),
+        volumeToken0: parseFloat(Gresult[i].pair.volumeToken0),
+        volumeToken1: parseFloat(Gresult[i].pair.volumeToken1),
         address: Gresult[i].pair.id,
-        fee: swapFeeRate,
+        fee: Number(swapFeeRate)/100,
+        liquidityTokenBalance: parseFloat(Gresult[i].liquidityTokenBalance),
+        totalSupply: parseFloat(Gresult[i].pair.totalSupply),
       });
     }
     console.log("result", result);
@@ -430,6 +462,85 @@ export function useSwap(swapOpts: SwapOptions) {
         amountAMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
         amountBMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
         toAddress: account.address,
+        deadline: BigInt(deadline),
+      })
+      return receipt;
+    }
+  }
+
+  async function approveToRouter({
+    token,
+    amount,
+  }:{
+    token: string,
+    amount: number,
+  }) {
+    if (!account.address) return console.error("wallet account is not connected");
+    if (!amount) return console.error("NULL");
+    const allowance = await UseERC20.ERC20View.allowance({
+      tokenAddress: token,
+      ownerAddress: account.address,
+      spenderAddress: routerAddress,
+    });
+    const _amount = parseUnits(amount.toString(), 18);
+    if (allowance < _amount) {
+      const receipt = await UseERC20.ERC20Write.approve({
+        erc20Address: token,
+        spender: routerAddress,
+        amount: _amount - allowance,
+      });
+      return receipt;
+    }
+  }
+
+  async function removeLiquidity({
+    liquidity,
+    Amount0,
+    Amount1,
+  }:{
+    liquidity: number,
+    Amount0: number,
+    Amount1: number,
+  }) {
+    if (!account.address) return console.error("wallet account is not connected");
+    if (!token0 || !token1 || !routerAddress || !swapFeeRate) return console.error("token0 or token1 or routerAddress or swapFeeRate is not defined");
+    const deadline = Math.floor(Date.now() / 1000) + transactionDeadline * 60;
+    const token0AmountInputMin = Amount0*(100-slippage)/100;
+    const token1AmountInputMin = Amount1*(100-slippage)/100;
+    if (token0.isNative) {
+      const receipt = await UseSwapRouter.swapRouterWrite.removeLiquidityETH({
+        routerAddress: routerAddress,
+        token: (token1 as Token).address,
+        feeRate: swapFeeRate,
+        liquidity: parseUnits(liquidity!.toString(), token1.decimals),
+        amountTokenMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        amountETHMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
+        to: account.address,
+        deadline: BigInt(deadline),
+      });
+      return receipt;
+    } else if (token1.isNative) {
+      const receipt = await UseSwapRouter.swapRouterWrite.removeLiquidityETH({
+        routerAddress: routerAddress,
+        token: (token0 as Token).address,
+        feeRate: swapFeeRate,
+        liquidity: parseUnits(liquidity!.toString(), token0.decimals),
+        amountTokenMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
+        amountETHMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        to: account.address,
+        deadline: BigInt(deadline),
+      });
+      return receipt;
+    } else {
+      const receipt = await UseSwapRouter.swapRouterWrite.removeLiquidity({
+        routerAddress: routerAddress,
+        tokenA: (token0 as Token).address,
+        tokenB: (token1 as Token).address,
+        feeRate: swapFeeRate,
+        liquidity: parseUnits(liquidity!.toString(), token0.decimals),
+        amountAMin: parseUnits(token0AmountInputMin!.toString(), token0.decimals),
+        amountBMin: parseUnits(token1AmountInputMin!.toString(), token1.decimals),
+        to: account.address,
         deadline: BigInt(deadline),
       })
       return receipt;
@@ -590,6 +701,7 @@ export function useSwap(swapOpts: SwapOptions) {
  
   return {
     swapData: {
+      routerAddress,
       token0,
       token1,
       token0Balance,
@@ -618,6 +730,7 @@ export function useSwap(swapOpts: SwapOptions) {
     allPairsData,
     ownerLiquiditysData,
     loading,
+    approveToRouter,
     setLoading,
     setToken0,
     setToken1,
@@ -635,6 +748,7 @@ export function useSwap(swapOpts: SwapOptions) {
     approveToken0,
     approveToken1,
     addLiquidity,
+    removeLiquidity,
     swap,
   };
 }
