@@ -15,6 +15,7 @@ import Position from "@/app/staking/position/page";
 import { useYT } from "@/contracts/useContract/useYT";
 import { Accordion, AccordionItem, Divider, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue} from "@nextui-org/react";
 import { positionTableColumns } from "@/constants";
+import { Currency, Token } from "@/packages/core";
 
 function unixTimestampToYMDHMS(timestamp: number) {
     const date = new Date(timestamp * 1000); // 将秒转换为毫秒
@@ -67,7 +68,7 @@ export default function PositionLTab() {
                 const _positionDatas = [];
                 const allPOT = await UsePOT.POTRead.getAllPOT(POTs[i],account.address);
                 const result = await UsePOT.POTRead.positions(POTs[i],account.address);
-                const APY = await UseYT.YTView.APY({YT:POTs[i].YT} );
+                const currentRealRate = await UseYT.YTView.currentRealRate((POTs[i].YT as Token).address);
                 if (!result) return;
                 for (let j = 0; j < result.length; j++) {
                     const POTBalance = new Decimal(ethers.formatEther(allPOT[j].value || "0"));
@@ -80,7 +81,7 @@ export default function PositionLTab() {
                     const _positionData = {
                         name: POTs[i].symbol,
                         principalRedeemable:principalRedeemable,
-                        APY: APY,
+                        currentRealRate: currentRealRate,
                         deadline:deadline,
                         RTSymbol:POTs[i].RTSymbol,
                         POTBalance:POTBalance,
@@ -93,7 +94,6 @@ export default function PositionLTab() {
             return _positionsDatas;
         }
         _().then(setPositionsDatas);
-        // _().then(setPositionDatas);
     },[POTs]);
 
     function getTableData(item:any,key:Key) {
@@ -103,7 +103,7 @@ export default function PositionLTab() {
             case "principalRedeemable":
                 return (<div><span>{item.principalRedeemable.toFixed(6)} {item.RTSymbol}</span></div>);
             case "rate":
-                return (<div><span>{item.APY}%</span></div>);
+                return (<div><span>{item.currentRealRate.toFixed(2)}%</span></div>);
             case "unlockTime": 
                 return (<div><span>{item.deadline}</span></div>);
             case "action":

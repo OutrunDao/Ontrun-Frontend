@@ -1,8 +1,9 @@
 import { Token } from "@/packages/core/entities/token";
 import { computePairAddress } from "@/packages/sdk";
 import { addressMap } from "../addressMap/addressMap";
-import { ChainId } from "../chains";
+import { ChainETHSymbol, ChainId } from "../chains";
 import { tokenAddressMap } from "../addressMap/TokenAddressMap";
+import { Ether } from "@/packages/core";
 
 export const WETH9: { [chainId: number]: Token } = {
   // blast testnet
@@ -92,4 +93,12 @@ export const USDT: { [chainId: number]: Token } = {
     "USDT",
     "USDT",
   )
+}
+
+export function getTokenSymbol(token: Token|Ether, chainId: number): string {
+  if(token.isNative){
+    return ChainETHSymbol[chainId];
+  } else {
+    return token.symbol ?? "";
+  }
 }

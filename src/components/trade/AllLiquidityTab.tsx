@@ -27,22 +27,17 @@ export default function AllLiquidityTab() {
       let _row:any[] = []
       for (let i = 0; i < allPairsData.length; i++) {
         _row.push({
-          id: i.toString(), 
-          pool: `${allPairsData[i].token0Symbol}/${allPairsData[i].token1Symbol}`,
-          feeRate: `${allPairsData[i].fee.toFixed(6).replace(/\.?0+$/, '')}%`,
-          volume: `${allPairsData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
-          tcl: `${allPairsData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
-          fees: `${Number(allPairsData[i].fee * allPairsData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')} $`,
-          address: allPairsData[i].address
-        
+          id: Number(i+1).toString(), 
+          pool: `${allPairsData[i].token0Symbol}/${allPairsData[i].token1Symbol} ${Number(allPairsData[i].fee*100).toFixed(6).replace(/\.?0+$/, '')}%`,
+          volume: `$ ${allPairsData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')}`,
+          liquidity: `$ ${allPairsData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')}`,
+          fees: `$ ${Number(allPairsData[i].fee * allPairsData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')}`,
+          address: allPairsData[i].address,
+          apy: `${Number(allPairsData[i].fee * allPairsData[i].volumeUSD * 36500 / allPairsData[i].reserveUSD).toFixed(2)} %`
         })
       }
       return _row;
   },[allPairsData])
-
-  function handleDetail(address: Address) {
-    window.location.href = '/trade/liquidity/liquidityDetail?pairAddress=' + address;
-  }
 
   function getRows(item: any, key: Key) {
     switch (key) {
@@ -50,14 +45,14 @@ export default function AllLiquidityTab() {
         return item.id;
       case "pool":
         return item.pool;
-      case "feeRate":
-        return item.feeRate;
       case "volume":
         return item.volume;
-      case "tcl": 
-        return item.tcl;
+      case "liquidity": 
+        return item.liquidity;
       case "fees":
         return item.fees;
+      case "apy":
+        return item.apy;
       case "action":
         return 
   }
@@ -107,7 +102,6 @@ export default function AllLiquidityTab() {
           ):(
             <TableBody >
               <TableRow key="1">
-                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>

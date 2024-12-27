@@ -1,6 +1,6 @@
 import { Currency, Token } from "@/packages/core";
 import { ChainId } from "../chains";
-import { SYAddressMap } from "../addressMap/SYAddressMap";
+import { SYAddressMap } from "../addressMap/OutStakeAddressMap";
 
 export type SY = {
     chainId: number,

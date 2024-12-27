@@ -1,10 +1,10 @@
 import { Currency, Token } from "@/packages/core";
-import { POTAddressMap } from "../addressMap/POTAddressMap";
 import { ChainId } from "../chains";
 import { graphURLMap } from "../graphURLs";
 import { useYT } from "@/contracts/useContract/useYT";
 import { YTslisBNB } from "./YT";
 import { SYslisBNB } from "./SY";
+import { POTAddressMap } from "../addressMap/OutStakeAddressMap";
 
 export type POT = {
     chainId: number,

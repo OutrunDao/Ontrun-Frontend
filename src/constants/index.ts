@@ -129,11 +129,10 @@ export const positionTableColumns = [
 export const liquidityTableColumns = [
   { key: "id", label: "#" },
   { key: "pool", label: "Pool" },
-  { key: "feeRate", label: "Fee Rate" },
   { key: "volume", label: "Volume(24H)" },
-  { key: "tcl", label: "TCL" },
+  { key: "liquidity", label: "Liquidity" },
   { key: "fees", label: "Fees(24H)" },
-  { key: "apr", label: "APR" },
+  { key: "apy", label: "APY" },
   { key: "action", label: "" },
 ];
 

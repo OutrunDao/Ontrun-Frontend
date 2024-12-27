@@ -1,6 +1,6 @@
 "use client"
 import { useMemeverse } from "@/hooks/useMemeverse";
-import { Button, Image, Input, Select, SelectItem, Tab, Tabs} from "@nextui-org/react";
+import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@nextui-org/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
@@ -56,7 +56,10 @@ export default function CreateMemeverseCard() {
       <Button
         disableRipple
         className="bg-transparent text-white text-[1.13rem] leading-[1.56rem] font-medium mb-12"
-        startContent={<Image alt="back" src="/images/back.svg" />}>
+        startContent={<Image alt="back" src="/images/back.svg" />}
+        href="/memeverse"
+        as={Link}
+        >
         Back
       </Button>
       {/* bg-[#120A1C] */}
@@ -66,13 +69,13 @@ export default function CreateMemeverseCard() {
           classNames={{
             base: "w-full",
             tab: "h-full data-[hover-unselected=true]:opacity-100 bg-transparent font-kronaOne",
-            tabList: "h-full flex gap-x-8 rounded-none px-4 pt-8 bg-transparent border-white border-b border-divider",
+            tabList: "w-full text-center h-full flex gap-x-8 rounded-none px-4 pt-8 bg-transparent border-white border-b border-divider",
             tabContent:
               "text-white group-data-[selected=true]:bg-title text-[1.5rem] leading-[1.88rem] font-kronaOne group-data-[selected=true]:text-transparent group-data-[selected=true]:bg-clip-text",
             cursor: "bg-transparent",
             panel: "mx-6 mb-8",
           }}>
-            <Tab key="creat" title="Create Memeverse">
+            <Tab key="creat" title="Create">
             <div className="text-white text-[0.75rem]">
               <div className="flex flex-wrap">
                 <div className="flex justify-center items-center w-full">

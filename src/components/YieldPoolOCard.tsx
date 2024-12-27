@@ -10,14 +10,17 @@ import { ethers, parseEther } from "ethers";
 import { set } from "radash";
 import { POT } from "@/contracts/tokens/POT";
 import { usePOT } from "@/contracts/useContract/usePOT";
+import { useStake } from "@/hooks/useStake";
 
 export default function YieldPoolOCard() {
+    const searchParams = useSearchParams();
+    const tokenName = searchParams.get('tokenName');
+
+    const { stakeData } = useStake(tokenName || ""); // Handle the case where tokenName is null
 
     const [withdrawAmount, setWithdrawAmount] = useState("");
     const [amountOut, setAmountOut] = useState<string | undefined>("");
 
-    const searchParams = useSearchParams();
-    const tokenName = searchParams.get('tokenName');
     const chainId = useChainId();
     const account = useAccount();
     const publicClient = usePublicClient();
@@ -28,7 +31,7 @@ export default function YieldPoolOCard() {
     const [POT, setPOT] = useState<POT>();
     const [YTBalance, setYTBalance] = useState<Decimal>(new Decimal(0));
     // const [SYBalance, setSYBalance] = useState<Decimal>(new Decimal(0));
-    const [YieldsNow, setYieldsNow] = useState("");
+    const [YieldsNow, setYieldsNow] = useState<Number>();
     const [rateNow, setRateNow] = useState("");
     const [APY, setAPY] = useState<string | undefined>("");
     const [impliedStakingDays, setImpliedStakingDays] = useState("");
@@ -45,7 +48,7 @@ export default function YieldPoolOCard() {
         if (!YT) return;
         const totalRedeemableYields = await UseYT.YTView.totalRedeemableYields(YT);
         if (totalRedeemableYields) {
-            setYieldsNow(totalRedeemableYields.toString());
+            setYieldsNow(Number(totalRedeemableYields));
         }
     },[YT])
 
@@ -172,15 +175,15 @@ export default function YieldPoolOCard() {
                 </div>
                 <div className="flex flex-col gap-5 items-center">
                     <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(YieldsNow).toFixed(6)} {RT?.symbol}</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{YieldsNow?.toFixed(6) ?? 0} {RT?.symbol}</span>
                 </div>
                 <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Rate Now</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{parseFloat(rateNow).toFixed(2)}%</span>
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">YT Current Real Rate</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{stakeData.currentRealRate?.toFixed(2) ?? 0}%</span>
                 </div>
                 <div className="flex flex-col gap-5 ml-[1.13rem]">
                     <span className="text-[0.75rem] leading-[1.56rem] opacity-30">YT Anchored Rate</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{APY}%</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{stakeData.anchoredRate?.toFixed(2) ?? 0}%</span>
                 </div>
             </div>
             <span className="text-[1.13rem] leading-[1.56rem] font-medium mt-[2.5rem]">

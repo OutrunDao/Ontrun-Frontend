@@ -15,7 +15,7 @@ import { useSwapFactory } from "../contracts/useContract/useSwapFactory";
 import { useERC20 } from "../contracts/useContract/useERC20";
 import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
 import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
-import { ORETH, USDT } from "@/contracts/tokens/tokens";
+import { ORETH, USDT, getTokenSymbol } from "@/contracts/tokens/tokens";
 
 
 export enum BtnAction {
@@ -53,8 +53,8 @@ export function useSwap(swapOpts: SwapOptions) {
   const publicClient = usePublicClient();
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [token0, setToken0] = useState<Currency | Ether>(Ether.onChain(chainId));
-  const [token1, setToken1] = useState<Currency | Ether>(USDT[chainId]);
+  const [token0, setToken0] = useState<Currency | Ether>();
+  const [token1, setToken1] = useState<Currency | Ether>();
   const [token0AmountInput, setToken0AmountInput] = useState<string>("");
   const [token1AmountInput, setToken1AmountInput] = useState<string>("");
   const [routeNotExist, setRouteNotExist] = useState<boolean>(false);
@@ -93,8 +93,17 @@ export function useSwap(swapOpts: SwapOptions) {
 
   useEffect(() => {
     if (!chainId) return;
-    if (!token1) {
+    if (!token1 || token1.chainId != chainId) {
+      console.log("chainId", chainId);
       setToken1(USDT[chainId]);
+    }
+  },[chainId])
+
+  useEffect(() => {
+    if (!chainId) return;
+    if (!token0 || token0.chainId != chainId) {
+      console.log("chainId", chainId);
+      setToken0(Ether.onChain(chainId));
     }
   },[chainId])
 
@@ -214,9 +223,9 @@ export function useSwap(swapOpts: SwapOptions) {
   const tradeRoutePath = useMemo(() => {
     if (!tradeRoute) return [];
     return tradeRoute.route.path.map((token, index) => {
-      if (index === 0) return token0?.symbol;
-      if (index === tradeRoute.route.path.length - 1) return token1!.symbol;
-      return token.symbol;
+      if (index === 0) return getTokenSymbol(token0 as Token, chainId);
+      if (index === tradeRoute.route.path.length - 1) return getTokenSymbol(token1 as Token, chainId);
+      return getTokenSymbol(token, chainId);
     });
   }, [tradeRoute, token0, token1]);
 
@@ -330,7 +339,7 @@ export function useSwap(swapOpts: SwapOptions) {
         reserveUSD: parseFloat(Gresult[i].reserveUSD),
         volumeUSD: parseFloat(Gresult[i].volumeUSD),
         address: Gresult[i].id,
-        fee: Number(swapFeeRate)/100,
+        fee: Number(swapFeeRate)/10000,
       });
     }
     return result;
@@ -373,7 +382,7 @@ export function useSwap(swapOpts: SwapOptions) {
         volumeToken0: parseFloat(Gresult[i].pair.volumeToken0),
         volumeToken1: parseFloat(Gresult[i].pair.volumeToken1),
         address: Gresult[i].pair.id,
-        fee: Number(swapFeeRate)/100,
+        fee: Number(swapFeeRate)/10000,
         liquidityTokenBalance: parseFloat(Gresult[i].liquidityTokenBalance),
         totalSupply: parseFloat(Gresult[i].pair.totalSupply),
       });
@@ -624,7 +633,7 @@ export function useSwap(swapOpts: SwapOptions) {
       if (!publicClient) return;
       // const Pairs =
       if (tradeType === TradeType.EXACT_INPUT) {
-        // console.log("token0", tokenConvert(token0!));
+        // console.log("token0", token0);
         const result = Trade.bestTradeExactIn(
           await makePairs(token0!, token1!, publicClient),
           CurrencyAmount.fromRawAmount(tokenConvert(token0!), parseUnits(value, token0!.decimals).toString()),

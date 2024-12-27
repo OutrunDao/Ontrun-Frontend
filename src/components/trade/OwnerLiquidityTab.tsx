@@ -27,14 +27,13 @@ export default function OwnerLiquidityTab() {
     let _row:any[] = []
     for (let i = 0; i < ownerLiquiditysData.length; i++) {
       _row.push({
-        id: i.toString(), 
-        pool: `${ownerLiquiditysData[i].token0Symbol}/${ownerLiquiditysData[i].token1Symbol}`,
-        feeRate: `${ownerLiquiditysData[i].fee.toFixed(6).replace(/\.?0+$/, '')}%`,
-        volume: `${ownerLiquiditysData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
-        tcl: `${ownerLiquiditysData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')} $`,
-        fees: `${Number(ownerLiquiditysData[i].fee * ownerLiquiditysData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')} $`,
-        address: ownerLiquiditysData[i].address
-      
+        id: Number(i+1).toString(), 
+        pool: `${ownerLiquiditysData[i].token0Symbol}/${ownerLiquiditysData[i].token1Symbol} ${Number(ownerLiquiditysData[i].fee*100).toFixed(6).replace(/\.?0+$/, '')}%`,
+        volume: `$ ${ownerLiquiditysData[i].volumeUSD.toFixed(6).replace(/\.?0+$/, '')}`,
+        liquidity: `$ ${ownerLiquiditysData[i].reserveUSD.toFixed(6).replace(/\.?0+$/, '')}`,
+        fees: `$ ${Number(ownerLiquiditysData[i].fee * ownerLiquiditysData[i].volumeUSD).toFixed(6).replace(/\.?0+$/, '')}`,
+        address: ownerLiquiditysData[i].address,
+        apy: `${Number(ownerLiquiditysData[i].fee * ownerLiquiditysData[i].volumeUSD * 36500 / ownerLiquiditysData[i].reserveUSD).toFixed(2)} %`
       })
     }
     return _row;
@@ -50,14 +49,14 @@ export default function OwnerLiquidityTab() {
         return item.id;
       case "pool":
         return item.pool;
-      case "feeRate":
-        return item.feeRate;
       case "volume":
         return item.volume;
-      case "tcl": 
-        return item.tcl;
+      case "liquidity": 
+        return item.liquidity;
       case "fees":
         return item.fees;
+      case "apy":
+        return item.apy;
       case "action":
         return (
           <div>
@@ -116,7 +115,6 @@ export default function OwnerLiquidityTab() {
           </TableBody>):(
             <TableBody >
               <TableRow key="1">
-                <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
