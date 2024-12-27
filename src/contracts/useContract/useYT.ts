@@ -16,6 +16,40 @@ export function useYT() {
     const publicClient = usePublicClient();
     const chainId = useChainId();
 
+    async function getYTread(YTAddress: string) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        return new ethers.Contract(YTAddress, YTAbi, provider);
+    }
+
+    async function getYTwrite(YTAddress: string) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        return new ethers.Contract(YTAddress, YTAbi, signer);
+    }
+
+    async function currentRealRate(YTAddress: string) {
+        const contract = await getYTread(YTAddress);
+        const _result0 = await contract.recentTwoAccumulatedInfos(0);
+        const _result1 = await contract.recentTwoAccumulatedInfos(1);
+        if (_result0[1] == _result1[1]) {
+            return 0;
+        } else {
+            const value = _result1[0] - _result0[0];
+            const time = _result1[1] - _result0[1];
+            return value * 86400 * 365 * 100 / time;
+        }
+    }
+
+    async function anchoredRate(YTAddress: string) {
+        const contract = await getYTread(YTAddress);
+        const totalRedeemableYields = await contract.totalRedeemableYields();
+        const totalSupply = await contract.totalSupply();
+        if (!totalRedeemableYields || !totalSupply) return 0;
+        return Number(totalRedeemableYields.div(totalSupply))*100;
+    }
+
     async function totalSupply(token: Currency) {
 
         if (token?.chainId == chainId) {
@@ -31,34 +65,10 @@ export function useYT() {
         }
     }
 
-    async function currentYields(token: Currency) {
-    
-        if (token?.chainId == chainId) {
-            const result = await publicClient?.readContract({
-                // @ts-ignore
-                address: (token as Token)?.address,
-                abi: YTAbi,
-                functionName: 'currentYields',
-            })
-            if (result) {
-                return new Decimal(formatUnits(result, token?.decimals))
-            }
-        }
-    }
-
     async function totalRedeemableYields(token: Currency) {
-
-        if (token.chainId == chainId) {
-            const result = await publicClient?.readContract({
-                // @ts-ignore
-                address: (token as Token).address,
-                abi: YTAbi,
-                functionName: 'totalRedeemableYields',
-            })
-            if (result) {
-                return new Decimal(formatUnits(result, token?.decimals))
-            }
-        }
+        const contract = await getYTread((token as Token).address);
+        const result = await contract.totalRedeemableYields();
+        return result;
     }
 
     async function withdrawYields({
@@ -146,8 +156,9 @@ export function useYT() {
 
     return {
         YTView: {
+            currentRealRate,
+            anchoredRate,
             totalSupply,
-            currentYields,
             totalRedeemableYields,
             amountInYields,
             APY,

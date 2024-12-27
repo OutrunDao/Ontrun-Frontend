@@ -5,7 +5,7 @@ import { useChainId, usePublicClient} from "wagmi"
 import { useEffect, useMemo, useState } from "react";
 import { useSY } from "../contracts/useContract/useSY";
 import { getTokensByChainId } from "@/contracts/tokens/tokenStake";
-import { Currency } from "@/packages/core";
+import { Currency, Token } from "@/packages/core";
 import { set } from "radash";
 import { useYT } from "../contracts/useContract/useYT";
 import { usePOT } from "../contracts/useContract/usePOT";
@@ -19,7 +19,8 @@ export function useMarkets() {
     const tokensOnChain = useMemo(() => getTokensByChainId(chainId), [chainId]);
     const [ liquiditys, setLiquiditys ] = useState<any[]>([]);
     const [ impliedStakingDays, setImpliedStakingDays ] = useState<any[]>([]);
-    const [ APYs, setAPYs ] = useState<any[]>([]);
+    const [ anchoredRates, setAnchoredRates ] = useState<any[]>([]);
+    const [ currentRealRates, setCurrentRealRates ] = useState<any[]>([]);
     const [ SYs,setSYs ] = useState<any[]>([]);
     const [ YTs,setYTs ] = useState<any[]>([]);
     const [ POTs,setPOTs ] = useState<any[]>([]);
@@ -99,23 +100,33 @@ export function useMarkets() {
         
     }
 
-    function refreshAPY() {
+    function refreshRate() {
         
         async function _() {
-            const _APYs = [];
+            const _anchoredRate = [];
             for (let i = 0; i < SYs.length; i++) {
                 setSY(SYs[i]);
-                const APY = await UseYT.YTView.APY({YT:YTs[i]});
-                _APYs.push(APY);
+                const APY = await UseYT.YTView.anchoredRate((YTs[i] as Token).address);
+                _anchoredRate.push(APY);
             }
-            return _APYs;
+            return _anchoredRate;
         }
-        _().then(setAPYs);
+        _().then(setAnchoredRates);
+
+        async function __() {
+            const _currentRealRate = [];
+            for (let i = 0; i < SYs.length; i++) {
+                setSY(SYs[i]);
+                const APY = await UseYT.YTView.anchoredRate((YTs[i] as Token).address);
+                _currentRealRate.push(APY);
+            }
+            return _currentRealRate;
+        }
+        __().then(setCurrentRealRates);
     }
     function refresh() {
 
         async function _() {
-
             const _marketDatas: any[] = [];
             for (let i = 0; i < tokensOnChain.length; i++) {
                 const token = tokensOnChain[i];
@@ -126,7 +137,8 @@ export function useMarkets() {
                     icon: '🔹',
                     platform: ChainNames[chainId],
                     liquidity: liquiditys[i],
-                    currentlyAnchoredAPY: APYs[i],
+                    currentlyAnchoredAPY: anchoredRates[i],
+                    currentRealRate: currentRealRates[i],
                     averageLockTime: impliedStakingDays[i],
                     days: 235,
                     currencySelectList: StakeCurrencyListMap[chainId][token.symbol]
@@ -145,14 +157,14 @@ export function useMarkets() {
 
     useEffect(() => {
         refreshLiquiditys();
-        refreshAPY();
+        refreshRate();
         refreshImpliedStakingDays();
     },[chainId, SYs, YTs, POTs])
 
     useEffect(() => {
         refresh();
-    },[chainId, liquiditys, APYs])
+    },[chainId, liquiditys, anchoredRates, currentRealRates])
 
-    return { marketsData: marketDatas, refresh, refreshSYsYTs, refreshLiquiditys, refreshAPY, refreshImpliedStakingDays };
+    return { marketsData: marketDatas, refresh, refreshSYsYTs, refreshLiquiditys, refreshRate, refreshImpliedStakingDays };
 
 }

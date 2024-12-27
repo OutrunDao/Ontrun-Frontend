@@ -1,5 +1,5 @@
 "use client";
-import { BlockExplorers } from "@/contracts/chains";
+import { BlockExplorers, ChainETHSymbol } from "@/contracts/chains";
 import { SwapCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import useContract from "@/hooks/useContract";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
@@ -10,18 +10,17 @@ import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
+import { USDT, getTokenSymbol } from "@/contracts/tokens/tokens";
+import { Ether } from "@/packages/core";
+import { Token } from "graphql";
 
 export default function SwapCard() {
   const chainId = useChainId();
-  const account = useAccount();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-  const { write: writeContract } = useContract();
   const [countdown, setCountdown] = useState(60);
 
-  const [ tokenA,setTokenA ] = useState();
-  const [ tokenB,setTokenB ] = useState();
   const [isApproveToken0Loading, setIsApproveToken0Loading] = useState(false);
+  // const [token0Symbol, setToken0Symbol] = useState<string>();
+  // const [token1Symbol, setToken1Symbol] = useState<string>();
 
   const {
     swapData,
@@ -67,6 +66,30 @@ export default function SwapCard() {
     }
     // setIsApproveToken0Loading(false);
   }
+
+  // useEffect(() => {
+  //   async function _() {
+  //     if (!swapData.token0) return;
+  //     if (swapData.token0.isNative) {
+  //       return ChainETHSymbol[chainId];
+  //     } else {
+  //       return swapData.token0.symbol;
+  //     }
+  //   }
+  //   _().then(setToken0Symbol);
+  // },[swapData.token0]);
+
+  // useEffect(() => {
+  //   async function _() {
+  //     if (!swapData.token1) return;
+  //     if (swapData.token1.isNative) {
+  //       return ChainETHSymbol[chainId];
+  //     } else {
+  //       return swapData.token1.symbol;
+  //     }
+  //   }
+  //   _().then(setToken1Symbol);
+  // },[swapData.token1]);
 
   useEffect(() => {
 
@@ -232,7 +255,7 @@ export default function SwapCard() {
                 </div>
               </div>
             </div>
-            {swapData?.token0 && swapData?.token1 && (
+            {swapData?.token0 && swapData?.token1 && swapData.token1AmountInput !== "" && (
               <div className="w-full mt-[1.18rem] rounded-xl border-solid border-[0.06rem] border-[#C29BFF] border-opacity-[0.37] px-5">
                 <Accordion selectionMode="single">
                   <AccordionItem
@@ -240,7 +263,7 @@ export default function SwapCard() {
                     aria-label=""
                     title={
                       <div className="text-white font-avenir font-extrabold text-[0.82rem] leading-[1.18rem] flex gap-2">
-                        {`1 ${swapData.token0?.symbol} = ${swapData.exchangeRate} ${swapData.token1?.symbol} `}
+                        {`1 ${getTokenSymbol(swapData.token0,chainId)} = ${swapData.exchangeRate} ${getTokenSymbol(swapData.token1,chainId)} `}
                         <span className="font-normal text-white text-opacity-50">{`($1.00)`}</span>
                       </div>
                     }>
@@ -260,7 +283,7 @@ export default function SwapCard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Min.received:</span>
-                        <span className="font-extrabold">{Number(swapData.token0AmountInput)!=0?`${swapData.minimalReceive} ${swapData.token1.symbol}`:"---"}</span>
+                        <span className="font-extrabold">{Number(swapData.token0AmountInput)!=0?`${swapData.minimalReceive} ${getTokenSymbol(swapData.token1,chainId)}`:"---"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-opacity-50 text-white">Max.Slippage:</span>

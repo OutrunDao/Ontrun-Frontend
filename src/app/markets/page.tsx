@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react'
+import React, { use, useEffect, useMemo, useState } from 'react'
 import { ArrowUpDown, Link, Star, TrendingUp, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
@@ -31,10 +31,9 @@ export default function EnhancedMarketPage() {
   // const [ token,setToken ] = useState("");
   const router = useRouter();
 
-  // const handleMarketClick = (currencySelectList : CurrencySelectListType) => {
-  //   const data = encodeURIComponent(JSON.stringify(currencySelectList))
-  //   router.push(`/staking/liquidstaking?data=${data}`)
-  // };
+  const count = useMemo(() => {
+    return marketsData.length;
+  },[marketsData])
 
   const handleMarketClick = (tokenName : string) => {
     router.push(`/staking/liquidstaking?tokenName=${tokenName}`)
@@ -61,6 +60,7 @@ export default function EnhancedMarketPage() {
               <TableHead className="text-gray-300">Liquidity</TableHead>
               <TableHead className="text-gray-300">Average Lock Time</TableHead>
               <TableHead className="text-gray-300">YT Anchored Rate</TableHead>
+              <TableHead className="text-gray-300">YT Real Rate</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,7 +88,7 @@ export default function EnhancedMarketPage() {
                 </TableCell>
                 <TableCell>
                   <div className="transition-all duration-300 ease-in-out hover:scale-105">
-                    ${item.liquidity}
+                    {item.liquidity} slisBNB
                   </div>
                 </TableCell>
                 <TableCell>
@@ -99,7 +99,15 @@ export default function EnhancedMarketPage() {
                 <TableCell>
                   <div className="bg-gradient-to-r from-blue-900/50 via-purple-900/50 to-pink-900/50 p-3 rounded-md inline-block min-w-[120px] shadow-lg transition-all duration-300 ease-in-out hover:scale-105">
                     <div className="text-lg font-bold flex items-center">
-                      {item.currentlyAnchoredAPY}%
+                      {item.currentlyAnchoredAPY?.toFixed(2)}%
+                      {/* <TrendingUp className="ml-1 h-4 w-4 text-green-500" /> */}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="bg-gradient-to-r from-blue-900/50 via-purple-900/50 to-pink-900/50 p-3 rounded-md inline-block min-w-[120px] shadow-lg transition-all duration-300 ease-in-out hover:scale-105">
+                    <div className="text-lg font-bold flex items-center">
+                      {item.currentRealRate?.toFixed(2)}%
                       {/* <TrendingUp className="ml-1 h-4 w-4 text-green-500" /> */}
                     </div>
                   </div>
@@ -110,7 +118,7 @@ export default function EnhancedMarketPage() {
         </Table>
       </div>
       <div className="mt-6 text-center text-sm text-gray-300">
-        Showing all Blast pools (2 of 2).{' '}
+        Showing all pools ({count} of {count}).{' '}
         <Button
           variant="link"
           className="text-blue-400 hover:text-purple-300 transition-colors duration-300"

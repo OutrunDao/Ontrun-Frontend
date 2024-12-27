@@ -25,7 +25,7 @@ export const BlockExplorers = {
 
 export const ChainETHSymbol = {
   [ChainId.BLAST_SEPOLIA]: "ETH",
-  [ChainId.BSC_TESTNET]: "TBNB",
+  [ChainId.BSC_TESTNET]: "BNB",
 } as Record<number, string>;
 
 export const ChainETHName = {

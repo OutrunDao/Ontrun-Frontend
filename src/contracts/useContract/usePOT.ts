@@ -55,6 +55,7 @@ export function usePOT() {
 
     async function impliedStakingDays({POT}:{POT:POT}) {
         const POTContract = await getPOTread(POT.address);
+        console.log(POT.address);
         const result = await POTContract.impliedStakingDays();
         return result;
     }

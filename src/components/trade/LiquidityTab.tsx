@@ -106,7 +106,6 @@ export default function LiquidityTab({symbol}: LiquidityTabProps) {
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
                 <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
               </TableRow>
             </TableBody>
           )}

@@ -1,6 +1,6 @@
 import { Currency, Token } from "@/packages/core";
-import { YTAddressMap } from "../addressMap/YTAddressMap";
 import { ChainId } from "../chains";
+import { YTAddressMap } from "../addressMap/OutStakeAddressMap";
 
 export type YT = {
     chainId: number,
