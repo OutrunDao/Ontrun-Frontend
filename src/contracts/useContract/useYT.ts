@@ -47,7 +47,7 @@ export function useYT() {
         const totalRedeemableYields = await contract.totalRedeemableYields();
         const totalSupply = await contract.totalSupply();
         if (!totalRedeemableYields || !totalSupply) return 0;
-        return Number(totalRedeemableYields.div(totalSupply))*100;
+        return Number(totalRedeemableYields/totalSupply)*100;
     }
 
     async function totalSupply(token: Currency) {

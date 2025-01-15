@@ -1,5 +1,10 @@
+import { SwapView, useSwap } from "@/hooks/useSwap"
 
 export function RefferCard() {
+
+  const {referData} = useSwap({
+    view: SwapView.Referral
+  })
   
   return (
     <div className="mt-[2.94rem] w-full relative">
@@ -13,7 +18,7 @@ export function RefferCard() {
               </span>
             </div>
             <span className="text-white font-verdana font-bold text-[1.5rem] self-center mt-10">
-              123
+              {referData?.referCount || 0}
             </span>
           </div>
           <div className="flex flex-col items-start mr-[10rem]">
@@ -24,7 +29,7 @@ export function RefferCard() {
               </span>
             </div>
             <span className="text-white font-verdana font-bold text-[1.5rem] self-center mt-10">
-              456
+              {referData?.totalRebateFeeUSD || 0} $
             </span>
           </div>
         </div>

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Memeverse | Outrun",
 };
 
-export default function Liquidity() {
+export default function Memeverse() {
   return (
     <div className="h-[125rem] relative bg-[#0B0C1D] flex justify-center">
       <img alt="background" src="/images/common-bg.svg" className="absolute top-0 left-0 bg-no-repeat z-0" />

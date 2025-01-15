@@ -223,6 +223,7 @@ export default function StakeTab() {
           />
         ));
       } catch (error) {
+        console.log(error);
         toast.custom(() => (
           <ToastCustom
             content={"Transaction failed"}

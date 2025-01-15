@@ -22,7 +22,7 @@ export enum ContractName {
   multicall = "multicall",
   slisBNB = "slisBNB",
   stakeRouter = "stakeRouter",
-  refferManager = "refferManager",
+  referManager = "referManager",
   memeverseRegistrationCenter = "memeverseRegistrationCenter",
 }
 export type ContractAddressMap = Record<string, `0x${string}`>;
@@ -50,7 +50,7 @@ export const addressMap = {
     [ContractName.stakeRouter]: "0x54E1612cea0BAfD21c4e2d380ac41d7509E1BD5a",
     [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
     [ContractName.SWAP_ROUTER]: "0x10C30c55566f21ed0ad6ee073fF3Dd81C6899C81",
-    [ContractName.refferManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
+    [ContractName.referManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
 
   }
 } as Record<number, ContractAddressMap>;

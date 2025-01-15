@@ -51,34 +51,38 @@ export function useSwapFactoryGraphQL() {
         const GET_OWNER_LIQUIDITYS = gql`
             query GET_OWNER_LIQUIDITYS($user: String!) {
                 user(id: $user) {
-                liquidityPositions(first: 10, orderBy: liquidityTokenBalance, orderDirection: desc) {
-                    liquidityTokenBalance
-                    pair {
-                        token0 {
+                    liquidityPositions(first: 10, orderBy: liquidityTokenBalance, orderDirection: desc) {
+                        liquidityTokenBalance
+                        pair {
+                            token0 {
+                                id
+                                name
+                                symbol
+                                decimals
+                            }
+                            token1 {
+                                id
+                                name
+                                symbol
+                                decimals
+                            }
                             id
-                            name
-                            symbol
-                            decimals
+                            reserve0
+                            reserve1
+                            token0Price
+                            token1Price
+                            reserveUSD
+                            volumeToken0
+                            volumeToken1
+                            volumeUSD
+                            totalSupply
+                            factoryAddress
                         }
-                        token1 {
-                            id
-                            name
-                            symbol
-                            decimals
-                        }
-                        id
-                        reserve0
-                        reserve1
-                        token0Price
-                        token1Price
-                        reserveUSD
-                        volumeToken0
-                        volumeToken1
-                        volumeUSD
-                        totalSupply
-                        factoryAddress
                     }
-                }
+                    refers
+                    totalRebateFeeETH
+                    totalRebateFeeUSD
+                    usdSwapped
                 }
             }
         `;
@@ -87,7 +91,7 @@ export function useSwapFactoryGraphQL() {
             variables: { user: ownerAddress },
         });
         if (!Gresult.data.user) return [];
-        return Gresult.data.user.liquidityPositions;
+        return Gresult.data.user;
     }
 
     return {
