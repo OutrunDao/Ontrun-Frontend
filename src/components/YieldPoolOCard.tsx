@@ -48,7 +48,8 @@ export default function YieldPoolOCard() {
         if (!YT) return;
         const totalRedeemableYields = await UseYT.YTView.totalRedeemableYields(YT);
         if (totalRedeemableYields) {
-            setYieldsNow(Number(totalRedeemableYields));
+            const totalRedeemableYieldsInEther = ethers.formatEther(totalRedeemableYields);
+            setYieldsNow(Number(totalRedeemableYieldsInEther));
         }
     },[YT])
 

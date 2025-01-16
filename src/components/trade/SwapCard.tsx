@@ -35,7 +35,9 @@ export default function SwapCard() {
     token1AmountInputHandler,
     maxHandler,
     approveToken0,
+    setIsToken0Approved,
     swap,
+    registerReferrer,
   } = useSwap({
     view: SwapView.swap,
     getTradeRoute: true,
@@ -45,6 +47,9 @@ export default function SwapCard() {
     try {
       setIsApproveToken0Loading(true);
       const receipt = await approveToken0();
+      if (receipt.status === 1) {
+        setIsToken0Approved(true);
+      }
       toast.custom(() => (
         <ToastCustom
           content={receipt.status === 1 ?
@@ -64,32 +69,7 @@ export default function SwapCard() {
     } finally {
       setIsApproveToken0Loading(false);
     }
-    // setIsApproveToken0Loading(false);
   }
-
-  // useEffect(() => {
-  //   async function _() {
-  //     if (!swapData.token0) return;
-  //     if (swapData.token0.isNative) {
-  //       return ChainETHSymbol[chainId];
-  //     } else {
-  //       return swapData.token0.symbol;
-  //     }
-  //   }
-  //   _().then(setToken0Symbol);
-  // },[swapData.token0]);
-
-  // useEffect(() => {
-  //   async function _() {
-  //     if (!swapData.token1) return;
-  //     if (swapData.token1.isNative) {
-  //       return ChainETHSymbol[chainId];
-  //     } else {
-  //       return swapData.token1.symbol;
-  //     }
-  //   }
-  //   _().then(setToken1Symbol);
-  // },[swapData.token1]);
 
   useEffect(() => {
 
@@ -140,6 +120,20 @@ export default function SwapCard() {
           }
         />
       ));
+      if (receipt.status === 1) {
+        const receipt = await registerReferrer();
+        if (receipt) {
+          toast.custom(() => (
+            <ToastCustom
+              content={receipt.status === 1 &&
+                <>
+                  {`Register Referrer Success`}
+                </>
+              }
+            />
+          ));
+        }
+      }
     } catch (error) {
       console.log(error);
       toast.custom(() => (

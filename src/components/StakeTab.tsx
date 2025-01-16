@@ -148,12 +148,16 @@ export default function StakeTab() {
   useEffect(() => {
 
     async function _() {
-      if (NTAmount) {
+      if (NTAmount || Number(NTAmount) != 0) {
         if (NT?.symbol != tokenName && SY) {
-          return String(+NTAmount * Number(exchangeRate?.toFixed(18)));
+          // return String(+NTAmount * Number(exchangeRate?.toFixed(18)));
+          const result = await UseSY.SYView.previewDeposit((SY as Token).address, "0x0000000000000000000000000000000000000000", parseUnits(NTAmount, NT?.decimals));
+          return ethers.formatEther(result.toString());
         } else {
-          return NTAmount;
-        }
+          // return NTAmount;
+          const result = await UseSY.SYView.previewDeposit((SY as Token).address, (NT as Token).address, parseUnits(NTAmount, NT?.decimals));
+          return ethers.formatEther(result.toString());
+          }
       } else {
         return "";
       }
@@ -223,6 +227,7 @@ export default function StakeTab() {
           />
         ));
       } catch (error) {
+        console.log(error);
         toast.custom(() => (
           <ToastCustom
             content={"Transaction failed"}

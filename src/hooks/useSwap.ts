@@ -16,6 +16,7 @@ import { useERC20 } from "../contracts/useContract/useERC20";
 import { useSwapRouter } from "../contracts/useContract/useSwapRouter";
 import { useSwapFactoryGraphQL } from "@/contracts/graphQL/useSwapFactoryGraphQL";
 import { ORETH, USDT, getTokenSymbol } from "@/contracts/tokens/tokens";
+import { useReferManager } from "@/contracts/useContract/useReferManager";
 
 
 export enum BtnAction {
@@ -33,6 +34,7 @@ export enum SwapView {
   addLiquidity,
   createPoll,
   mint,
+  Referral,
 }
 
 export type SwapOptions = {
@@ -46,7 +48,12 @@ function tokenConvert(token: Currency): Token {
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
-
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
 
 export function useSwap(swapOpts: SwapOptions) {
   const chainId = useChainId();
@@ -71,11 +78,14 @@ export function useSwap(swapOpts: SwapOptions) {
   const [isToken1Approved, setIsToken1Approved] = useState<boolean>(false);
   const [allPairsData, setAllPairsData] = useState<any[] | undefined>();
   const [ownerLiquiditysData, setOwnerLiquiditysData] = useState<any[] | undefined>();
+  const [referData,setReferData] = useState<any | undefined>();
+  const [refer, setRefer] = useState<Address>("0x0000000000000000000000000000000000000000");
 
   const UseERC20 = useERC20();
   const UseSwapRouter = useSwapRouter();
   const UseSwapFactory = useSwapFactory();
   const UseSwapFactoryGraphQL = useSwapFactoryGraphQL();
+  const UseReferManager = useReferManager();
 
   const { data: pair } = useQuery({
     queryKey: ["queryPair", chainId, token0?.name, token1?.name, swapOpts.fetchPair],
@@ -93,8 +103,23 @@ export function useSwap(swapOpts: SwapOptions) {
 
   useEffect(() => {
     if (!chainId) return;
+    async function _() {
+      if (!account.address) return "0x0000000000000000000000000000000000000000";
+      const _referrer = getCookie("inviteCode");
+      let referrer = await UseReferManager.referrerOf(chainId, account.address);
+      if (referrer === "0x0000000000000000000000000000000000000000") {
+        if (_referrer) {
+          referrer = _referrer;
+        } 
+      }
+      return referrer;
+    }
+    _().then(setRefer);
+  },[account])
+
+  useEffect(() => {
+    if (!chainId) return;
     if (!token1 || token1.chainId != chainId) {
-      console.log("chainId", chainId);
       setToken1(USDT[chainId]);
     }
   },[chainId])
@@ -102,7 +127,6 @@ export function useSwap(swapOpts: SwapOptions) {
   useEffect(() => {
     if (!chainId) return;
     if (!token0 || token0.chainId != chainId) {
-      console.log("chainId", chainId);
       setToken0(Ether.onChain(chainId));
     }
   },[chainId])
@@ -127,6 +151,15 @@ export function useSwap(swapOpts: SwapOptions) {
       return await handleOwenerLiquiditys(account.address);
     }
     _().then(setOwnerLiquiditysData)
+  },[chainId,account.address])
+
+  useEffect(() => {
+    if (!chainId || swapOpts.view != SwapView.Referral) return;
+    async function _() {
+      if (!account.address) return;
+      return await handleUserRefer(account.address);
+    }
+    _().then(setReferData)
   },[chainId,account.address])
 
   useEffect(() => {
@@ -351,7 +384,8 @@ export function useSwap(swapOpts: SwapOptions) {
   async function handleOwenerLiquiditys(owner: Address) {
     let result: any[] = [];
     try {
-      const Gresult = await UseSwapFactoryGraphQL.getOwnerLiquiditys(chainId, owner);
+      const userData = await UseSwapFactoryGraphQL.getOwnerLiquiditys(chainId, owner);
+      const Gresult = userData.user.liquidityPositions;
       console.log("Gresult", Gresult);
     if (!Gresult) return;
     for (let i = 0; i < Gresult.length; i++) {
@@ -387,12 +421,26 @@ export function useSwap(swapOpts: SwapOptions) {
         totalSupply: parseFloat(Gresult[i].pair.totalSupply),
       });
     }
-    console.log("result", result);
     return result;
     } catch (error) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    
+  }
+
+  async function handleUserRefer(user: Address) {
+    try {
+      const userData = await UseSwapFactoryGraphQL.getOwnerLiquiditys(chainId, user);
+      const result = {
+        refers: userData.refers,
+        referCount: userData.refers.length,
+        totalRebateFeeETH: userData.totalRebateFeeETH,
+        totalRebateFeeUSD: userData.totalRebateFeeUSD,
+      }
+      console.log("result",result)
+      return result;
+    } catch (error) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 
   async function approveToken0() {
@@ -556,6 +604,13 @@ export function useSwap(swapOpts: SwapOptions) {
     }
   }
 
+  async function registerReferrer() {
+    if (!account.address) return console.error("wallet account is not connected");
+    if (!refer) return console.error("refer is not defined");
+    const receipt = await UseReferManager.registerReferrerOutside(chainId, account.address, refer);
+    return receipt;
+  }
+
   async function swap() {
     if (!account.address) return console.log("wallet account is not connected");
     if (!token0 || !token1 || !bestTradeRouter || !tradeRouteAddressPath) return;
@@ -574,7 +629,7 @@ export function useSwap(swapOpts: SwapOptions) {
         path: tradeRouteAddressPath,
         swapFeeRates: swapFeeRates,
         to: account.address,
-        referrer: "0x0000000000000000000000000000000000000000",
+        referrer: refer,
         deadline: BigInt(deadline),
       });
       return receipt;
@@ -586,7 +641,7 @@ export function useSwap(swapOpts: SwapOptions) {
         path: tradeRouteAddressPath,
         swapFeeRates: swapFeeRates,
         to: account.address,
-        referrer: "0x0000000000000000000000000000000000000000",
+        referrer: refer,
         deadline: BigInt(deadline),
       });
       return receipt;
@@ -604,8 +659,8 @@ export function useSwap(swapOpts: SwapOptions) {
         path: tradeRouteAddressPath,
         swapFeeRates: swapFeeRates,
         to: account.address,
-        // referrer: "0x0000000000000000000000000000000000000000",
-        referrer: "0x35eDD5f2c2205C4e88F3a69279D1EF06497cF44a",
+        referrer: refer,
+        // referrer: "0x35eDD5f2c2205C4e88F3a69279D1EF06497cF44a",
         deadline: BigInt(deadline),
       });
       return receipt;
@@ -738,6 +793,7 @@ export function useSwap(swapOpts: SwapOptions) {
     chainId,
     allPairsData,
     ownerLiquiditysData,
+    referData,
     loading,
     approveToRouter,
     setLoading,
@@ -745,6 +801,8 @@ export function useSwap(swapOpts: SwapOptions) {
     setToken1,
     setToken0AmountInput,
     setToken1AmountInput,
+    setIsToken0Approved,
+    setIsToken1Approved,
     setSlippage,
     setTransactionDeadline,
     setUnlimitedAmount,
@@ -759,5 +817,6 @@ export function useSwap(swapOpts: SwapOptions) {
     addLiquidity,
     removeLiquidity,
     swap,
+    registerReferrer,
   };
 }

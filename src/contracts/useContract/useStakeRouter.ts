@@ -44,6 +44,8 @@ export  function useStakeRouter() {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
 
+            console.log('mintYieldTokensFromToken', SYAddress, POTAddress, PTAddress, UPTAddress, TokenInAddress, tokenAmount, lockupDays, minPTGenerated, value);
+
             const stakeRouterContract = new ethers.Contract(addressMap[chainId].stakeRouter, stakeRouterAbi, signer);
             const tx = await stakeRouterContract.mintPPYFromToken(
                 SYAddress,
