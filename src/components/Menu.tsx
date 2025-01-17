@@ -26,15 +26,27 @@ export function Menu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-	useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const inviteCode = params.get('inviteCode');
-    if (inviteCode) {
-      const expires = new Date();
-      expires.setDate(expires.getDate() + 7);
-      setCookie(null,'inviteCode', inviteCode, { expires });
+	// useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const inviteCode = params.get('inviteCode');
+  //   if (inviteCode) {
+  //     const expires = new Date();
+  //     expires.setDate(expires.getDate() + 7);
+  //     setCookie(null,'inviteCode', inviteCode, { expires });
+  //   }
+  // });
+  
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      const inviteCode = path.split('/')[2]; // Assuming the invite code is the first segment after the domain
+      if (inviteCode) {
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        setCookie(null, 'inviteCode', inviteCode, { expires, path: '/' });
+      }
     }
-  });
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
