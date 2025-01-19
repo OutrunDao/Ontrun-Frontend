@@ -12,7 +12,7 @@ export function useReffer() {
     if (!account || !account.address) return;
     if (typeof window !== "undefined") {
       const location = window.location;
-      setInviteLink(`${location.origin}/?inviteCode=${account.address}`);
+      setInviteLink(`${location.origin}/referrer/${account.address}`);
     }  
   }
   _();

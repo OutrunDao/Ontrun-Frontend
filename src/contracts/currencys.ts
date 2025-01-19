@@ -39,7 +39,7 @@ export const SwapCurrencyList = {
 }
 
 export const BaseCurrencyList = {
-    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2],
+    [ChainId.BSC_TESTNET]: [Token0, Token1, Token2, USDT],
 }
 
 export const StakeCurrencyListMap = {
