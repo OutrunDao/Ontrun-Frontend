@@ -39,7 +39,7 @@ export function useReferManager() {
       referrer: referrer,
     }
     try {
-      const response = await axios.post('http://localhost:3001/refer', formData);
+      const response = await axios.post('http://123.57.164.143:3001/refer', formData);
       return response.data.receipt;
     } catch (error) {
       console.error('Error signing transaction:', error);
