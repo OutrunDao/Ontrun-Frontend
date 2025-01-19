@@ -83,6 +83,28 @@ export function useSwapFactoryGraphQL() {
                     totalRebateFeeETH
                     totalRebateFeeUSD
                     usdSwapped
+                    referalTransactions(orderBy: timestamp, orderDirection: desc) {
+                        swaps {
+                            from
+                        }
+                        protocolFees {
+                          pair {
+                            token0 {
+                              symbol
+                            }
+                            token1 {
+                              symbol
+                            }
+                          }
+                          protocolFee0
+                          protocolFee1
+                          rebateFee0
+                          rebateFee1
+                          referrer
+                        }
+                        id
+                        timestamp
+                    }
                 }
             }
         `;

@@ -1,4 +1,5 @@
 import { use, useEffect, useMemo, useState } from "react";
+import { Tooltip } from 'react-tooltip'
 import { StakeCurrencyListMap } from "@/contracts/currencys";
 import { Currency } from "@/packages/core";
 import { useSearchParams } from "next/navigation";
@@ -169,22 +170,27 @@ export default function YieldPoolOCard() {
                 RTSymbol={RT?.symbol || ""}
             /> */}
             <div className="flex flex-col items-center text-white font-avenir">
-            <div className="w-[33.5rem] h-[6.5rem]  bg-white bg-opacity-[0.03] flex gap-x-5 items-center">
-                <div className="flex flex-col gap-5 items-center ml-[1.13rem]">
+            <div className="w-[33.5rem] h-[6.5rem] bg-white bg-opacity-[0.03] flex gap-x-5 items-center">
+                <div className="flex flex-col gap-5 items-center ml-[1.13rem] flex-grow">
                     <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Average Staking Days</span>
                     <span className="text-[1rem] leading-[1.69rem] font-extrabold">{impliedStakingDays} Days</span>
                 </div>
-                <div className="flex flex-col gap-5 items-center">
+                <div className="flex flex-col gap-5 items-center flex-grow">
                     <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Unclaimed Yield</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{YieldsNow?.toFixed(6) ?? 0} {RT?.symbol}</span>
+                    <span className="my-anchor-element text-[1rem] leading-[1.69rem] font-extrabold">
+                    {YieldsNow?.toFixed(2)} {RT?.symbol}
+                    </span>
+                    <Tooltip anchorSelect=".my-anchor-element" content={YieldsNow?.toFixed(18)} />
                 </div>
-                <div className="flex flex-col gap-5 items-center">
-                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">YT Current Real Rate</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{stakeData.currentRealRate?.toFixed(2) ?? 0}%</span>
+                <div className="flex flex-col gap-5 items-center flex-grow">
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Real Rate</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold realRate">{stakeData.currentRealRate?.toFixed(2) ?? 0}%</span>
+                    <Tooltip anchorSelect=".realRate" content={`${stakeData.currentRealRate?.toFixed(18) ?? 0}%`} />
                 </div>
-                <div className="flex flex-col gap-5 ml-[1.13rem]">
-                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">YT Anchored Rate</span>
-                    <span className="text-[1rem] leading-[1.69rem] font-extrabold">{stakeData.anchoredRate?.toFixed(2) ?? 0}%</span>
+                <div className="flex flex-col gap-5 ml-[1.13rem] flex-grow">
+                    <span className="text-[0.75rem] leading-[1.56rem] opacity-30">Anchored Rate</span>
+                    <span className="text-[1rem] leading-[1.69rem] font-extrabold anchoreRate">{stakeData.anchoredRate?.toFixed(2) ?? 0}%</span>
+                    <Tooltip anchorSelect=".anchoreRate" content={`${stakeData.anchoredRate?.toFixed(18) ?? 0}%` } />
                 </div>
             </div>
             <span className="text-[1.13rem] leading-[1.56rem] font-medium mt-[2.5rem]">

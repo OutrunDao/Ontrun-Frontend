@@ -145,6 +145,13 @@ export const MemeverseTableColumns = [
   { key: "population", label: "Population" },
 ];
 
+export const ReferralTableColumns = [
+  { key: "router", label: "Router" },
+  { key: "amount", label: "Gross commission (Token)" },
+  { key: "account", label: "Account" },
+  { key: "time", label: "Time" },
+]
+
 export const minLockupDays = 7;
 export const maxLockupDays = 365;
 export const oneDaySec = 24 * 3600;

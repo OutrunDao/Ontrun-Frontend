@@ -433,8 +433,9 @@ export function useSwap(swapOpts: SwapOptions) {
       const result = {
         refers: userData.refers,
         referCount: userData.refers.length,
-        totalRebateFeeETH: userData.totalRebateFeeETH,
-        totalRebateFeeUSD: userData.totalRebateFeeUSD,
+        totalRebateFeeETH: Number(userData.totalRebateFeeETH),
+        totalRebateFeeUSD: Number(userData.totalRebateFeeUSD),
+        referalTransactions: userData.referalTransactions,
       }
       console.log("result",result)
       return result;
