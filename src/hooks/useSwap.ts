@@ -647,12 +647,6 @@ export function useSwap(swapOpts: SwapOptions) {
       });
       return receipt;
     } else {
-      console.log("token0AmountInput", parseUnits(token0AmountInput!.toString(), token0.decimals));
-      console.log("token1AmountInputMin", parseUnits(token1AmountInputMin!.toString(), token1.decimals));
-      console.log("tradeRouteAddressPath", tradeRouteAddressPath);
-      console.log("account.address", account.address);
-      console.log("deadline", BigInt(deadline));
-
       const receipt = await UseSwapRouter.swapRouterWrite.swapExactTokensForTokens({
         routerAddress: routerAddress,
         amountIn: parseUnits(token0AmountInput!.toString(), token0.decimals),
