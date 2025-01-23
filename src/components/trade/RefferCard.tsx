@@ -153,44 +153,40 @@ export function RefferCard() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-y-12 items-center justify-center">
-
-      <div className="mt-[2.94rem] bg-no-repeat bg-contain bg-[#1b1226FF] border-[#4a385fFF] border-2 w-[70rem] h-[56.30rem]">
-      <Table
-          removeWrapper
-          classNames={{
-            th: "bg-transparent text-left border-b border-divider border-[#4A325D] border-opacity-[0.3] py-4",
-            tr: "border-divider border-[#4A325D] border-opacity-[0.3] outline-2 py-4",
-            td: "text-left text-white py-4",
-          }}>
-          <TableHeader columns={ReferralTableColumns}>
-            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-          </TableHeader>
-          {referalRows && referalRows.length > 0 ? (
-          <TableBody items={referalRows} emptyContent={"No data"}>
-            {(item) => (
-              <TableRow key={item.id}>
-                {/* <TableCell>{item.id}</TableCell>
-                <TableCell>{item.pool}</TableCell> */}
-
-                {(columnKey) => <TableCell>{getRows(item, columnKey)}</TableCell>}
-                </TableRow>
-            )}
-          </TableBody>):(
-            <TableBody >
-              <TableRow key="1">
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
-              </TableRow>
-            </TableBody>
-          )}
-        </Table>
+      <div className="w-[70rem] mt-[2.94rem]">
+        <span className="text-[1.5rem] text-white">Rebate historical data</span>
       </div>
-      <PaginationCustom total={10} currentPage={1} pageSize={10} setCurrentPage={() => {}} />
-      {/* <span>{allPairs}</span> */}
-    </div>
+      <div className="flex flex-col gap-y-12 items-center justify-center">
+        <div className="mt-[1rem] bg-no-repeat bg-contain bg-[#1b1226FF] border-[#4a385fFF] border-2 w-[70rem] h-[56.30rem]">
+        <Table
+            removeWrapper
+            classNames={{
+              th: "bg-transparent text-left border-b border-divider border-[#4A325D] border-opacity-[0.3] py-4",
+              tr: "border-divider border-[#4A325D] border-opacity-[0.3] outline-2 py-4",
+              td: "text-left text-white py-4",
+            }}>
+            <TableHeader columns={ReferralTableColumns}>
+              {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+            </TableHeader>
+            {referalRows && referalRows.length > 0 ? (
+            <TableBody items={referalRows} emptyContent={"No data"}>
+              {(item) => (
+                <TableRow key={item.id}>
+                  {/* <TableCell>{item.id}</TableCell>
+                  <TableCell>{item.pool}</TableCell> */}
+
+                  {(columnKey) => <TableCell>{getRows(item, columnKey)}</TableCell>}
+                  </TableRow>
+              )}
+            </TableBody>):(
+            <TableBody emptyContent={"None Yet."}>{[]}</TableBody>
+
+            )}
+          </Table>
+        </div>
+        <PaginationCustom total={10} currentPage={1} pageSize={10} setCurrentPage={() => {}} />
+        {/* <span>{allPairs}</span> */}
+      </div>
     </div>
   )
 }
