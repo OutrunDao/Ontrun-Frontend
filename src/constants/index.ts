@@ -146,7 +146,7 @@ export const MemeverseTableColumns = [
 ];
 
 export const ReferralTableColumns = [
-  { key: "router", label: "Router" },
+  { key: "route", label: "Route" },
   { key: "amount", label: "Gross commission (Token)" },
   { key: "account", label: "Account" },
   { key: "time", label: "Time" },
