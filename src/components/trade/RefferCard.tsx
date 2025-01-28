@@ -27,46 +27,46 @@ export function RefferCard() {
     const transactions = referData.referalTransactions;
     let _row:any[] = [];
     for (let i = 0; i < transactions.length; i++) {
-      let _router:any[] = [];
+      let _route:any[] = [];
       let _amount:any[] = [];
-      // push router,amount
+      // push route,amount
       for (let j = 0; j < transactions[i].protocolFees.length; j++) {
         if (j == 0) {
           if (transactions[i].protocolFees[j].protocolFee0 != 0) {
-            _router.push(transactions[i].protocolFees[j].pair.token0.symbol);
-            _router.push(transactions[i].protocolFees[j].pair.token1.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token0.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token1.symbol);
             _amount.push(transactions[i].protocolFees[j].rebateFee0);
           } else {
-            _router.push(transactions[i].protocolFees[j].pair.token1.symbol);
-            _router.push(transactions[i].protocolFees[j].pair.token0.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token1.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token0.symbol);
             _amount.push(transactions[i].protocolFees[j].rebateFee1);
           }
         } else {
           if (transactions[i].protocolFees[j].protocolFee0 != 0) {
-            _router.push(transactions[i].protocolFees[j].pair.token1.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token1.symbol);
             _amount.push(transactions[i].protocolFees[j].rebateFee0);
           } else {
-            _router.push(transactions[i].protocolFees[j].pair.token0.symbol);
+            _route.push(transactions[i].protocolFees[j].pair.token0.symbol);
             _amount.push(transactions[i].protocolFees[j].rebateFee1);
           }
         }
       }
-      let router;
+      let route;
       let amount;
-      // create router,amount
-      for (let j = 0; j < _router.length; j++) {
+      // create route,amount
+      for (let j = 0; j < _route.length; j++) {
         if (j == 0) {
-          router = `${_router[j]}`;
+          route = `${_route[j]}`;
         } else {
-          router += `->${_router[j]}`;
+          route += `->${_route[j]}`;
         }
 
         if (j == 0) {
-          amount = `${Number(_amount[j]).toFixed(18).replace(/\.?0+$/, '')} ${_router[j]}`;
-        } else if (j == _router.length-1) {
+          amount = `${Number(_amount[j]).toFixed(18).replace(/\.?0+$/, '')} ${_route[j]}`;
+        } else if (j == _route.length-1) {
           continue;
         } else {
-          amount += `,${Number(_amount[j]).toFixed(18).replace(/\.?0+$/, '')} ${_router[j]}`;
+          amount += `,${Number(_amount[j]).toFixed(18).replace(/\.?0+$/, '')} ${_route[j]}`;
         }
         
       }
@@ -76,8 +76,8 @@ export function RefferCard() {
       
       _row.push({
         id: transactions[i].id,
-        router: router,
-        _router: _router,
+        route: route,
+        _route: _route,
         amount: amount,
         _amount: _amount,
         account: transactions[i].swaps[0].from,
@@ -89,7 +89,7 @@ export function RefferCard() {
 
   function getRows(item: any, key: Key) {
     switch (key) {
-      case "router":
+      case "route":
         return (
           <div>
             <a 
@@ -98,7 +98,7 @@ export function RefferCard() {
               rel="noopener noreferrer"
               className="text-white"
             >
-              {item.router}
+              {item.route}
             </a>
           </div>
         )
@@ -129,7 +129,7 @@ export function RefferCard() {
             <div className="flex items-center">
               <img src="/images/refer-person-icon.png" alt="refferDataIcon" className="w-8 h-8 mr-2" />
               <span className="text-white font-verdana font-bold text-[1rem]">
-                Number of Guests
+                Number of recommended
               </span>
             </div>
             <span className="text-white font-verdana font-bold text-[1.5rem] self-center mt-10">
