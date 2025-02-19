@@ -1,7 +1,7 @@
 "use client";
 import { useSwap, SwapView } from "@/hooks/useSwap";
 import { Ether, Currency} from "@/packages/core";
-import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useChainId } from "wagmi";

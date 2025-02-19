@@ -1,6 +1,6 @@
 "use client";
 import { useReferManager } from "@/contracts/useContract/useReferManager";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import axios from "axios";
 import { useState } from "react";
 import { useAccount, useChainId } from "wagmi";

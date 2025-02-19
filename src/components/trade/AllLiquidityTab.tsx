@@ -10,7 +10,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import PaginationCustom from "../PaginationCustom";
 import { SwapView, useSwap } from "@/hooks/useSwap";
 import { useState, useEffect, useMemo, Key } from "react";

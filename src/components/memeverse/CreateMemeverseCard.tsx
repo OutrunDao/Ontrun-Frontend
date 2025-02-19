@@ -1,27 +1,57 @@
 "use client"
 import { useMemeverse } from "@/hooks/useMemeverse";
-import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@nextui-org/react";
-import { useState } from "react";
+import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@heroui/react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
 import { useChainId } from "wagmi";
+import { UPTAddressMap } from "@/contracts/addressMap/TokenAddressMap";
 
 
 export default function CreateMemeverseCard() {
 
   const chainId = useChainId();
+  const [selectedMainChain, setSelectedMainChain] = useState<string[]>(["97"]);
+  const [selectedChain, setSelectedChain] = useState<string>(selectedMainChain[0]);
   const [fileName, setFileName] = useState('');
   const {
     loading,
     memeverseData,
     memeverseSetPramas,
     setLoading,
-    handleFee,
+    handleFeeAtLocal,
+    handleFeeOmnichainId,
     registration,
   } = useMemeverse();
 
+  useEffect(() => {
+    if (chainId == 97) {
+      handleFeeAtLocal(selectedChain);
+    } else {
+      handleFeeOmnichainId(selectedChain);
+    }
+  }, [selectedChain, chainId]);
+
   function handleSelectFile(event:any) {
     
+  }
+
+  function handleSelectSingle(value:string) {
+    setSelectedMainChain([value]);
+    let arr = selectedChain.split(',').map(String);
+    arr[0] = value;
+    setSelectedChain(arr.join(','));
+  }
+
+  function handleSelectMultiple(value:string) {
+    if (value == "") {
+      setSelectedChain(selectedMainChain[0]);
+    } else {
+      const newChains = value.split(',').map(String);
+      const newSelectedChain = [selectedMainChain[0],...newChains.slice(0)];
+      setSelectedChain(newSelectedChain.join(','));
+      // console.log(newSelectedChain);
+    }
   }
 
   async function handleRegistration() {
@@ -170,20 +200,27 @@ export default function CreateMemeverseCard() {
                     </div>
                   </div>
                   <div className="w-1/2 flex p-2 justify-center">
-                    <div>
-                      <span>maxFund</span>
-                      <Input
-                        value={memeverseData.maxFund}
-                        onValueChange={(value) => {memeverseSetPramas.setMaxFund(value)}}
+                    <div className="w-full mx-4">
+                      <span>UPT</span>
+                      <Select
+                        isRequired
                         classNames={{
-                          base: "text-white",
-                          input:
-                            "data-[hover=true]:bg-transparent group-data-[has-value=true]:text-white text-[1rem] leading-[1rem] font-avenir font-black w-full",
-                          inputWrapper:
-                            "bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent px-0 border-[0.1rem] border-[#30213D] w-full",
-                          innerWrapper: "justify-start",
+                          trigger:
+                            "bg-transparent data-[hover=true]:bg-transparent border-solid border-[0.1rem] border-[#30213D]",
+                          value: "group-data-[has-value=true]:text-white ml-0",
+                          popoverContent: "bg-[#4A325D]",
+                          listboxWrapper: "text-white",
                         }}
-                      />
+                        onChange={(event) => {memeverseSetPramas.setUPT(UPTAddressMap[event.target.value])}}
+                        fullWidth={true}
+                        placeholder="Select Chains"
+                        selectionMode="single"
+                        defaultSelectedKeys={["UETH"]} // Fix: Wrap chainId in an array
+                      >
+                        {memeverseData.UPT.map((UPT) => (
+                          <SelectItem key={UPT.symbol}>{UPT.symbol}</SelectItem>
+                        ))}
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -275,6 +312,30 @@ export default function CreateMemeverseCard() {
                 <div className="flex justify-center items-center w-full">
                   <div className="w-1/2 p-2 flex justify-center">
                     <div className="w-full mx-4">
+                      <span>OmniChainIds (main)</span>
+                      <Select
+                        isRequired
+                        classNames={{
+                          trigger:
+                            "bg-transparent data-[hover=true]:bg-transparent border-solid border-[0.1rem] border-[#30213D]",
+                          value: "group-data-[has-value=true]:text-white ml-0",
+                          popoverContent: "bg-[#4A325D]",
+                          listboxWrapper: "text-white",
+                        }}
+                        onChange={(event) => {handleSelectSingle(event.target.value)}}
+                        fullWidth={true}
+                        placeholder="Select Chains"
+                        selectionMode="single"
+                        defaultSelectedKeys={["97"]} // Fix: Wrap chainId in an array
+                      >
+                        {memeverseData.supportChains.map((chain) => (
+                          <SelectItem key={chain.chainId}>{chain.chainName}</SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="w-1/2 p-2 flex justify-center">
+                    <div className="w-full mx-4">
                       <span>OmniChainIds</span>
                       <Select
                         classNames={{
@@ -284,11 +345,11 @@ export default function CreateMemeverseCard() {
                           popoverContent: "bg-[#4A325D]",
                           listboxWrapper: "text-white",
                         }}
-                        onChange={(event) => {handleFee(event.target.value)}}
+                        disabledKeys={selectedMainChain}
+                        onChange={(event) => {handleSelectMultiple(event.target.value)}}
                         fullWidth={true}
                         placeholder="Select Chains"
                         selectionMode="multiple"
-                        defaultSelectedKeys={[97]} // Fix: Wrap chainId in an array
                       >
                         {memeverseData.supportChains.map((chain) => (
                           <SelectItem key={chain.chainId}>{chain.chainName}</SelectItem>
@@ -296,13 +357,13 @@ export default function CreateMemeverseCard() {
                       </Select>
                     </div>
                   </div>
-                  <div className="w-1/2 p-2 flex justify-center">
+                </div>
+                <div className="w-1/2 p-2 flex justify-center">
                     <div>
                       <span>Layzero Fee</span>
                       <span>{memeverseData.fee}</span>
                     </div>
                   </div>
-                </div>
 
                 <div className="flex justify-center w-full">
                   <div className="flex justify-center space-x-4 mt-4">

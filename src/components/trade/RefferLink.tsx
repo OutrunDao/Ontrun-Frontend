@@ -1,5 +1,5 @@
 import { useReffer } from "@/hooks/useReffer";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import toast from "react-hot-toast";
 import ToastCustom from "../ToastCustom";
 

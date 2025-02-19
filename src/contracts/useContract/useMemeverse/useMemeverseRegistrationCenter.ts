@@ -21,15 +21,13 @@ export function useMemeverseRegistrationCenter() {
 
   async function quoteSend({
     omnichainIds,
-    options,
     message,
   }: {
     omnichainIds: Number[];
-    options: any;
     message: any;
   }) {
     const memeverseRegistrationCenterContract = await getMemeverseRegistrationCenterRead();
-    const receipt = await memeverseRegistrationCenterContract.quoteSend(omnichainIds, options, message);
+    const receipt = await memeverseRegistrationCenterContract.quoteSend(omnichainIds, message);
     return receipt;
   }
 
@@ -38,50 +36,37 @@ export function useMemeverseRegistrationCenter() {
     name,
     symbol,
     uri,
-    website,
-    X,
-    telegram,
-    discord,
-    description,
     durationDays,
     lockupDays,
     maxFund,
     omnichainIds,
     registrar,
+    UPT,
   }:{
     value: BigInt,
     name: string,
     symbol: string,
     uri: string,
-    website: string,
-    X: string,
-    telegram: string,
-    discord: string,
-    description: string,
     durationDays: BigInt,
     lockupDays: BigInt,
     maxFund: BigInt,
     omnichainIds: number[],
     registrar: Address,
+    UPT: string,
   }) {
     console.log(value);
-    console.log([name, symbol, uri, website, X, telegram, discord, description, durationDays, lockupDays, maxFund, omnichainIds, registrar]);
+    console.log([value, name, symbol, uri, durationDays, lockupDays, omnichainIds, registrar, UPT]);
     const memeverseRegistrationCenterContract = await getMemeverseRegistrationCenterWrite();
     const tx = await memeverseRegistrationCenterContract.registration(
       [
         name,
         symbol,
         uri,
-        website,
-        X,
-        telegram,
-        discord,
-        description,
         durationDays,
         lockupDays,
-        maxFund,
         omnichainIds,
         registrar,
+        UPT,
       ],
       {value : value}
     );

@@ -1,5 +1,5 @@
 import type { CardContent } from "@/types";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 
 export function Card({
 	title,

@@ -1,5 +1,5 @@
 import type { DiscoverCard as DiscoverCardType } from "@/types";
-import { Link } from "@nextui-org/react";
+import { Link } from "@heroui/react";
 import { DiscoverCardItem } from "./DiscoverCardItem";
 
 export function DiscoverCard({

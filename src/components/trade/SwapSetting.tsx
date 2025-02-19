@@ -9,7 +9,7 @@ import {
   Radio,
   RadioGroup,
   Switch,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 export default function SwapSetting({
   slippage,

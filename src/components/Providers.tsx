@@ -1,6 +1,5 @@
 "use client";
-import setFontSize from "@/utils/setFontSize";
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { connectorsForWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   coinbaseWallet,
@@ -16,8 +15,7 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { blastSepolia, bscTestnet } from "viem/chains";
+import { baseSepolia, blastSepolia, bscTestnet } from "viem/chains";
 
 import { createConfig, http, WagmiProvider } from "wagmi";
 
@@ -48,10 +46,10 @@ const connectors = connectorsForWallets(
 const config = createConfig(
   {
   connectors,
-  chains: [blastSepolia,bscTestnet],
+  chains: [bscTestnet,baseSepolia],
   transports: {
-    [blastSepolia.id]: http(),
     [bscTestnet.id]: http(),
+    [baseSepolia.id]: http(),
   },
   ssr: true,
 });
@@ -73,12 +71,12 @@ export function Providers({
   // }, []);
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider modalSize="compact">{children}</RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
-    </NextUIProvider>
+    </HeroUIProvider>
   );
 }

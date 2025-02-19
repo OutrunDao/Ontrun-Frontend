@@ -14,7 +14,7 @@ import {
   ModalHeader,
   Slider,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";

@@ -3,7 +3,7 @@ import { BlockExplorers, ChainETHSymbol } from "@/contracts/chains";
 import { SwapCurrencyList, getSwapCurrencyList } from "@/contracts/currencys";
 import useContract from "@/hooks/useContract";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
-import { Accordion, AccordionItem, Button, Divider, Image, Input, Tab, Tabs } from "@nextui-org/react";
+import { Accordion, AccordionItem, Button, Divider, Image, Input, Tab, Tabs } from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 import TokenSelect from "../TokenSelect";

@@ -1,4 +1,4 @@
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@heroui/react";
 import RedeemTab from "./RedeemTab";
 import StakeTab from "./StakeTab";
 import YieldPoolOCard from "./YieldPoolOCard";

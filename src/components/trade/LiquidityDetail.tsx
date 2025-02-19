@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Image, Link } from "@nextui-org/react";
+import { Button, Image, Link } from "@heroui/react";
 import LiquidityDetailCard from "./LiquidityDetailCard";
 import LiquidityDetailCardOwn from "./LiquidityDetailCardOwn";
 

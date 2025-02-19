@@ -5,7 +5,7 @@ import { useAccount, useChainId } from "wagmi";
 import { use, useEffect, useState } from "react";
 import { usePOT } from "@/contracts/useContract/usePOT";
 import { POTslisBNB } from "@/contracts/tokens/POT";
-import { Button, Divider, Input, Link } from "@nextui-org/react";
+import { Button, Divider, Input, Link } from "@heroui/react";
 import { useYT } from "@/contracts/useContract/useYT";
 import { YTslisBNB } from "@/contracts/tokens/YT";
 import { graphURLMap } from "@/contracts/graphURLs";

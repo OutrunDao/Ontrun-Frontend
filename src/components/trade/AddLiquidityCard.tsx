@@ -1,6 +1,6 @@
 "use client";
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
-import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@nextui-org/react";
+import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@heroui/react";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
 import { useEffect, useMemo, useState } from "react";

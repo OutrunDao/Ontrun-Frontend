@@ -9,13 +9,12 @@ import {
   NavbarItem,
   NavbarMenuToggle,
   NavbarMenu as NextUINavbarMenu,
+  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Button,
-} from "@nextui-org/react"
-import Link from "next/link"
+} from "@heroui/react"
 import { usePathname } from "next/navigation"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { ChevronDown, Settings } from "lucide-react"
@@ -59,7 +58,7 @@ export function Menu() {
 
   const renderNavItem = (item: { name: string; path: string }) => (
     <NavbarItem key={item.name}>
-      <Link
+      <a
         href={item.path}
         className={`px-3 py-2 text-sm font-medium ${
           pathname === item.path
@@ -68,7 +67,7 @@ export function Menu() {
         } transition-colors duration-300`}
       >
         {item.name}
-      </Link>
+      </a>
     </NavbarItem>
   )
 
@@ -91,12 +90,9 @@ export function Menu() {
 
       <NavbarContent className="pr-3" justify="center">
         <NavbarBrand>
-          <Link
-            href="/"
-            className="font-bold text-xl text-white"
-          >
+          <a href="/" className="font-bold text-xl text-white">
             Outrun
-          </Link>
+          </a>
         </NavbarBrand>
       </NavbarContent>
 
@@ -222,7 +218,7 @@ export function Menu() {
         </NavbarItem>
       </NavbarContent>
 
-      <NextUINavbarMenu className="bg-gray-900 pt-6">
+      {/* <NextUINavbarMenu className="bg-gray-900 pt-6">
         {NavbarMenu.map((item) => (
           <NavbarItem key={item.name} className="flex flex-col items-start py-2">
             {item.hasChildren ? (
@@ -245,12 +241,12 @@ export function Menu() {
                 >
                   {item.children?.map((child) => (
                     <DropdownItem key={child.name} className="py-2">
-                      <Link
+                      <a
                         href={child.path}
                         className="text-sm font-medium"
                       >
                         {child.name}
-                      </Link>
+                      </a>
                     </DropdownItem>
                   ))}
                 </DropdownMenu>
@@ -263,7 +259,7 @@ export function Menu() {
         <NavbarItem className="mt-4">
           <ConnectButton />
         </NavbarItem>
-      </NextUINavbarMenu>
+      </NextUINavbarMenu> */}
     </Navbar>
   )
 }

@@ -1,4 +1,4 @@
-import { Image } from "@nextui-org/react";
+import { Image } from "@heroui/react";
 import Link from "next/link";
 
 export function Footer() {

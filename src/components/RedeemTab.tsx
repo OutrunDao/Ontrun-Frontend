@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Link } from "@nextui-org/react";
+import { Button, Divider, Input, Link } from "@heroui/react";
 import { use, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
