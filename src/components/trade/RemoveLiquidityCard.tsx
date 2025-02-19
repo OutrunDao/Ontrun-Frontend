@@ -1,5 +1,5 @@
 import { BtnAction, SwapView, useSwap } from "@/hooks/useSwap";
-import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@nextui-org/react";
+import { Button, Image, Input, Select, SelectItem, Tab, Tabs, Link} from "@heroui/react";
 import TokenSelect from "../TokenSelect";
 import SwapSetting from "./SwapSetting";
 import { useEffect, useMemo, useState } from "react";
@@ -168,7 +168,7 @@ export default function RemoveLiquidityCard({
   }
 
   return (
-    <div className="w-[34rem] min-h-[26.59rem]">
+    (<div className="w-[34rem] min-h-[26.59rem]">
       <div className="mb-20"></div>
       <div className="w-[34rem] min-h-[39.13rem] shadow-card bg-modal border-[0.06rem] border-card relative">
         <div className="absolute z-10 text-white top-[2.29rem] right-[2rem]">
@@ -314,6 +314,6 @@ export default function RemoveLiquidityCard({
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </div>)
   );
 }

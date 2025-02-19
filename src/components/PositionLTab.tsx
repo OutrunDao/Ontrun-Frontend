@@ -13,7 +13,7 @@ import { X } from 'lucide-react'
 import RedeemCard from "./RedeemCard";
 import Position from "@/app/staking/position/page";
 import { useYT } from "@/contracts/useContract/useYT";
-import { Accordion, AccordionItem, Divider, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue} from "@nextui-org/react";
+import { Accordion, AccordionItem, Divider, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue} from "@heroui/react";
 import { positionTableColumns } from "@/constants";
 import { Currency, Token } from "@/packages/core";
 

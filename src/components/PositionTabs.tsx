@@ -1,6 +1,6 @@
 "use client";
 import { execute, RethPositionDocument, RusdPositionDocument, type StakeORETH, type StakeORUSD } from "@/subgraph";
-import { Tab, Tabs } from "@nextui-org/react";
+import { Tab, Tabs } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import PositionTab from "./PositionNTab";

@@ -1,5 +1,5 @@
 "use client";
-import { Button, Link, Tab, Tabs } from "@nextui-org/react";
+import { Button, Link, Tab, Tabs } from "@heroui/react";
 import AllLiquidityTab from "./AllLiquidityTab";
 import OwnerLiquidityTab from "./OwnerLiquidityTab";
 

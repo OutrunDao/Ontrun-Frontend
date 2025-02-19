@@ -47,20 +47,21 @@ export const addressMap = {
     [ContractName.multicall]: "0xcA11bde05977b3631167028862bE2a173976CA11",
     [ContractName.slisBNB]: "0xCc752dC4ae72386986d011c2B485be0DAd98C744",
     // [ContractName.stakeRouter]: "0x88c022aA8Ccae9C1cdc2BeC7Aac32dc0ec61986c",
-    [ContractName.stakeRouter]: "0x54E1612cea0BAfD21c4e2d380ac41d7509E1BD5a",
+    [ContractName.stakeRouter]: "0x8e915c76581155F0c8BA643a5073D57c9dcfbf0F",
     [ContractName.SWAP_FACTORY]: "0xe2d3d0BC4Cc3ACfe3DAbDc01e291c8E8fb25EED8",
     [ContractName.SWAP_ROUTER]: "0x10C30c55566f21ed0ad6ee073fF3Dd81C6899C81",
     [ContractName.referManager]: "0x19D4B167198a6f5c5cF5A31668a0F276c3EF173e",
-
-  }
+  },
+  
 } as Record<number, ContractAddressMap>;
 
 export const factoryAddressMap = {
   [ChainId.BLAST_SEPOLIA]: [
   ],
   [ChainId.BSC_TESTNET]: [
-    "0x367aEc60D79c4E7Ff93086F7FEfA71F4A349aD6E",//0.3% Fee
-    "0x6c293Aa6F04408DA6797CE8Fd0B72086f70bBd28",//1% Fee
+    "0xf7021505c9414Eb4Cfec8a7F884c8C426C69682B",//0.3% Fee
+    "0x7A307F4ee31dc9DDcFf3dFEfb1dc529cD1378114",//1% Fee
+    "0xA68308BCe3BceF36CE559502739AD1e60fED9F35",//Memeverse
   ],
 };
 

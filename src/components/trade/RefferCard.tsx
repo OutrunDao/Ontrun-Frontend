@@ -11,7 +11,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Tooltip } from 'react-tooltip'
 import PaginationCustom from "../PaginationCustom";
 import { useState, useEffect, useMemo, Key } from "react";
@@ -122,7 +122,7 @@ export function RefferCard() {
   }
   
   return (
-    <div className="mt-[2.94rem] w-full relative">
+    (<div className="mt-[2.94rem] w-full relative">
       <div className="w-[70rem] h-[14rem] bg-no-repeat bg-contain bg-[url('/images/refferDataBG.png')] flex flex-col gap-y-24 pt-[3rem]">
         <div className="flex justify-between w-full">
           <div className="flex flex-col items-start ml-[10rem]">
@@ -187,6 +187,6 @@ export function RefferCard() {
         <PaginationCustom total={10} currentPage={1} pageSize={10} setCurrentPage={() => {}} />
         {/* <span>{allPairs}</span> */}
       </div>
-    </div>
-  )
+    </div>)
+  );
 }

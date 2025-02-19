@@ -12,7 +12,7 @@ import {
   ModalContent,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Decimal from "decimal.js-light";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isAddress } from "viem";

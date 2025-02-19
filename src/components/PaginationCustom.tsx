@@ -1,5 +1,5 @@
 "use client";
-import { Button, Image, Pagination } from "@nextui-org/react";
+import { Button, Image, Pagination } from "@heroui/react";
 
 export default function PaginationCustom({
   total,

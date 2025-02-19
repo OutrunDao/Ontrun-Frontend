@@ -1,6 +1,6 @@
 "use client"
 
-import { Tab, Tabs } from "@nextui-org/react"
+import { Tab, Tabs } from "@heroui/react"
 import StakeTab from "./StakeTab"
 import YieldPoolOCard from "./YieldPoolOCard"
 export default function LiquidStakingCard() {

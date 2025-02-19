@@ -1,5 +1,5 @@
 "use client";
-import { Button, Link, Tab, Tabs } from "@nextui-org/react";
+import { Button, Link, Tab, Tabs } from "@heroui/react";
 import MemeverseTab from "./MemeverseTab";
 
 export default function MemeverseContent() {

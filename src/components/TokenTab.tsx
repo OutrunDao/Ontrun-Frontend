@@ -1,4 +1,4 @@
-import { Button, Input } from "@nextui-org/react"
+import { Button, Input } from "@heroui/react"
 import TokenSure from "./TokenSure"
 import { Currency } from "@/packages/core";
 import { POT } from "@/contracts/tokens/POT";

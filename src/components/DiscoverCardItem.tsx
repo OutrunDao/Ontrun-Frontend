@@ -1,5 +1,5 @@
 import type { CardItem } from "@/types";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 
 export function DiscoverCardItem({ icon, title, description, link }: CardItem) {
 	return (

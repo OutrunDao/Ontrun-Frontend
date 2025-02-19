@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
 import Decimal from "decimal.js-light";
 import { useYT } from "@/contracts/useContract/useYT";
-import { Button, Divider, Input, Link } from "@nextui-org/react";
+import { Button, Divider, Input, Link } from "@heroui/react";
 import { ethers, parseEther } from "ethers";
 import { set } from "radash";
 import { POT } from "@/contracts/tokens/POT";
